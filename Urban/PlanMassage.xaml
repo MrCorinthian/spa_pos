@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="Urban.PlanMassage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Urban"
+             mc:Ignorable="d" 
+             d:DesignHeight="150" d:DesignWidth="300">
+    <Grid Cursor="Hand">
+        <Border x:Name="planBorder" BorderThickness="5,5,5,0" CornerRadius="20">
+            <!--<TextBlock x:Name="planTextBlock" FontSize="20" TextWrapping="WrapWithOverflow" TextAlignment="Center" VerticalAlignment="Center" Padding="25,0"/>-->
+            <TextBlock x:Name="planTextBlock" FontSize="15" TextWrapping="WrapWithOverflow" TextAlignment="Center" VerticalAlignment="Center" Padding="25,0"/>
+        </Border>
+    </Grid>
+</UserControl>

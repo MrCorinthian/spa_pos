@@ -1,0 +1,49 @@
+﻿<Window x:Class="Urban.LandingPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Urban"
+        mc:Ignorable="d"
+        Title="LandingPage" Height="1080" Width="1920" ResizeMode="NoResize" WindowState="Maximized" WindowStartupLocation="CenterScreen" WindowStyle="None">
+    <Window.Resources>
+        <Storyboard x:Key="StartFadeIn">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="grid">
+                <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.6" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="progressBar">
+                <DiscreteObjectKeyFrame KeyTime="0:0:1.6" Value="{x:Static Visibility.Visible}"/>
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="textBlock1">
+                <DiscreteObjectKeyFrame KeyTime="0:0:1.6" Value="{x:Static Visibility.Visible}"/>
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
+    </Window.Resources>
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource StartFadeIn}"/>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Grid x:Name="grid" Opacity="0">
+        <Grid Opacity="0.2">
+            <Grid.Background>
+                <ImageBrush Stretch="UniformToFill" ImageSource="Images/spabg2.jpg"/>
+            </Grid.Background>
+        </Grid>
+
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Spa &amp; Massage POS System" FontSize="72" Foreground="#FF0AA835" FontFamily="Forte"/>
+            <ProgressBar x:Name="progressBar" IsIndeterminate="True" Height="20" Margin="0,150,0,0" Visibility="Hidden"/>
+            <TextBlock x:Name="textBlock1" TextWrapping="Wrap" Text="Checking data version.." HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,12,0,0" FontSize="24" Visibility="Hidden"/>
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,12" Orientation="Horizontal">
+            <TextBlock x:Name="vTxt" TextWrapping="Wrap" Text="Version " VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="systemVersion" TextWrapping="Wrap" Text="4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        </StackPanel>
+        <TextBlock x:Name="textBlock3" TextWrapping="Wrap" Text="Copyright © 2016. Euro Siam Concept. All rights reserved." VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,12" FontSize="16"/>
+
+    </Grid>
+</Window>
