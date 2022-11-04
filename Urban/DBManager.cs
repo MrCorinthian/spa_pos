@@ -12,7 +12,8 @@ namespace Urban
     public class DBManager
     {
         SQLiteConnection db;
-        string dbname = @"C:\SpaSystem\Release\spasystemdb0.db";
+        //string dbname = @"C:\SpaSystem\Release\spasystemdb0.db";
+        string dbname = "spasystemdb0.db";
         //string dateTimeFormat = "dd/MM/yyyy";
         public DBManager()
         {

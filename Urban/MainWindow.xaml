@@ -60,7 +60,7 @@
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border BorderThickness="0" Background="#FF08B190" CornerRadius="40" Margin="24">
+            <Border BorderThickness="0" Background="#FF08B190" CornerRadius="40" Margin="24" MouseLeftButtonDown="Border_MouseLeftButtonDown">
                 <TextBlock x:Name="branchNameTxt" TextWrapping="Wrap" Text="Branch Name" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Foreground="White" FontFamily="Segoe UI Light"/>
             </Border>
             <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -557,22 +557,6 @@
                     </StackPanel>
                 </StackPanel>
             </Grid>
-        </Grid>
-        <Grid x:Name="systemUpdateNotifyGrid" Height="34" VerticalAlignment="Top" Background="Red" Visibility="Collapsed">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock TextWrapping="Wrap" Text="A new version of system is available, click 'UPDATE' to update or 'CANCEL' to postpone" FontSize="20" Margin="0,0,48,0" Foreground="White"/>
-                <Button x:Name="systemUpdateBtn" Content="UPDATE" Width="70" Height="25" Margin="0,0,6,0" Click="SystemUpdateBtn_Click"/>
-                <Button x:Name="cancelUpdateBtn" Content="CANCEL" Width="70" Height="25" Click="CancelUpdateBtn_Click"/>
-            </StackPanel>
-        </Grid>
-        <Grid x:Name="systemUpdateGrid" Background="#CCFFFFFF" Grid.RowSpan="3" Visibility="Collapsed">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <ProgressBar x:Name="pbar" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1000" Height="40" Foreground="#FFF74205" />
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,12,0,0" Orientation="Horizontal">
-                    <TextBlock TextWrapping="Wrap" Text="System is updating.. " HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" Foreground="#FFF74205"/>
-                    <TextBlock x:Name="downloadPercent" TextWrapping="Wrap" Text="[ 0% ]" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" Foreground="#FFF74205"/>
-                </StackPanel>
-            </StackPanel>
         </Grid>
         <Grid x:Name="transactionLoadingGrid" Background="#E5FFFFFF" Grid.RowSpan="3" Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

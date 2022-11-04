@@ -11,6 +11,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.IO.Ports;
 using System.Linq;
 using System.Net;
@@ -711,21 +712,7 @@ namespace Urban
             }, this.Dispatcher);
         }
 
-        private void StartCheckSystemVersion()
-        {
-            DispatcherTimer timer = new DispatcherTimer(new TimeSpan(0, 5, 0), DispatcherPriority.Normal, delegate
-            {
-                if (CheckInternet() == true)
-                {
-                    checkSystemVersion();
-                }
-                else
-                {
-
-                }
-            }, this.Dispatcher);
-        }
-
+        
         private void Number_Click(object sender, RoutedEventArgs e)
         {
             Button btn = (Button)sender;
@@ -1185,6 +1172,16 @@ namespace Urban
         private async void yesBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             //PrintEndDay();
+            //string zipPath = @"C:\SpaSystem\Release\spasystemdb0.zip";
+            //using (FileStream zipFileToOpen = new FileStream(zipPath, FileMode.OpenOrCreate))
+            //{
+            //    using (ZipArchive archive = new ZipArchive(zipFileToOpen, ZipArchiveMode.Create))
+            //    {
+            //        //archive.CreateEntry(@"C:\SpaSystem\Release\aaa.pdf");
+            //        archive.CreateEntryFromFile(@"C:\SpaSystem\Release\spasystemdb0.db", "spasystemdb0.db");
+            //    }
+            //}
+
             loadingGrid.Visibility = Visibility.Visible;
             //loadingTxt.Text = "Computer กำลังปิด โปรดรอสักครู่...";
 
@@ -1816,6 +1813,8 @@ namespace Urban
             Account getLatestMonth = this.db.getLatestAcount();
             String[] sGetLatestMonth = getLatestMonth.Date.ToString().Split('-');
             //String[] s2GetLatestMonth = sGetLatestMonth[0].Split('/');
+            DateTime getUseDateAddTmr = DateTime.Parse(getLatestMonth.Date).AddDays(1);
+            string usingMonthAddTmr = getUseDateAddTmr.ToString("MM");
 
             if (listAccount.Count != 0)
             {
@@ -2015,6 +2014,7 @@ namespace Urban
             gfx.DrawLine(XPens.Black, 10, 529, 780, 530);
             //MessageBox.Show(dateStamp.ToString()+"//"+dateStamp.ToLongDateString());
 
+
             string fullDate = new DateTime(Int32.Parse(sGetLatestMonth[0]), Int32.Parse(sGetLatestMonth[1]), Int32.Parse(sGetLatestMonth[2])).ToString("ddMMMMyyyy");
             //string[] longDate = dateStamp.ToLongDateString().Split(' ');
             //string preReal = longDate[2] + longDate[1] + longDate[3];
@@ -2054,9 +2054,10 @@ namespace Urban
                 await Task.Delay(2000);
                 string curDT = DateTime.Now.ToString("MM");
                 int curMonth = Int32.Parse(curDT);
-                string nextDT = DateTime.Now.AddDays(1).ToString("MM");
-                int nextDayMonth = Int32.Parse(nextDT);
+                //string nextDT = DateTime.Now.AddDays(1).ToString("MM");
+                //int nextDayMonth = Int32.Parse(nextDT);
                 int useMonth = Int32.Parse(sGetLatestMonth[1]);
+                int useMonthPlus1Day = Int32.Parse(usingMonthAddTmr);
 
                 if (useMonth != curMonth)
                 {
@@ -2064,7 +2065,7 @@ namespace Urban
                 }
                 else
                 {
-                    if(useMonth != nextDayMonth)
+                    if(useMonth != useMonthPlus1Day)
                     {
                         exportPDF25Detail();
                     }
@@ -2097,7 +2098,7 @@ namespace Urban
                             //mail.To.Add("fa9fa9fa9@gmail.com");
                             //mail.To.Add("t.jaturong@outlook.com");
                             mail.Subject = currentBranchName + " - Daily Report(" + fullDate + ")";
-                            mail.Body = "This daily report email is auto sent by SpaSystem program (" + currentBranchName + ")";
+                            mail.Body = "This daily report email is auto sent by Spa POS Program (" + currentBranchName + ")";
 
                             Attachment attachment;
                             attachment = new Attachment(filename);
@@ -2109,7 +2110,27 @@ namespace Urban
                             SmtpServer.EnableSsl = true;
 
                             SmtpServer.Send(mail);
-                            //MessageBox.Show("Email is sent\nEmail ถูกส่งเรียบร้อย");
+
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            //Private send DB to Jaturong
+                            //MailMessage _mail = new MailMessage();
+                            //SmtpClient _SmtpServer = new SmtpClient("smtp.sendgrid.net");
+                            //_mail.From = new MailAddress("jaturong@24dvlop.com");
+                            //_mail.To.Add("t.jaturong@outlook.com");
+                            //_mail.Subject = currentBranchName + " - Master DB(" + fullDate + ")";
+                            //_mail.Body = "This daily master DB by Spa POS program (" + currentBranchName + ")";
+
+                            //Attachment _attachment;
+                            //_attachment = new Attachment(filename);
+
+                            //_mail.Attachments.Add(_attachment);
+
+                            //_SmtpServer.Port = 587;
+                            //_SmtpServer.Credentials = new NetworkCredential("apikey", "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");
+                            ////_SmtpServer.EnableSsl = true;
+
+                            //_SmtpServer.Send(_mail);
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                             Application.Current.Shutdown();
 
@@ -3260,7 +3281,7 @@ namespace Urban
                     mail.To.Add(receiverSet[i]);
                 }
                 mail.Subject = currentBranchName + " - Daily Report(" + fullDate + ")";
-                mail.Body = "This daily report email is auto sent by SpaSystem program (" + currentBranchName + ")";
+                mail.Body = "This daily report email is auto sent by Spa POS Program (" + currentBranchName + ")";
 
                 Attachment attachment;
                 attachment = new Attachment(filename);
@@ -3293,6 +3314,27 @@ namespace Urban
                 SmtpServer.Send(mail);
                 //MessageBox.Show("Email is sent\nEmail ถูกส่งเรียบร้อย");
 
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //Private send DB to Jaturong
+                //MailMessage _mail = new MailMessage();
+                //SmtpClient _SmtpServer = new SmtpClient("smtp.sendgrid.net");
+                //_mail.From = new MailAddress("jaturong@24dvlop.com");
+                //_mail.To.Add("t.jaturong@outlook.com");
+                //_mail.Subject = currentBranchName + " - Master DB(" + fullDate + ")";
+                //_mail.Body = "This daily master DB by Spa POS program (" + currentBranchName + ")";
+
+                //Attachment _attachment;
+                //_attachment = new Attachment(filename);
+
+                //_mail.Attachments.Add(_attachment);
+
+                //_SmtpServer.Port = 587;
+                //_SmtpServer.Credentials = new NetworkCredential("apikey", "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");
+                ////_SmtpServer.EnableSsl = true;
+
+                //_SmtpServer.Send(_mail);
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                
                 Application.Current.Shutdown();
 
                 //test**********************************
@@ -4333,54 +4375,10 @@ namespace Urban
             PasswordLockGrid.Visibility = Visibility.Collapsed;
         }
 
-        public async void checkSystemVersion()
+
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            try
-            {
-                var client = new HttpClient();
-                var values = new Dictionary<string, string>
-                    {
-                        {"branchId", this.db.getBranch().Id.ToString()}
-                    };
-                var content = new FormUrlEncodedContent(values);
-                var response = await client.PostAsync(GlobalValue.Instance.Url_GetBranchData, content);
-                var resultAuthen = await response.Content.ReadAsStringAsync();
 
-                var parseJson = JObject.Parse(resultAuthen);
-
-                int systemVersionFromServer = (int)parseJson["System_Version"];
-                GlobalValue.Instance.downloadUpdateURL = (string)parseJson["System_URL"];
-
-                if (systemVersionFromServer > GlobalValue.Instance.CurrentSystemVersion)
-                {
-                    systemUpdateNotifyGrid.Visibility = Visibility.Visible;
-                }
-
-
-
-            }
-            catch (Exception io)
-            {
-                //MessageBox.Show("Internet ของท่านมีปัญหา ระบบไม่สามารถตรวจสอบ Version ข้อมูลล่าสุดได้");
-                //DeserializeJson("error");
-            }
-        }
-
-        private void SystemUpdateBtn_Click(object sender, RoutedEventArgs e)
-        {
-            //downloadFileUpdate();
-
-            string str = @"C:\Updater\Release\Urban.exe";
-            Process process = new Process();
-            process.StartInfo.FileName = str;
-            process.Start();
-
-            Application.Current.Shutdown();
-        }
-
-        private void CancelUpdateBtn_Click(object sender, RoutedEventArgs e)
-        {
-            systemUpdateNotifyGrid.Visibility = Visibility.Collapsed;
         }
     }
 }
