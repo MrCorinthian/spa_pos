@@ -106,6 +106,14 @@
                 <Border x:Name="reportBtn" BorderThickness="0" Width="160" Height="60" CornerRadius="100" Background="#FF08B190" Margin="12,0,0,0" MouseLeftButtonDown="reportBtn_MouseLeftButtonDown">
                     <TextBlock x:Name="textBlock1_Copy" TextWrapping="Wrap" Text="รายงาน / Report" Foreground="White" FontSize="16" FontFamily="Segoe UI Light" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
+                <Grid>
+                    <Border x:Name="vipBtn" BorderThickness="0" Width="160" Height="60" CornerRadius="100" Background="#FF08B190" Margin="12,0,0,0" MouseLeftButtonDown="vipBtn_MouseLeftButtonDown">
+                        <TextBlock x:Name="textBlock1x_Copy" TextWrapping="Wrap" Text="VIP Card" Foreground="White" FontSize="16" FontFamily="Segoe UI Light" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <Border x:Name="cancelVipBtn" BorderThickness="0" Width="160" Height="60" CornerRadius="100" Background="#FFCF0000" Margin="12,0,0,0" MouseLeftButtonDown="cancelVipBtn_MouseLeftButtonDown" Visibility="Collapsed">
+                        <TextBlock x:Name="textBlock2x_Copy" TextWrapping="Wrap" Text="Cancel VIP Card" Foreground="White" FontSize="16" FontFamily="Segoe UI Light" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </StackPanel>
             <StackPanel x:Name="checkoutAndClearGrid" Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
                 <Border x:Name="checkoutSummaryBtn" BorderThickness="0" Width="160" Height="60" CornerRadius="100" Background="#FF08B190" MouseLeftButtonDown="checkoutSummaryBtn_MouseLeftButtonDown">
@@ -562,6 +570,16 @@
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ProgressBar x:Name="loadingBar" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1000" Height="40" Foreground="#FFF74205" IsIndeterminate="True" />
                 <TextBlock TextWrapping="Wrap" Text="Waiting.." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="36" FontWeight="Bold" Margin="0,12,0,0" Foreground="#FFED0707"/>
+            </StackPanel>
+        </Grid>
+        <Grid x:Name="VIPwaitingGrid" Background="#E5FFFFFF" Grid.RowSpan="3">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid>
+                    <TextBox x:Name="vipInputTbx" TextChanged="vipInputTbx_TextChanged" />
+                    <TextBlock x:Name="showVipInputTbl" />
+                    <ProgressBar x:Name="VIPloadingBar" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1000" Height="40" Foreground="#FFF74205" IsIndeterminate="True" />
+                </Grid>
+                <TextBlock TextWrapping="Wrap" Text="Swipe the VIP card" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="36" FontWeight="Bold" Margin="0,12,0,0" Foreground="#FFED0707"/>
             </StackPanel>
         </Grid>
     </Grid>

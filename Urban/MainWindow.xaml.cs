@@ -4380,5 +4380,44 @@ namespace Urban
         {
 
         }
+
+        private async void vipBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            VIPwaitingGrid.Visibility = Visibility.Visible;
+            vipInputTbx.Focus();
+            await Task.Delay(4000);
+            VIPwaitingGrid.Visibility = Visibility.Collapsed;
+
+            if (showVipInputTbl.Text.Equals("VIP?01?000003?"))
+            {
+                MessageBox.Show("Welcome VIP!!");
+                vipInputTbx.Text = "";
+            }
+            else if (showVipInputTbl.Text.Equals("VIP?01?000006?"))
+            {
+                MessageBox.Show("Welcome SUPER VIP!!");
+                vipInputTbx.Text = "";
+            }
+            else
+            {
+                MessageBox.Show("No VIP!!");
+                vipInputTbx.Text = "";
+            }
+        }
+
+        private void cancelVipBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void vipInputTbx_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string getText = vipInputTbx.Text;
+            string rplc1 = getText.Replace("%", "");
+            string rplc2 = rplc1.Replace(";", "");
+            string rplc3 = rplc2.Replace("+", "");
+
+            showVipInputTbl.Text = rplc3;
+        }
     }
 }
