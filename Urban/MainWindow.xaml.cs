@@ -511,6 +511,172 @@ namespace Urban
 
         }
 
+        public void InitialInterfaceForVIP()
+        {
+            //List<Branch> listBranch = this.db.getAllBranch();
+            branchNameTxt.Text = this.db.getBranch().Name;
+            reportBranchNameTxt.Text = this.db.getBranch().Name;
+            currentBranchName = this.db.getBranch().Name;
+
+            DateTime current = DateTime.Now;
+            dateTxt.Text = current.ToString("dd MMMM yyyy");
+            timeTxt.Text = current.ToString("HH:mm:ss");
+            reportDateTxt.Text = current.ToString("dd MMMM yyyy");
+            reportTimeTxt.Text = current.ToString("HH:mm:ss");
+
+            List<int> getAllMassageTopicId = new List<int>();
+            List<MassageSet> getAllMassageSets = this.db.getAllMassageSet();
+            for (int i = 0; i < getAllMassageSets.Count(); i++)
+            {
+                getAllMassageTopicId.Add(getAllMassageSets[i].MassageTopicId);
+                //System.Diagnostics.Debug.WriteLine(getAllMassageSets[i].MassageTopicId+"");
+            }
+
+            var set = new HashSet<int>(getAllMassageTopicId);
+            List<int> finalTopicId = set.ToList<int>();
+
+            globalListMassageTopic = this.db.getAllMassageTopic(finalTopicId);
+            List<MassageTopic> listMassageTopic = this.db.getAllMassageTopic(finalTopicId);
+            if (listMassageTopic.Count() < 1)
+            {
+
+            }
+            else
+            {
+                for (int i = 0; i < listMassageTopic.Count(); i++)
+                {
+
+                    //Item StackPanel
+                    StackPanel itemStackPanel = new StackPanel()
+                    {
+                        Width = 194,
+                        Orientation = Orientation.Vertical,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Top
+
+                    };
+
+                    //Topic
+                    Grid topicGrid = new Grid()
+                    {
+                        Width = 190,
+                        Height = 70,
+                        Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(listMassageTopic[i].HeaderColor)),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Stretch,
+                        Margin = new Thickness(0, 0, 0, 12)
+                    };
+
+                    //Topic Text
+                    TextBlock topicText = new TextBlock()
+                    {
+                        FontSize = 16,
+                        Foreground = new SolidColorBrush(Colors.White),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Text = listMassageTopic[i].Name,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.None,
+                        TextAlignment = TextAlignment.Center,
+                        Margin = new Thickness(4, 0, 4, 0)
+                    };
+
+                    topicGrid.Children.Add(topicText);
+                    itemStackPanel.Children.Add(topicGrid);
+
+                    List<MassageSet> msgPlanFromTopic = this.db.getMassagePlanFromTopic(listMassageTopic[i].Id);
+                    if (msgPlanFromTopic.Count() < 1)
+                    {
+
+                    }
+                    else
+                    {
+                        for (int j = 0; j < msgPlanFromTopic.Count(); j++)
+                        {
+                            string msgPlanName = this.db.getMassagePlanName(msgPlanFromTopic[j].MassagePlanId);
+                            double fullPrice = double.Parse(msgPlanFromTopic[j].Price);
+                            double vipPrice = fullPrice - (fullPrice * 0.1);
+                            string msgPlanPrice = vipPrice.ToString(); ;
+
+                            //Massage Plan Border
+                            Border borderPlan = new Border()
+                            {
+                                Width = 186,
+                                Height = 100,
+                                CornerRadius = new CornerRadius(25),
+                                BorderThickness = new Thickness(0),
+                                Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(listMassageTopic[i].ChildColor)),
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                VerticalAlignment = VerticalAlignment.Stretch,
+                                Margin = new Thickness(0, 3, 0, 3),
+                                Tag = msgPlanFromTopic[j].MassageTopicId + "Y" + msgPlanFromTopic[j].MassagePlanId + "Y" + msgPlanPrice + "Y" + msgPlanFromTopic[j].Commission + "Y" + listMassageTopic[i].HeaderColor + "Y" + listMassageTopic[i].ChildColor + "Y" + "false"
+
+                            };
+
+                            borderPlan.MouseLeftButtonDown += BorderPlan_MouseLeftButtonDown;
+
+                            //Massage Plan text
+                            TextBlock planText = new TextBlock()
+                            {
+                                FontSize = 15,
+                                Foreground = new SolidColorBrush(Colors.Black),
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                VerticalAlignment = VerticalAlignment.Center,
+                                Text = msgPlanName + "\n(" + msgPlanPrice + " ฿)",
+                                TextWrapping = TextWrapping.Wrap,
+                                TextTrimming = TextTrimming.None,
+                                TextAlignment = TextAlignment.Center,
+                                Margin = new Thickness(4, 0, 4, 0)
+                            };
+
+                            borderPlan.Child = planText;
+                            itemStackPanel.Children.Add(borderPlan);
+
+                        }
+                    }
+
+                    MassageSetContainer.Children.Add(itemStackPanel);
+
+                }
+            }
+
+            //Get all voucher list
+            List<DiscountMasterDetail> listAllVOuchers = this.db.getAllVoucherList();
+            for (int k = 0; k < listAllVOuchers.Count(); k++)
+            {
+                Grid voucherItem = new Grid()
+                {
+                    Width = 196,
+                    Height = 70,
+                    Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFD5E0EC")),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    //VerticalAlignment = VerticalAlignment.Stretch,
+                    Margin = new Thickness(2, 0, 2, 2),
+                    Tag = listAllVOuchers[k].Id + "Y" + listAllVOuchers[k].DiscountMasterId + "Y" + listAllVOuchers[k].Name + "Y" + listAllVOuchers[k].Value
+                };
+
+                voucherItem.MouseLeftButtonDown += VoucherItem_MouseLeftButtonDown;
+
+                //Topic Text
+                TextBlock voucherText = new TextBlock()
+                {
+                    FontSize = 18,
+                    Foreground = new SolidColorBrush(Colors.Black),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Text = listAllVOuchers[k].Name,
+                    TextWrapping = TextWrapping.Wrap,
+                    TextTrimming = TextTrimming.None,
+                    TextAlignment = TextAlignment.Center
+                    //Margin = new Thickness(4, 0, 4, 0)
+                };
+
+                voucherItem.Children.Add(voucherText);
+                voucherContainer.Children.Add(voucherItem);
+            }
+
+        }
+
         private void VoucherItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Grid voucherClicked = (Grid)sender;
@@ -3576,6 +3742,19 @@ namespace Urban
             checkoutAndClearGrid.Visibility = Visibility.Collapsed;
         }
 
+        public void clearAllSelectedAndBalanceForVIP()
+        {
+            MassageSetContainer.Children.Clear();
+            voucherContainer.Children.Clear();
+            InitialInterfaceForVIP();
+            currentBalance = 0;
+            finalBalance = 0;
+            currentBalanceTxt.Text = "ราคาทั้งหมด / Total";
+            prepareOrder.Clear();
+            prepareDiscount.Clear();
+            checkoutAndClearGrid.Visibility = Visibility.Collapsed;
+        }
+
         public static bool CheckInternet()
         {
             try
@@ -4392,22 +4571,34 @@ namespace Urban
             {
                 MessageBox.Show("Welcome VIP!!");
                 vipInputTbx.Text = "";
+                vipBtn.Visibility = Visibility.Collapsed;
+                cancelVipBtn.Visibility = Visibility.Visible;
+
+                clearAllSelectedAndBalanceForVIP();
             }
             else if (showVipInputTbl.Text.Equals("VIP?01?000006?"))
             {
                 MessageBox.Show("Welcome SUPER VIP!!");
                 vipInputTbx.Text = "";
+                vipBtn.Visibility = Visibility.Collapsed;
+                cancelVipBtn.Visibility = Visibility.Visible;
+
+                clearAllSelectedAndBalanceForVIP();
             }
             else
             {
                 MessageBox.Show("No VIP!!");
                 vipInputTbx.Text = "";
             }
+
+            
         }
 
         private void cancelVipBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-
+            vipBtn.Visibility = Visibility.Visible;
+            cancelVipBtn.Visibility = Visibility.Collapsed;
+            clearAllSelectedAndBalance();
         }
 
         private void vipInputTbx_TextChanged(object sender, TextChangedEventArgs e)

@@ -572,7 +572,7 @@
                 <TextBlock TextWrapping="Wrap" Text="Waiting.." HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="36" FontWeight="Bold" Margin="0,12,0,0" Foreground="#FFED0707"/>
             </StackPanel>
         </Grid>
-        <Grid x:Name="VIPwaitingGrid" Background="#E5FFFFFF" Grid.RowSpan="3">
+        <Grid x:Name="VIPwaitingGrid" Background="#E5FFFFFF" Grid.RowSpan="3" Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid>
                     <TextBox x:Name="vipInputTbx" TextChanged="vipInputTbx_TextChanged" />
