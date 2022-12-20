@@ -242,20 +242,20 @@ namespace Urban
                         }
 
                         //Insert New DiscountMasterDetail
-                        var rootDiscountMasterDetail = parseJson["DiscountMasterDetail"];
-                        for (int i = 0; i < rootDiscountMasterDetail.Count(); i++)
-                        {
-                            DiscountMasterDetail mDiscountMasterDetail = new DiscountMasterDetail();
-                            mDiscountMasterDetail.Id = (int)rootDiscountMasterDetail[i]["Id"];
-                            mDiscountMasterDetail.DiscountMasterId = (int)rootDiscountMasterDetail[i]["DiscountMasterId"];
-                            mDiscountMasterDetail.Name = rootDiscountMasterDetail[i]["Name"].ToString();
-                            mDiscountMasterDetail.Value = rootDiscountMasterDetail[i]["Value"].ToString();
-                            mDiscountMasterDetail.Status = rootDiscountMasterDetail[i]["Status"].ToString();
-                            //mDiscountMasterDetail.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
-                            //mDiscountMasterDetail.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+                        //var rootDiscountMasterDetail = parseJson["DiscountMasterDetail"];
+                        //for (int i = 0; i < rootDiscountMasterDetail.Count(); i++)
+                        //{
+                        //    DiscountMasterDetail mDiscountMasterDetail = new DiscountMasterDetail();
+                        //    mDiscountMasterDetail.Id = (int)rootDiscountMasterDetail[i]["Id"];
+                        //    mDiscountMasterDetail.DiscountMasterId = (int)rootDiscountMasterDetail[i]["DiscountMasterId"];
+                        //    mDiscountMasterDetail.Name = rootDiscountMasterDetail[i]["Name"].ToString();
+                        //    mDiscountMasterDetail.Value = rootDiscountMasterDetail[i]["Value"].ToString();
+                        //    mDiscountMasterDetail.Status = rootDiscountMasterDetail[i]["Status"].ToString();
+                        //    //mDiscountMasterDetail.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                        //    //mDiscountMasterDetail.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
-                            this.db.InsertDiscountMasterDetail(mDiscountMasterDetail);
-                        }
+                        //    this.db.InsertDiscountMasterDetail(mDiscountMasterDetail);
+                        //}
 
                         //Update VersionNo
                         ProgramVersion curVer = this.db.getVersion();
@@ -306,6 +306,128 @@ namespace Urban
                         //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
                         this.db.InsertSystemSetting(mSetting);
+                    }
+
+                    //Insert and Update Member data
+                    this.db.clearAllMemberRelateTable();
+
+                    //Reset Seq
+                    //sqlite_sequence settingSeq = this.db.getSettingSeq();
+                    //if (settingSeq != null)
+                    //{
+                    //    settingSeq.seq = "0";
+                    //    this.db.updateSettingSeq(settingSeq);
+                    //}
+
+                    var rootMember = parseJson["Member"];
+                    for (int i = 0; i < rootMember.Count(); i++)
+                    {
+                        Member mMember = new Member();
+                        mMember.Id = (int)rootMember[i]["Id"];
+                        mMember.MemberNo = rootMember[i]["MemberNo"].ToString();
+                        mMember.Title = rootMember[i]["Title"].ToString();
+                        mMember.FirstName = rootMember[i]["FirstName"].ToString();
+                        mMember.FamilyName = rootMember[i]["FamilyName"].ToString();
+                        if(!string.IsNullOrEmpty(rootMember[i]["Birth"].ToString()))
+                        {
+                            mMember.Birth = ConvertDate(rootMember[i]["Birth"].ToString());
+                        }
+                        mMember.AddressInTH = rootMember[i]["AddressInTH"].ToString();
+                        mMember.City = rootMember[i]["City"].ToString();
+                        mMember.TelephoneNo = rootMember[i]["TelephoneNo"].ToString();
+                        mMember.WhatsAppId = rootMember[i]["WhatsAppId"].ToString();
+                        mMember.LineId = rootMember[i]["LineId"].ToString();
+                        mMember.ActiveStatus = rootMember[i]["ActiveStatus"].ToString();
+                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+
+                        this.db.InsertMember(mMember);
+                    }
+
+                    var rootMemberGroup = parseJson["MemberGroup"];
+                    for (int i = 0; i < rootMemberGroup.Count(); i++)
+                    {
+                        MemberGroup mMemberGroup = new MemberGroup();
+                        mMemberGroup.Id = (int)rootMemberGroup[i]["Id"];
+                        mMemberGroup.Name = rootMemberGroup[i]["Name"].ToString();
+                        mMemberGroup.ShowName = rootMemberGroup[i]["ShowName"].ToString();
+                        mMemberGroup.Status = rootMemberGroup[i]["Status"].ToString();
+                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+
+                        this.db.InsertMemberGroup(mMemberGroup);
+                    }
+
+                    var rootMemberPriviledge = parseJson["MemberPriviledge"];
+                    for (int i = 0; i < rootMemberPriviledge.Count(); i++)
+                    {
+                        MemberPriviledge mMemberPriviledge = new MemberPriviledge();
+                        mMemberPriviledge.Id = (int)rootMemberPriviledge[i]["Id"];
+                        mMemberPriviledge.PriviledgeTypeId = (int)rootMemberPriviledge[i]["PriviledgeTypeId"];
+                        mMemberPriviledge.ShowName = rootMemberPriviledge[i]["ShowName"].ToString();
+                        mMemberPriviledge.Value = (int)rootMemberPriviledge[i]["Value"];
+                        if (!string.IsNullOrEmpty(rootMemberPriviledge[i]["StartDate"].ToString()))
+                        {
+                            mMemberPriviledge.StartDate = ConvertDate(rootMemberPriviledge[i]["StartDate"].ToString());
+                        }
+                        if (!string.IsNullOrEmpty(rootMemberPriviledge[i]["ExpireDate"].ToString()))
+                        {
+                            mMemberPriviledge.ExpireDate = ConvertDate(rootMemberPriviledge[i]["ExpireDate"].ToString());
+                        }
+                        mMemberPriviledge.Status = rootMemberPriviledge[i]["Status"].ToString();
+                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+
+                        this.db.InsertMemberPriviledge(mMemberPriviledge);
+                    }
+
+                    var rootPriviledgeType = parseJson["PriviledgeType"];
+                    for (int i = 0; i < rootPriviledgeType.Count(); i++)
+                    {
+                        PriviledgeType mPriviledgeType = new PriviledgeType();
+                        mPriviledgeType.Id = (int)rootPriviledgeType[i]["Id"];
+                        mPriviledgeType.Name = rootPriviledgeType[i]["Name"].ToString();
+                        mPriviledgeType.Status = rootPriviledgeType[i]["Status"].ToString();
+                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+
+                        this.db.InsertPriviledgeType(mPriviledgeType);
+                    }
+
+                    var rootMemberGroupPriviledge = parseJson["MemberGroupPriviledge"];
+                    for (int i = 0; i < rootMemberGroupPriviledge.Count(); i++)
+                    {
+                        MemberGroupPriviledge mMemberGroupPriviledge = new MemberGroupPriviledge();
+                        mMemberGroupPriviledge.Id = (int)rootMemberGroupPriviledge[i]["Id"];
+                        mMemberGroupPriviledge.MemberGroupId = (int)rootMemberGroupPriviledge[i]["MemberGroupId"];
+                        mMemberGroupPriviledge.MemberPriviledgeId = (int)rootMemberGroupPriviledge[i]["MemberPriviledgeId"];
+                        mMemberGroupPriviledge.Status = rootMemberGroupPriviledge[i]["Status"].ToString();
+                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+
+                        this.db.InsertMemberGroupPriviledge(mMemberGroupPriviledge);
+                    }
+
+                    var rootMemberDetail = parseJson["MemberDetail"];
+                    for (int i = 0; i < rootMemberDetail.Count(); i++)
+                    {
+                        MemberDetail mMemberDetail = new MemberDetail();
+                        mMemberDetail.Id = (int)rootMemberDetail[i]["Id"];
+                        mMemberDetail.MemberId = (int)rootMemberDetail[i]["MemberId"];
+                        mMemberDetail.MemberGroupId = (int)rootMemberDetail[i]["MemberGroupId"];
+                        if (!string.IsNullOrEmpty(rootMemberDetail[i]["StartDate"].ToString()))
+                        {
+                            mMemberDetail.StartDate = ConvertDate(rootMemberDetail[i]["StartDate"].ToString());
+                        }
+                        if (!string.IsNullOrEmpty(rootMemberDetail[i]["ExpireDate"].ToString()))
+                        {
+                            mMemberDetail.ExpireDate = ConvertDate(rootMemberDetail[i]["ExpireDate"].ToString());
+                        }
+                        mMemberDetail.Status = rootMemberDetail[i]["Status"].ToString();
+                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+
+                        this.db.InsertMemberDetail(mMemberDetail);
                     }
 
                     GlobalValue.Instance.emailServer = this.db.getCurrentEmailServer().Value;
@@ -475,10 +597,44 @@ namespace Urban
             }
 
             //Get all voucher list
-            List<DiscountMasterDetail> listAllVOuchers = this.db.getAllVoucherList();
-            for(int k = 0; k < listAllVOuchers.Count(); k++)
+            //List<DiscountMasterDetail> listAllVOuchers = this.db.getAllVoucherList();
+            //for(int k = 0; k < listAllVOuchers.Count(); k++)
+            //{
+            //    Grid voucherItem = new Grid()
+            //    {
+            //        Width = 196,
+            //        Height = 70,
+            //        Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFD5E0EC")),
+            //        HorizontalAlignment = HorizontalAlignment.Center,
+            //        //VerticalAlignment = VerticalAlignment.Stretch,
+            //        Margin = new Thickness(2, 0, 2, 2),
+            //        Tag = listAllVOuchers[k].Id + "Y" + listAllVOuchers[k].DiscountMasterId + "Y" + listAllVOuchers[k].Name + "Y" + listAllVOuchers[k].Value
+            //    };
+
+            //    voucherItem.MouseLeftButtonDown += VoucherItem_MouseLeftButtonDown;
+
+            //    //Topic Text
+            //    TextBlock voucherText = new TextBlock()
+            //    {
+            //        FontSize = 18,
+            //        Foreground = new SolidColorBrush(Colors.Black),
+            //        HorizontalAlignment = HorizontalAlignment.Center,
+            //        VerticalAlignment = VerticalAlignment.Center,
+            //        Text = listAllVOuchers[k].Name,
+            //        TextWrapping = TextWrapping.Wrap,
+            //        TextTrimming = TextTrimming.None,
+            //        TextAlignment = TextAlignment.Center
+            //        //Margin = new Thickness(4, 0, 4, 0)
+            //    };
+
+            //    voucherItem.Children.Add(voucherText);
+            //    voucherContainer.Children.Add(voucherItem);
+            //}
+
+            List<DiscountMaster> listAllDiscountSrc = this.db.getAllDiscountSource();
+            for (int k = 0; k < listAllDiscountSrc.Count(); k++)
             {
-                Grid voucherItem = new Grid()
+                Grid discountSrcItem = new Grid()
                 {
                     Width = 196,
                     Height = 70,
@@ -486,33 +642,43 @@ namespace Urban
                     HorizontalAlignment = HorizontalAlignment.Center,
                     //VerticalAlignment = VerticalAlignment.Stretch,
                     Margin = new Thickness(2, 0, 2, 2),
-                    Tag = listAllVOuchers[k].Id + "Y" + listAllVOuchers[k].DiscountMasterId + "Y" + listAllVOuchers[k].Name + "Y" + listAllVOuchers[k].Value
+                    Tag = listAllDiscountSrc[k].Id + "Y" + listAllDiscountSrc[k].ShowName
                 };
 
-                voucherItem.MouseLeftButtonDown += VoucherItem_MouseLeftButtonDown;
+                discountSrcItem.MouseLeftButtonDown += DiscountSrcItem_MouseLeftButtonDown;
 
                 //Topic Text
-                TextBlock voucherText = new TextBlock()
+                TextBlock discountSrcText = new TextBlock()
                 {
                     FontSize = 18,
                     Foreground = new SolidColorBrush(Colors.Black),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
-                    Text = listAllVOuchers[k].Name,
+                    Text = listAllDiscountSrc[k].ShowName,
                     TextWrapping = TextWrapping.Wrap,
                     TextTrimming = TextTrimming.None,
                     TextAlignment = TextAlignment.Center
                     //Margin = new Thickness(4, 0, 4, 0)
                 };
 
-                voucherItem.Children.Add(voucherText);
-                voucherContainer.Children.Add(voucherItem);
+                discountSrcItem.Children.Add(discountSrcText);
+                discountSrcContainer.Children.Add(discountSrcItem);
             }
 
         }
 
-        public void InitialInterfaceForVIP()
+        public void InitialInterfaceForVIP(MemberPriviledge memberPriviledgeDetail)
         {
+            //int discountAmount = 0;
+            //if (memberPriviledgeDetail.PriviledgeTypeId == 1)
+            //{
+            //    discountAmount = memberPriviledgeDetail.Value/100;
+            //}
+            //else if (memberPriviledgeDetail.PriviledgeTypeId == 2)
+            //{
+            //    discountAmount = memberPriviledgeDetail.Value;
+            //}
+
             //List<Branch> listBranch = this.db.getAllBranch();
             branchNameTxt.Text = this.db.getBranch().Name;
             reportBranchNameTxt.Text = this.db.getBranch().Name;
@@ -595,8 +761,24 @@ namespace Urban
                         {
                             string msgPlanName = this.db.getMassagePlanName(msgPlanFromTopic[j].MassagePlanId);
                             double fullPrice = double.Parse(msgPlanFromTopic[j].Price);
-                            double vipPrice = fullPrice - (fullPrice * 0.1);
-                            string msgPlanPrice = vipPrice.ToString(); ;
+                            double vipPrice = 0;
+
+                            if (memberPriviledgeDetail.PriviledgeTypeId == 1)
+                            {
+                                double discountAmount = double.Parse(memberPriviledgeDetail.Value.ToString()) / 100;
+                                vipPrice = fullPrice - (fullPrice * discountAmount);
+                            }
+                            else if (memberPriviledgeDetail.PriviledgeTypeId == 2)
+                            {
+                                double discountAmount = double.Parse(memberPriviledgeDetail.Value.ToString());
+                                vipPrice = fullPrice - discountAmount;
+                            }
+
+                            //double vipPrice = fullPrice - (fullPrice * 0.1);
+                            //int fullPrice = Int32.Parse(msgPlanFromTopic[j].Price);
+                            //int vipPrice = fullPrice - (fullPrice * 10/100);
+                            int finalVipPrice = Convert.ToInt32(vipPrice);
+                            string msgPlanPrice = finalVipPrice.ToString();
 
                             //Massage Plan Border
                             Border borderPlan = new Border()
@@ -641,10 +823,44 @@ namespace Urban
             }
 
             //Get all voucher list
-            List<DiscountMasterDetail> listAllVOuchers = this.db.getAllVoucherList();
-            for (int k = 0; k < listAllVOuchers.Count(); k++)
+            //List<DiscountMasterDetail> listAllVOuchers = this.db.getAllVoucherList();
+            //for (int k = 0; k < listAllVOuchers.Count(); k++)
+            //{
+            //    Grid voucherItem = new Grid()
+            //    {
+            //        Width = 196,
+            //        Height = 70,
+            //        Background = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFD5E0EC")),
+            //        HorizontalAlignment = HorizontalAlignment.Center,
+            //        //VerticalAlignment = VerticalAlignment.Stretch,
+            //        Margin = new Thickness(2, 0, 2, 2),
+            //        Tag = listAllVOuchers[k].Id + "Y" + listAllVOuchers[k].DiscountMasterId + "Y" + listAllVOuchers[k].Name + "Y" + listAllVOuchers[k].Value
+            //    };
+
+            //    voucherItem.MouseLeftButtonDown += VoucherItem_MouseLeftButtonDown;
+
+            //    //Topic Text
+            //    TextBlock voucherText = new TextBlock()
+            //    {
+            //        FontSize = 18,
+            //        Foreground = new SolidColorBrush(Colors.Black),
+            //        HorizontalAlignment = HorizontalAlignment.Center,
+            //        VerticalAlignment = VerticalAlignment.Center,
+            //        Text = listAllVOuchers[k].Name,
+            //        TextWrapping = TextWrapping.Wrap,
+            //        TextTrimming = TextTrimming.None,
+            //        TextAlignment = TextAlignment.Center
+            //        //Margin = new Thickness(4, 0, 4, 0)
+            //    };
+
+            //    voucherItem.Children.Add(voucherText);
+            //    voucherContainer.Children.Add(voucherItem);
+            //}
+
+            List<DiscountMaster> listAllDiscountSrc = this.db.getAllDiscountSource();
+            for (int k = 0; k < listAllDiscountSrc.Count(); k++)
             {
-                Grid voucherItem = new Grid()
+                Grid discountSrcItem = new Grid()
                 {
                     Width = 196,
                     Height = 70,
@@ -652,101 +868,108 @@ namespace Urban
                     HorizontalAlignment = HorizontalAlignment.Center,
                     //VerticalAlignment = VerticalAlignment.Stretch,
                     Margin = new Thickness(2, 0, 2, 2),
-                    Tag = listAllVOuchers[k].Id + "Y" + listAllVOuchers[k].DiscountMasterId + "Y" + listAllVOuchers[k].Name + "Y" + listAllVOuchers[k].Value
+                    Tag = listAllDiscountSrc[k].Id + "Y" + listAllDiscountSrc[k].ShowName
                 };
 
-                voucherItem.MouseLeftButtonDown += VoucherItem_MouseLeftButtonDown;
+                discountSrcItem.MouseLeftButtonDown += DiscountSrcItem_MouseLeftButtonDown;
 
                 //Topic Text
-                TextBlock voucherText = new TextBlock()
+                TextBlock discountSrcText = new TextBlock()
                 {
                     FontSize = 18,
                     Foreground = new SolidColorBrush(Colors.Black),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
-                    Text = listAllVOuchers[k].Name,
+                    Text = listAllDiscountSrc[k].ShowName,
                     TextWrapping = TextWrapping.Wrap,
                     TextTrimming = TextTrimming.None,
                     TextAlignment = TextAlignment.Center
                     //Margin = new Thickness(4, 0, 4, 0)
                 };
 
-                voucherItem.Children.Add(voucherText);
-                voucherContainer.Children.Add(voucherItem);
+                discountSrcItem.Children.Add(discountSrcText);
+                discountSrcContainer.Children.Add(discountSrcItem);
             }
 
         }
 
-        private void VoucherItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void DiscountSrcItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Grid voucherClicked = (Grid)sender;
-            String[] voucherTagSplit = voucherClicked.Tag.ToString().Split('Y');
-            int voucherId = Int32.Parse(voucherTagSplit[0]);
-            //int voucherValue = Int32.Parse(voucherTagSplit[1]);
-            DateTime current = DateTime.Now;
-            string curDate = current.ToString("yyyy-MM-dd");
-            string curTime = current.ToString("HH:mm:ss");
-            string curDateTime = current.ToString("yyyy-MM-dd HH:mm:ss");
-
-            //add discount row in summary page
-            Grid itemInDiscountSummary = new Grid()
-            {
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Top,
-                Margin = new Thickness(24, 6, 24, 0)
-
-            };
-
-            TextBlock discountNameTxt = new TextBlock()
-            {
-                FontSize = 20,
-                Foreground = new SolidColorBrush(Colors.Black),
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Text = "- " + voucherTagSplit[2]
-            };
-
-            TextBlock discountValue = new TextBlock()
-            {
-                FontSize = 18,
-                Foreground = new SolidColorBrush(Colors.Black),
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Text = "- "+String.Format("{0:n}", voucherTagSplit[3]) + " ฿"
-            };
-
-            itemInDiscountSummary.Children.Add(discountNameTxt);
-            itemInDiscountSummary.Children.Add(discountValue);
-
-            summaryDiscountContainer.Children.Add(itemInDiscountSummary);
-
-            //Convert summary amount to integer
-            string cleanFloatingSummaryAmount = summaryAmountTxt.Text.Replace(".00", "");
-            string cleanCommaSummaryAmount = cleanFloatingSummaryAmount.Replace(",", "");
-            string finalCleanSummaryAmount = cleanCommaSummaryAmount.Replace(" ฿", "");
-            int currentSummaryAmount = Int32.Parse(finalCleanSummaryAmount);
-            int discountValueNumeric = Int32.Parse(voucherTagSplit[3]);
-            int afterDiscount = currentSummaryAmount - discountValueNumeric;
-
-            summaryAmountTxt.Text = String.Format("{0:n}", afterDiscount) + " ฿";
-            finalBalance = afterDiscount;
-            SendTextTotalWithDiscount();
-
-            DiscountMasterDetail discountItemDetail = this.db.getDiscountMasterDetailFromId(voucherId);
-            DiscountRecord discountRecordItemDetail = new DiscountRecord()
-            {
-                AccountId = currentUseAccountId,
-                Date = curDate,
-                Time = curTime,
-                DiscountMasterId = discountItemDetail.DiscountMasterId,
-                DiscountMasterDetailId = discountItemDetail.Id,
-                Value = discountItemDetail.Value,
-                SendStatus = "false",
-                CancelStatus = "false",
-                CreateDateTime = curDateTime,
-                UpdateDateTime = curDateTime
-            };
-
-            prepareDiscount.Add(discountRecordItemDetail);
+            Grid discountSrcClicked = (Grid)sender;
+            InitMoneyDiscountGrid.Tag = discountSrcClicked.Tag;
+            InitMoneyDiscountGrid.Visibility = Visibility.Visible;
         }
+
+        //private void VoucherItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    Grid voucherClicked = (Grid)sender;
+        //    String[] voucherTagSplit = voucherClicked.Tag.ToString().Split('Y');
+        //    int voucherId = Int32.Parse(voucherTagSplit[0]);
+        //    //int voucherValue = Int32.Parse(voucherTagSplit[1]);
+        //    DateTime current = DateTime.Now;
+        //    string curDate = current.ToString("yyyy-MM-dd");
+        //    string curTime = current.ToString("HH:mm:ss");
+        //    string curDateTime = current.ToString("yyyy-MM-dd HH:mm:ss");
+
+        //    //add discount row in summary page
+        //    Grid itemInDiscountSummary = new Grid()
+        //    {
+        //        HorizontalAlignment = HorizontalAlignment.Stretch,
+        //        VerticalAlignment = VerticalAlignment.Top,
+        //        Margin = new Thickness(24, 6, 24, 0)
+
+        //    };
+
+        //    TextBlock discountNameTxt = new TextBlock()
+        //    {
+        //        FontSize = 20,
+        //        Foreground = new SolidColorBrush(Colors.Black),
+        //        HorizontalAlignment = HorizontalAlignment.Left,
+        //        Text = "- " + voucherTagSplit[2]
+        //    };
+
+        //    TextBlock discountValue = new TextBlock()
+        //    {
+        //        FontSize = 18,
+        //        Foreground = new SolidColorBrush(Colors.Black),
+        //        HorizontalAlignment = HorizontalAlignment.Right,
+        //        Text = "- "+String.Format("{0:n}", voucherTagSplit[3]) + " ฿"
+        //    };
+
+        //    itemInDiscountSummary.Children.Add(discountNameTxt);
+        //    itemInDiscountSummary.Children.Add(discountValue);
+
+        //    summaryDiscountContainer.Children.Add(itemInDiscountSummary);
+
+        //    //Convert summary amount to integer
+        //    string cleanFloatingSummaryAmount = summaryAmountTxt.Text.Replace(".00", "");
+        //    string cleanCommaSummaryAmount = cleanFloatingSummaryAmount.Replace(",", "");
+        //    string finalCleanSummaryAmount = cleanCommaSummaryAmount.Replace(" ฿", "");
+        //    int currentSummaryAmount = Int32.Parse(finalCleanSummaryAmount);
+        //    int discountValueNumeric = Int32.Parse(voucherTagSplit[3]);
+        //    int afterDiscount = currentSummaryAmount - discountValueNumeric;
+
+        //    summaryAmountTxt.Text = String.Format("{0:n}", afterDiscount) + " ฿";
+        //    finalBalance = afterDiscount;
+        //    SendTextTotalWithDiscount();
+
+        //    DiscountMasterDetail discountItemDetail = this.db.getDiscountMasterDetailFromId(voucherId);
+        //    DiscountRecord discountRecordItemDetail = new DiscountRecord()
+        //    {
+        //        AccountId = currentUseAccountId,
+        //        Date = curDate,
+        //        Time = curTime,
+        //        DiscountMasterId = discountItemDetail.DiscountMasterId,
+        //        DiscountMasterDetailId = discountItemDetail.Id,
+        //        Value = discountItemDetail.Value,
+        //        SendStatus = "false",
+        //        CancelStatus = "false",
+        //        CreateDateTime = curDateTime,
+        //        UpdateDateTime = curDateTime
+        //    };
+
+        //    prepareDiscount.Add(discountRecordItemDetail);
+        //}
 
         private void BorderPlan_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -768,20 +991,44 @@ namespace Urban
                 currentBalance = currentBalance + Int32.Parse(planTagSplit[2]);
                 currentBalanceTxt.Text = String.Format("{0:n}", currentBalance);
 
-                OrderRecord ordRecord = new OrderRecord()
+                OrderRecord ordRecord;
+
+                if (GlobalValue.Instance.usingMember != null)
                 {
-                    AccountId = currentUseAccountId,
-                    Date = curDate,
-                    Time = curTime,
-                    MassageTopicId = Int32.Parse(planTagSplit[0]),
-                    MassagePlanId = Int32.Parse(planTagSplit[1]),
-                    Price = planTagSplit[2],
-                    Commission = planTagSplit[3],
-                    SendStatus = "false",
-                    CancelStatus = "false",
-                    CreateDateTime = curDateTime,
-                    UpdateDateTime = curDateTime
-                };
+
+                    ordRecord = new OrderRecord()
+                    {
+                        AccountId = currentUseAccountId,
+                        Date = curDate,
+                        Time = curTime,
+                        MassageTopicId = Int32.Parse(planTagSplit[0]),
+                        MassagePlanId = Int32.Parse(planTagSplit[1]),
+                        Price = planTagSplit[2],
+                        Commission = planTagSplit[3],
+                        SendStatus = "false",
+                        CancelStatus = "false",
+                        CreateDateTime = curDateTime,
+                        UpdateDateTime = curDateTime,
+                        MemberId = GlobalValue.Instance.usingMember.MemberId
+                    };
+                }
+                else
+                {
+                    ordRecord = new OrderRecord()
+                    {
+                        AccountId = currentUseAccountId,
+                        Date = curDate,
+                        Time = curTime,
+                        MassageTopicId = Int32.Parse(planTagSplit[0]),
+                        MassagePlanId = Int32.Parse(planTagSplit[1]),
+                        Price = planTagSplit[2],
+                        Commission = planTagSplit[3],
+                        SendStatus = "false",
+                        CancelStatus = "false",
+                        CreateDateTime = curDateTime,
+                        UpdateDateTime = curDateTime
+                    };
+                }
 
                 prepareOrder.Add(ordRecord);
                 SendTextToMonitor(planTagSplit);
@@ -1015,6 +1262,106 @@ namespace Urban
             }
         }
 
+        private void Number_Discount_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)sender;
+            showInputDiscountTb.Text += btn.Content;
+        }
+
+        private void enterBtn_Discount_Click(object sender, RoutedEventArgs e)
+        {
+            if (showInputDiscountTb.Text.Length > 0)//Coke
+            {
+                //Grid voucherClicked = (Grid)sender;
+                String[] discountSrcTagSplit = InitMoneyDiscountGrid.Tag.ToString().Split('Y');
+                int srcId = Int32.Parse(discountSrcTagSplit[0]);
+                //int voucherValue = Int32.Parse(voucherTagSplit[1]);
+                DateTime current = DateTime.Now;
+                string curDate = current.ToString("yyyy-MM-dd");
+                string curTime = current.ToString("HH:mm:ss");
+                string curDateTime = current.ToString("yyyy-MM-dd HH:mm:ss");
+
+                //add discount row in summary page
+                Grid itemInDiscountSummary = new Grid()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Margin = new Thickness(24, 6, 24, 0)
+
+                };
+
+                TextBlock discountNameTxt = new TextBlock()
+                {
+                    FontSize = 20,
+                    Foreground = new SolidColorBrush(Colors.Black),
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    Text = "- " + discountSrcTagSplit[1] + " " +showInputDiscountTb.Text
+                    //Text = "- " + voucherTagSplit[2]
+                };
+
+                TextBlock discountValue = new TextBlock()
+                {
+                    FontSize = 18,
+                    Foreground = new SolidColorBrush(Colors.Black),
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Text = "- " + String.Format("{0:n}", showInputDiscountTb.Text) + " ฿"
+                };
+
+                itemInDiscountSummary.Children.Add(discountNameTxt);
+                itemInDiscountSummary.Children.Add(discountValue);
+
+                summaryDiscountContainer.Children.Add(itemInDiscountSummary);
+
+                //Convert summary amount to integer
+                string cleanFloatingSummaryAmount = summaryAmountTxt.Text.Replace(".00", "");
+                string cleanCommaSummaryAmount = cleanFloatingSummaryAmount.Replace(",", "");
+                string finalCleanSummaryAmount = cleanCommaSummaryAmount.Replace(" ฿", "");
+                int currentSummaryAmount = Int32.Parse(finalCleanSummaryAmount);
+                int discountValueNumeric = Int32.Parse(showInputDiscountTb.Text);
+                int afterDiscount = currentSummaryAmount - discountValueNumeric;
+
+                summaryAmountTxt.Text = String.Format("{0:n}", afterDiscount) + " ฿";
+                finalBalance = afterDiscount;
+                SendTextTotalWithDiscount();
+
+                //DiscountMaster discountItemDetail = this.db.getDiscountMasterFromId(srcId);
+                DiscountRecord discountRecordItemDetail = new DiscountRecord()
+                {
+                    AccountId = currentUseAccountId,
+                    Date = curDate,
+                    Time = curTime,
+                    DiscountMasterId = srcId,
+                    DiscountMasterDetailId = 1,
+                    Value = discountValueNumeric.ToString(),
+                    SendStatus = "false",
+                    CancelStatus = "false",
+                    CreateDateTime = curDateTime,
+                    UpdateDateTime = curDateTime
+                };
+
+                prepareDiscount.Add(discountRecordItemDetail);
+                InitMoneyDiscountGrid.Visibility = Visibility.Collapsed;
+                showInputDiscountTb.Text = "";
+            }
+            else
+            {
+                MessageBox.Show("กรุณาใส่ราคา");
+            }
+        }
+
+        private void clearBtn_Discount_Click(object sender, RoutedEventArgs e)
+        {
+            showInputDiscountTb.Text = "";
+        }
+
+        private void deleteBtn_Discount_Click(object sender, RoutedEventArgs e)
+        {
+            if (showInputDiscountTb.Text.Length >= 1)
+            {
+                showInputDiscountTb.Text = showInputDiscountTb.Text.Substring(0, showInputDiscountTb.Text.Length - 1);
+            }
+        }
+
         private void clearSelectedBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             clearAllSelectedAndBalance();
@@ -1084,6 +1431,12 @@ namespace Urban
             PrintReceipt();
             PrintCommission();
 
+            vipBtn.Visibility = Visibility.Visible;
+            cancelVipBtn.Visibility = Visibility.Collapsed;
+            clearSelectedBtn.Visibility = Visibility.Visible;
+            clearSelectedForVIPBtn.Visibility = Visibility.Collapsed;
+            GlobalValue.Instance.usingMember = null;
+
             summaryPopupGrid.Visibility = Visibility.Collapsed;
             clearAllSelectedAndBalance();
             ClearText();
@@ -1099,6 +1452,12 @@ namespace Urban
             SaveDiscountToDB("credit");
             PrintReceipt();
             PrintCommission();
+
+            vipBtn.Visibility = Visibility.Visible;
+            cancelVipBtn.Visibility = Visibility.Collapsed;
+            clearSelectedBtn.Visibility = Visibility.Visible;
+            clearSelectedForVIPBtn.Visibility = Visibility.Collapsed;
+            GlobalValue.Instance.usingMember = null;
 
             summaryPopupGrid.Visibility = Visibility.Collapsed;
             clearAllSelectedAndBalance();
@@ -1659,6 +2018,9 @@ namespace Urban
             //
 
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
+
+            //For testing
+            MessageBox.Show(sb.ToString());
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
@@ -3545,8 +3907,8 @@ namespace Urban
             {
                 foreach (DiscountRecord p in prepareDiscount)
                 {
-                    discountValue = Int32.Parse(this.db.getDiscountMasterDetailFromId(p.DiscountMasterDetailId).Value);
-                    text += "- " + this.db.getDiscountMasterDetailFromId(p.DiscountMasterDetailId).Name + "\n  " + "-"+String.Format("{0:n}", discountValue) + " Baht\n\n";
+                    discountValue = Int32.Parse(p.Value);
+                    text += "- " + this.db.getDiscountMasterFromId(p.DiscountMasterId).ShowName + "\n  " + "-"+String.Format("{0:n}", discountValue) + " Baht\n\n";
                 }
             }
 
@@ -3732,7 +4094,7 @@ namespace Urban
         public void clearAllSelectedAndBalance()
         {
             MassageSetContainer.Children.Clear();
-            voucherContainer.Children.Clear();
+            discountSrcContainer.Children.Clear();
             InitialInterface();
             currentBalance = 0;
             finalBalance = 0;
@@ -3742,11 +4104,11 @@ namespace Urban
             checkoutAndClearGrid.Visibility = Visibility.Collapsed;
         }
 
-        public void clearAllSelectedAndBalanceForVIP()
+        public void clearAllSelectedAndBalanceForVIP(int memberGroupId)
         {
             MassageSetContainer.Children.Clear();
-            voucherContainer.Children.Clear();
-            InitialInterfaceForVIP();
+            discountSrcContainer.Children.Clear();
+            InitialInterfaceForVIP(this.db.getMemberPriviledge(memberGroupId));
             currentBalance = 0;
             finalBalance = 0;
             currentBalanceTxt.Text = "ราคาทั้งหมด / Total";
@@ -4543,9 +4905,25 @@ namespace Urban
 
             return convertedDateTime;
         }
+
+        public string ConvertDate(string jsonDateTime)
+        {
+            string[] splitA = jsonDateTime.Split(' ');
+            string[] splitB = splitA[0].Split('/');
+            string convertedDateTime = splitB[2] + "-" + splitB[0] + "-" + splitB[1];
+
+            return convertedDateTime;
+        }
+
         private void cancelNumpadOtherBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             InitMoneyForOtherSaleGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private void cancelNumpadDiscountBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            InitMoneyDiscountGrid.Visibility = Visibility.Collapsed;
+            showInputDiscountTb.Text = "";
         }
 
         private void closeCode_Click(object sender, RoutedEventArgs e)
@@ -4557,7 +4935,7 @@ namespace Urban
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-
+            //For backdoor
         }
 
         private async void vipBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -4566,24 +4944,53 @@ namespace Urban
             vipInputTbx.Focus();
             await Task.Delay(4000);
             VIPwaitingGrid.Visibility = Visibility.Collapsed;
+            String[] tempSplitVIP = showVipInputTbl.Text.Split('?');
 
-            if (showVipInputTbl.Text.Equals("VIP?01?000003?"))
+            //if (showVipInputTbl.Text.Equals("VIP?01?000003?"))
+            //{
+            //    MessageBox.Show("Welcome VIP!!");
+            //    vipInputTbx.Text = "";
+            //    vipBtn.Visibility = Visibility.Collapsed;
+            //    cancelVipBtn.Visibility = Visibility.Visible;
+
+            //    clearAllSelectedAndBalanceForVIP();
+            //}
+            //else if (showVipInputTbl.Text.Equals("VIP?01?000006?"))
+            //{
+            //    MessageBox.Show("Welcome SUPER VIP!!");
+            //    vipInputTbx.Text = "";
+            //    vipBtn.Visibility = Visibility.Collapsed;
+            //    cancelVipBtn.Visibility = Visibility.Visible;
+
+            //    clearAllSelectedAndBalanceForVIP();
+            //}
+            //else
+            //{
+            //    MessageBox.Show("No VIP!!");
+            //    vipInputTbx.Text = "";
+            //}
+
+            if (tempSplitVIP.Count()>2)
             {
-                MessageBox.Show("Welcome VIP!!");
-                vipInputTbx.Text = "";
-                vipBtn.Visibility = Visibility.Collapsed;
-                cancelVipBtn.Visibility = Visibility.Visible;
+                MemberDetail currentMemberDetail = this.db.checkMemberDataFromCard(tempSplitVIP[2]);
+                if (currentMemberDetail != null)
+                {
+                    MessageBox.Show("Welcome VIP!!");
+                    vipInputTbx.Text = "";
+                    vipBtn.Visibility = Visibility.Collapsed;
+                    cancelVipBtn.Visibility = Visibility.Visible;
+                    GlobalValue.Instance.usingMember = currentMemberDetail;
+                    clearSelectedBtn.Visibility = Visibility.Collapsed;
+                    clearSelectedForVIPBtn.Visibility = Visibility.Visible;
 
-                clearAllSelectedAndBalanceForVIP();
-            }
-            else if (showVipInputTbl.Text.Equals("VIP?01?000006?"))
-            {
-                MessageBox.Show("Welcome SUPER VIP!!");
-                vipInputTbx.Text = "";
-                vipBtn.Visibility = Visibility.Collapsed;
-                cancelVipBtn.Visibility = Visibility.Visible;
-
-                clearAllSelectedAndBalanceForVIP();
+                    //Send priviledge data to front
+                    clearAllSelectedAndBalanceForVIP(currentMemberDetail.MemberGroupId);
+                }
+                else
+                {
+                    MessageBox.Show("No VIP!!");
+                    vipInputTbx.Text = "";
+                }
             }
             else
             {
@@ -4591,13 +4998,16 @@ namespace Urban
                 vipInputTbx.Text = "";
             }
 
-            
+
         }
 
         private void cancelVipBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             vipBtn.Visibility = Visibility.Visible;
             cancelVipBtn.Visibility = Visibility.Collapsed;
+            clearSelectedBtn.Visibility = Visibility.Visible;
+            clearSelectedForVIPBtn.Visibility = Visibility.Collapsed;
+            GlobalValue.Instance.usingMember = null;
             clearAllSelectedAndBalance();
         }
 
@@ -4609,6 +5019,12 @@ namespace Urban
             string rplc3 = rplc2.Replace("+", "");
 
             showVipInputTbl.Text = rplc3;
+        }
+
+        private void clearSelectedForVIPBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            clearAllSelectedAndBalanceForVIP(GlobalValue.Instance.usingMember.MemberGroupId);
+            ClearText();
         }
     }
 }

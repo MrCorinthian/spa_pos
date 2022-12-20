@@ -68,5 +68,6 @@ namespace Urban
         public string report100 { get; set; }
         public string report25 { get; set; }
         public string reportDetail { get; set; }
+        public Model.MemberDetail usingMember { get; set; }
     }
 }

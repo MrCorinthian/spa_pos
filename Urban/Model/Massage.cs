@@ -173,6 +173,8 @@ namespace Urban.Model
         public string CancelStatus { get; set; }
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
+        public int MemberId { get; set; }
+        public string MemberDiscountAmount { get; set; }
     }
 
     public class OtherSale
@@ -221,6 +223,7 @@ namespace Urban.Model
         public string Status { get; set; }
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
+        public string ShowName { get; set; }
     }
 
     public class DiscountMasterDetail
@@ -251,7 +254,6 @@ namespace Urban.Model
         public string Time { get; set; }
         [NotNull]
         public int DiscountMasterId { get; set; }
-        [NotNull]
         public int DiscountMasterDetailId { get; set; }
         [NotNull]
         public string Value { get; set; }
@@ -279,6 +281,92 @@ namespace Urban.Model
         public string SendStatus { get; set; }
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
+    }
+
+    public class Member
+    {
+        [PrimaryKey, NotNull]
+        public int Id { get; set; }
+        [NotNull]
+        public string MemberNo { get; set; }
+        [NotNull]
+        public string Title { get; set; }
+        [NotNull]
+        public string FirstName { get; set; }
+        [NotNull]
+        public string FamilyName { get; set; }
+        public string Birth { get; set; }
+        public string AddressInTH { get; set; }
+        public string City { get; set; }
+        public string TelephoneNo { get; set; }
+        public string WhatsAppId { get; set; }
+        public string LineId { get; set; }
+        [NotNull]
+        public string ActiveStatus { get; set; }
+    }
+
+    public class MemberGroup
+    {
+        [PrimaryKey, NotNull]
+        public int Id { get; set; }
+        [NotNull]
+        public string Name { get; set; }
+        [NotNull]
+        public string ShowName { get; set; }
+        [NotNull]
+        public string Status { get; set; }
+    }
+
+    public class MemberPriviledge
+    {
+        [PrimaryKey, NotNull]
+        public int Id { get; set; }
+        [NotNull]
+        public int PriviledgeTypeId { get; set; }
+        [NotNull]
+        public string ShowName { get; set; }
+        [NotNull]
+        public int Value { get; set; }
+        public string StartDate { get; set; }
+        public string ExpireDate { get; set; }
+        [NotNull]
+        public string Status { get; set; }
+    }
+
+    public class PriviledgeType
+    {
+        [PrimaryKey, NotNull]
+        public int Id { get; set; }
+        [NotNull]
+        public string Name { get; set; }
+        [NotNull]
+        public string Status { get; set; }
+    }
+
+    public class MemberGroupPriviledge
+    {
+        [PrimaryKey, NotNull]
+        public int Id { get; set; }
+        [NotNull]
+        public int MemberGroupId { get; set; }
+        [NotNull]
+        public int MemberPriviledgeId { get; set; }
+        [NotNull]
+        public string Status { get; set; }
+    }
+
+    public class MemberDetail
+    {
+        [PrimaryKey, NotNull]
+        public int Id { get; set; }
+        [NotNull]
+        public int MemberId { get; set; }
+        [NotNull]
+        public int MemberGroupId { get; set; }
+        public string StartDate { get; set; }
+        public string ExpireDate { get; set; }
+        [NotNull]
+        public string Status { get; set; }
     }
 
     public class Setting

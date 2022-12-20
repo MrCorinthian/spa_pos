@@ -486,7 +486,17 @@ namespace Urban
             return OtherSaleRecords;
         }
 
-        //Voucher
+        //Voucher and cash card
+        public List<DiscountMaster> getAllDiscountSource()
+        {
+            List<DiscountMaster> discountSrcList;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                discountSrcList = db.Table<DiscountMaster>().Where(b => b.Status == "true").ToList();
+            }
+            return discountSrcList;
+        }
+
         public List<DiscountMasterDetail> getAllVoucherList()
         {
             List<DiscountMasterDetail> voucherList;
@@ -522,6 +532,17 @@ namespace Urban
                 discountRecords = db.Table<DiscountRecord>().Where(b => b.AccountId == AccountId && b.SendStatus == "false").ToList();
             }
             return discountRecords;
+        }
+
+        public DiscountMaster getDiscountMasterFromId(int Id)
+        {
+            DiscountMaster dmt = new DiscountMaster();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                dmt = db.Table<DiscountMaster>().Where(b => b.Id == Id).FirstOrDefault();
+            }
+
+            return dmt;
         }
 
         public DiscountMasterDetail getDiscountMasterDetailFromId(int Id)
@@ -840,6 +861,128 @@ namespace Urban
         //    }
         //    return pw.Value;
         //}
+
+
+        //Member management zone
+        public void clearAllMemberRelateTable()
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.DeleteAll<Member>();
+                db.DeleteAll<MemberGroup>();
+                db.DeleteAll<MemberPriviledge>();
+                db.DeleteAll<PriviledgeType>();
+                db.DeleteAll<MemberGroupPriviledge>();
+                db.DeleteAll<MemberDetail>();
+            }
+        }
+
+        public void InsertMember(Member MemberData)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(MemberData);
+
+            }
+        }
+
+        public void InsertMemberGroup(MemberGroup MemberGroupData)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(MemberGroupData);
+            }
+        }
+
+        public void InsertMemberPriviledge(MemberPriviledge MemberPriviledgeData)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(MemberPriviledgeData);
+            }
+        }
+
+        public void InsertPriviledgeType(PriviledgeType PriviledgeTypeData)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(PriviledgeTypeData);
+            }
+        }
+
+        public void InsertMemberGroupPriviledge(MemberGroupPriviledge MemberGroupPriviledgeData)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(MemberGroupPriviledgeData);
+            }
+        }
+
+        public void InsertMemberDetail(MemberDetail MemberDetailData)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(MemberDetailData);
+            }
+        }
+
+        public MemberDetail checkMemberDataFromCard(string memberNo)
+        {
+            Member memberData;
+            MemberDetail memberDetailData;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                memberData = db.Table<Member>().Where(b => b.MemberNo == memberNo && b.ActiveStatus == "true").FirstOrDefault();
+            }
+            if (memberData == null)
+            {
+                return null;
+            }
+            else
+            {
+                using (var db = new SQLiteConnection(dbname))
+                {
+                    memberDetailData = db.Table<MemberDetail>().Where(b => b.MemberId == memberData.Id && b.Status == "true").FirstOrDefault();
+                }
+                if (memberDetailData == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return memberDetailData;
+                }
+            }
+        }
+
+        public MemberPriviledge getMemberPriviledge(int memberGroupId)
+        {
+            MemberGroupPriviledge groupPriviledge;
+            MemberPriviledge priviledgeData;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                groupPriviledge = db.Table<MemberGroupPriviledge>().Where(b => b.MemberGroupId == memberGroupId && b.Status == "true").FirstOrDefault();
+            }
+            if (groupPriviledge == null)
+            {
+                return null;
+            }
+            else
+            {
+                using (var db = new SQLiteConnection(dbname))
+                {
+                    priviledgeData = db.Table<MemberPriviledge>().Where(b => b.Id == groupPriviledge.MemberPriviledgeId && b.Status == "true").FirstOrDefault();
+                }
+                if (priviledgeData == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return priviledgeData;
+                }
+            }
+        }
 
 
     }
