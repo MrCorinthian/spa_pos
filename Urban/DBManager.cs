@@ -852,6 +852,56 @@ namespace Urban
             }
         }
 
+        public Setting getBranchCompanyName()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "BranchCompanyName").FirstOrDefault();
+            }
+            return conFig;
+        }
+
+        public Setting getBranchAddress1()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "BranchAddress1").FirstOrDefault();
+            }
+            return conFig;
+        }
+
+        public Setting getBranchAddress2()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "BranchAddress2").FirstOrDefault();
+            }
+            return conFig;
+        }
+
+        public Setting getBranchAddress3()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "BranchAddress3").FirstOrDefault();
+            }
+            return conFig;
+        }
+
+        public Setting getBranchTaxId()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "BranchTaxId").FirstOrDefault();
+            }
+            return conFig;
+        }
+
         //public string getCurrentPasswordVal()
         //{
         //    Setting pw = new Setting();

@@ -566,6 +566,7 @@ namespace Urban
                                 VerticalAlignment = VerticalAlignment.Stretch,
                                 Margin = new Thickness(0, 3, 0, 3),
                                 Tag = msgPlanFromTopic[j].MassageTopicId+"Y"+ msgPlanFromTopic[j].MassagePlanId+"Y"+ msgPlanFromTopic[j].Price+"Y"+ msgPlanFromTopic[j].Commission+"Y"+listMassageTopic[i].HeaderColor + "Y" + listMassageTopic[i].ChildColor + "Y"+"false"
+                                //Tag = msgPlanFromTopic[j].MassageTopicId + "Y" + msgPlanFromTopic[j].MassagePlanId + "Y" + msgPlanFromTopic[j].Price + "Y" + msgPlanFromTopic[j].Commission + "Y" + listMassageTopic[i].HeaderColor + "Y" + listMassageTopic[i].ChildColor + "Y" + "false"
 
                             };
 
@@ -585,7 +586,46 @@ namespace Urban
                                 Margin = new Thickness(4, 0, 4, 0)
                             };
 
-                            borderPlan.Child = planText;
+                            Ellipse circleLabel = new Ellipse()
+                            {
+                                Name = "circleLab",
+                                Fill = new SolidColorBrush(Colors.White),
+                                HorizontalAlignment = HorizontalAlignment.Right,
+                                VerticalAlignment = VerticalAlignment.Top,
+                                Width = 35,
+                                Height = 35,
+                                Margin = new Thickness(0, 0, 0, 0),
+                                Visibility = Visibility.Collapsed
+                            };
+
+                            //Massage Amount Number
+                            TextBlock amountText = new TextBlock()
+                            {
+                                Name = "amountTbl",
+                                FontSize = 25,
+                                FontWeight = FontWeights.Bold,
+                                Foreground = new SolidColorBrush(Colors.DarkSlateBlue),
+                                HorizontalAlignment = HorizontalAlignment.Right,
+                                VerticalAlignment = VerticalAlignment.Top,
+                                Text = "1",
+                                TextWrapping = TextWrapping.Wrap,
+                                TextTrimming = TextTrimming.None,
+                                TextAlignment = TextAlignment.Center,
+                                Margin = new Thickness(0, 0, 10, 0),
+                                Visibility = Visibility.Collapsed
+                            };
+
+                            Grid contentGrid = new Grid()
+                            {
+
+                            };
+
+                            contentGrid.Children.Add(planText);
+                            contentGrid.Children.Add(circleLabel);
+                            contentGrid.Children.Add(amountText);
+                            //borderPlan.Child = planText;
+                            //borderPlan.Child = amountText;
+                            borderPlan.Child = contentGrid;
                             itemStackPanel.Children.Add(borderPlan);
 
                         }
@@ -811,7 +851,46 @@ namespace Urban
                                 Margin = new Thickness(4, 0, 4, 0)
                             };
 
-                            borderPlan.Child = planText;
+                            Ellipse circleLabel = new Ellipse()
+                            {
+                                Name = "circleLab",
+                                Fill = new SolidColorBrush(Colors.White),
+                                HorizontalAlignment = HorizontalAlignment.Right,
+                                VerticalAlignment = VerticalAlignment.Top,
+                                Width = 35,
+                                Height = 35,
+                                Margin = new Thickness(0, 0, 0, 0),
+                                Visibility = Visibility.Collapsed
+                            };
+
+                            //Massage Amount Number
+                            TextBlock amountText = new TextBlock()
+                            {
+                                Name = "amountTbl",
+                                FontSize = 25,
+                                FontWeight = FontWeights.Bold,
+                                Foreground = new SolidColorBrush(Colors.DarkSlateBlue),
+                                HorizontalAlignment = HorizontalAlignment.Right,
+                                VerticalAlignment = VerticalAlignment.Top,
+                                Text = "1",
+                                TextWrapping = TextWrapping.Wrap,
+                                TextTrimming = TextTrimming.None,
+                                TextAlignment = TextAlignment.Center,
+                                Margin = new Thickness(0, 0, 10, 0),
+                                Visibility = Visibility.Collapsed
+                            };
+
+                            Grid contentGrid = new Grid()
+                            {
+
+                            };
+
+                            contentGrid.Children.Add(planText);
+                            contentGrid.Children.Add(circleLabel);
+                            contentGrid.Children.Add(amountText);
+                            //borderPlan.Child = planText;
+                            //borderPlan.Child = amountText;
+                            borderPlan.Child = contentGrid;
                             itemStackPanel.Children.Add(borderPlan);
 
                         }
@@ -976,11 +1055,23 @@ namespace Urban
             Border planClicked = (Border)sender;
             String[] planTagSplit = planClicked.Tag.ToString().Split('Y');
 
+            Grid getGrid = planClicked.Child as Grid;
+
+            var getEllipseInGrid = getGrid.Children[1];
+            Ellipse circleLabels = (Ellipse)getEllipseInGrid;
+            circleLabels.Visibility = Visibility.Visible;
+
+            var getChildrenInGrid = getGrid.Children[2];
+            TextBlock amountTbls = (TextBlock)getChildrenInGrid;
+            amountTbls.Visibility = Visibility.Visible;
+            int amountNum = Int32.Parse(amountTbls.Text);
+
             DateTime current = DateTime.Now;
             string curDate = current.ToString("yyyy-MM-dd");
             string curTime = current.ToString("HH:mm:ss");
             string curDateTime = current.ToString("yyyy-MM-dd HH:mm:ss");
 
+            //Test  new function for multiple buy
             if (planTagSplit[6].Equals("false"))
             {
                 checkoutAndClearGrid.Visibility = Visibility.Visible;
@@ -1035,30 +1126,141 @@ namespace Urban
             }
             else
             {
-                planClicked.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(planTagSplit[5]));
-                planClicked.Tag = planClicked.Tag.ToString().Replace("true", "false");
+                amountNum = amountNum + 1;
+                amountTbls.Text = amountNum.ToString();
 
-                currentBalance = currentBalance - Int32.Parse(planTagSplit[2]);
-                if (currentBalance == 0)
+                currentBalance = currentBalance + Int32.Parse(planTagSplit[2]);
+                currentBalanceTxt.Text = String.Format("{0:n}", currentBalance);
+
+                OrderRecord ordRecord;
+
+                if (GlobalValue.Instance.usingMember != null)
                 {
-                    currentBalanceTxt.Text = "ราคาทั้งหมด / Total";
-                    checkoutAndClearGrid.Visibility = Visibility.Collapsed;
-                    ClearText();
+
+                    ordRecord = new OrderRecord()
+                    {
+                        AccountId = currentUseAccountId,
+                        Date = curDate,
+                        Time = curTime,
+                        MassageTopicId = Int32.Parse(planTagSplit[0]),
+                        MassagePlanId = Int32.Parse(planTagSplit[1]),
+                        Price = planTagSplit[2],
+                        Commission = planTagSplit[3],
+                        SendStatus = "false",
+                        CancelStatus = "false",
+                        CreateDateTime = curDateTime,
+                        UpdateDateTime = curDateTime,
+                        MemberId = GlobalValue.Instance.usingMember.MemberId
+                    };
                 }
                 else
                 {
-                    currentBalanceTxt.Text = String.Format("{0:n}", currentBalance);
-                }
-                
-                for(int x=0;x<prepareOrder.Count();x++)
-                {
-                    if((prepareOrder[x].MassageTopicId == Int32.Parse(planTagSplit[0]))&&(prepareOrder[x].MassagePlanId == Int32.Parse(planTagSplit[1])))
+                    ordRecord = new OrderRecord()
                     {
-                        prepareOrder.RemoveAt(x);
-                    }
+                        AccountId = currentUseAccountId,
+                        Date = curDate,
+                        Time = curTime,
+                        MassageTopicId = Int32.Parse(planTagSplit[0]),
+                        MassagePlanId = Int32.Parse(planTagSplit[1]),
+                        Price = planTagSplit[2],
+                        Commission = planTagSplit[3],
+                        SendStatus = "false",
+                        CancelStatus = "false",
+                        CreateDateTime = curDateTime,
+                        UpdateDateTime = curDateTime
+                    };
                 }
-                
+
+                prepareOrder.Add(ordRecord);
+                SendTextToMonitor(planTagSplit);
             }
+
+
+            /*
+            MessageBox.Show(prepareOrder.Count().ToString());
+            for(int u=0;u<prepareOrder.Count();u++)
+            {
+                MessageBox.Show(prepareOrder[u].MassageTopicId + " " + prepareOrder[u].MassagePlanId + " " + prepareOrder[u].Price);
+            }*/
+
+            //if (planTagSplit[6].Equals("false"))
+            //{
+            //    checkoutAndClearGrid.Visibility = Visibility.Visible;
+
+            //    planClicked.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(planTagSplit[4]));
+            //    planClicked.Tag = planClicked.Tag.ToString().Replace("false", "true");
+
+            //    currentBalance = currentBalance + Int32.Parse(planTagSplit[2]);
+            //    currentBalanceTxt.Text = String.Format("{0:n}", currentBalance);
+
+            //    OrderRecord ordRecord;
+
+            //    if (GlobalValue.Instance.usingMember != null)
+            //    {
+
+            //        ordRecord = new OrderRecord()
+            //        {
+            //            AccountId = currentUseAccountId,
+            //            Date = curDate,
+            //            Time = curTime,
+            //            MassageTopicId = Int32.Parse(planTagSplit[0]),
+            //            MassagePlanId = Int32.Parse(planTagSplit[1]),
+            //            Price = planTagSplit[2],
+            //            Commission = planTagSplit[3],
+            //            SendStatus = "false",
+            //            CancelStatus = "false",
+            //            CreateDateTime = curDateTime,
+            //            UpdateDateTime = curDateTime,
+            //            MemberId = GlobalValue.Instance.usingMember.MemberId
+            //        };
+            //    }
+            //    else
+            //    {
+            //        ordRecord = new OrderRecord()
+            //        {
+            //            AccountId = currentUseAccountId,
+            //            Date = curDate,
+            //            Time = curTime,
+            //            MassageTopicId = Int32.Parse(planTagSplit[0]),
+            //            MassagePlanId = Int32.Parse(planTagSplit[1]),
+            //            Price = planTagSplit[2],
+            //            Commission = planTagSplit[3],
+            //            SendStatus = "false",
+            //            CancelStatus = "false",
+            //            CreateDateTime = curDateTime,
+            //            UpdateDateTime = curDateTime
+            //        };
+            //    }
+
+            //    prepareOrder.Add(ordRecord);
+            //    SendTextToMonitor(planTagSplit);
+            //}
+            //else
+            //{
+            //    planClicked.Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(planTagSplit[5]));
+            //    planClicked.Tag = planClicked.Tag.ToString().Replace("true", "false");
+
+            //    currentBalance = currentBalance - Int32.Parse(planTagSplit[2]);
+            //    if (currentBalance == 0)
+            //    {
+            //        currentBalanceTxt.Text = "ราคาทั้งหมด / Total";
+            //        checkoutAndClearGrid.Visibility = Visibility.Collapsed;
+            //        ClearText();
+            //    }
+            //    else
+            //    {
+            //        currentBalanceTxt.Text = String.Format("{0:n}", currentBalance);
+            //    }
+
+            //    for (int x = 0; x < prepareOrder.Count(); x++)
+            //    {
+            //        if ((prepareOrder[x].MassageTopicId == Int32.Parse(planTagSplit[0])) && (prepareOrder[x].MassagePlanId == Int32.Parse(planTagSplit[1])))
+            //        {
+            //            prepareOrder.RemoveAt(x);
+            //        }
+            //    }
+
+            //}
 
             //MessageBox.Show(planClicked.Tag.ToString());
             /*
@@ -1067,7 +1269,7 @@ namespace Urban
             {
                 MessageBox.Show(prepareOrder[u].MassageTopicId + " " + prepareOrder[u].MassagePlanId + " " + prepareOrder[u].Price);
             }*/
-            
+
         }
 
         public void CheckIn()
@@ -2001,7 +2203,11 @@ namespace Urban
             //string thReplaceMin = TheSlip.getInvoice().Replace("นาที", "mins");
             //string thReplaceHr = thReplaceMin.Replace("ชั่วโมง", "hr");
             var sb = new StringBuilder();
-            sb.AppendLine("       " + currentBranchName);
+            sb.AppendLine("      " + this.db.getBranchCompanyName().Value);
+            sb.AppendLine("       " + this.db.getBranchAddress1().Value);
+            sb.AppendLine("       " + this.db.getBranchAddress2().Value);
+            sb.AppendLine("          " + this.db.getBranchAddress3().Value);
+            sb.AppendLine("     TAX ID : " + this.db.getBranchTaxId().Value);
             sb.AppendLine("     " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
             sb.AppendLine("===============================");
             //sb.AppendLine("\n");
@@ -4613,7 +4819,8 @@ namespace Urban
                 IsCreditCard = getOrd.IsCreditCard,
                 CancelStatus = getOrd.CancelStatus,
                 CreateDateTime = getOrd.CreateDateTime,
-                UpdateDateTime = getOrd.UpdateDateTime
+                UpdateDateTime = getOrd.UpdateDateTime,
+                MemberId = getOrd.MemberId
             };
 
             listOrders.Add(ords);
@@ -4975,7 +5182,7 @@ namespace Urban
                 MemberDetail currentMemberDetail = this.db.checkMemberDataFromCard(tempSplitVIP[2]);
                 if (currentMemberDetail != null)
                 {
-                    MessageBox.Show("Welcome VIP!!");
+                    //MessageBox.Show("Welcome VIP!!");
                     vipInputTbx.Text = "";
                     vipBtn.Visibility = Visibility.Collapsed;
                     cancelVipBtn.Visibility = Visibility.Visible;
@@ -4988,13 +5195,13 @@ namespace Urban
                 }
                 else
                 {
-                    MessageBox.Show("No VIP!!");
+                    MessageBox.Show("No member found!!");
                     vipInputTbx.Text = "";
                 }
             }
             else
             {
-                MessageBox.Show("No VIP!!");
+                MessageBox.Show("No member found!!");
                 vipInputTbx.Text = "";
             }
 
@@ -5025,6 +5232,12 @@ namespace Urban
         {
             clearAllSelectedAndBalanceForVIP(GlobalValue.Instance.usingMember.MemberGroupId);
             ClearText();
+        }
+
+        private void AmountNumber_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)sender;
+            showInitMoneyTb.Text += btn.Content;
         }
     }
 }
