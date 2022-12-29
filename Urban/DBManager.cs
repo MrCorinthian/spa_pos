@@ -976,6 +976,24 @@ namespace Urban
             }
         }
 
+        public Member getMemberProfile(string memberNo)
+        {
+            Member memberData;
+            
+            using (var db = new SQLiteConnection(dbname))
+            {
+                memberData = db.Table<Member>().Where(b => b.MemberNo == memberNo).FirstOrDefault();
+            }
+            if (memberData == null)
+            {
+                return null;
+            }
+            else
+            {
+                return memberData;
+            }
+        }
+
         public MemberDetail checkMemberDataFromCard(string memberNo)
         {
             Member memberData;

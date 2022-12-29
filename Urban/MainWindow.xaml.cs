@@ -2226,7 +2226,7 @@ namespace Urban
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
 
             //For testing
-            MessageBox.Show(sb.ToString());
+            //MessageBox.Show(sb.ToString());
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
@@ -2805,6 +2805,8 @@ namespace Urban
                     }
                     else
                     {
+                        Application.Current.Shutdown();
+                        //------------------------------------------------------ Test please uncomment before release -----------------------------------
                         if (GlobalValue.Instance.report100.Equals("false"))
                         {
                             Application.Current.Shutdown();
@@ -2874,6 +2876,7 @@ namespace Urban
                             psi.UseShellExecute = false;
                             Process.Start(psi);
                         }
+                        //---------------------------------------------------------------------------------------------
                     }
                     
                     
@@ -5149,7 +5152,7 @@ namespace Urban
         {
             VIPwaitingGrid.Visibility = Visibility.Visible;
             vipInputTbx.Focus();
-            await Task.Delay(4000);
+            await Task.Delay(3000);
             VIPwaitingGrid.Visibility = Visibility.Collapsed;
             String[] tempSplitVIP = showVipInputTbl.Text.Split('?');
 
@@ -5177,18 +5180,22 @@ namespace Urban
             //    vipInputTbx.Text = "";
             //}
 
-            if (tempSplitVIP.Count()>2)
+            if (tempSplitVIP.Count()>0)
             {
-                MemberDetail currentMemberDetail = this.db.checkMemberDataFromCard(tempSplitVIP[2]);
+                MemberDetail currentMemberDetail = this.db.checkMemberDataFromCard(tempSplitVIP[0]);
                 if (currentMemberDetail != null)
                 {
-                    //MessageBox.Show("Welcome VIP!!");
+                    
                     vipInputTbx.Text = "";
                     vipBtn.Visibility = Visibility.Collapsed;
                     cancelVipBtn.Visibility = Visibility.Visible;
                     GlobalValue.Instance.usingMember = currentMemberDetail;
                     clearSelectedBtn.Visibility = Visibility.Collapsed;
                     clearSelectedForVIPBtn.Visibility = Visibility.Visible;
+
+                    Member profile = this.db.getMemberProfile(tempSplitVIP[0]);
+
+                    MessageBox.Show("Welcome VIP!!\n"+profile.Title+" "+profile.FirstName+" "+profile.FamilyName);
 
                     //Send priviledge data to front
                     clearAllSelectedAndBalanceForVIP(currentMemberDetail.MemberGroupId);
