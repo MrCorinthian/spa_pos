@@ -235,6 +235,7 @@ namespace Urban
                             mDiscountMaster.Id = (int)rootDiscountMaster[i]["Id"];
                             mDiscountMaster.Name = rootDiscountMaster[i]["Name"].ToString();
                             mDiscountMaster.Status = rootDiscountMaster[i]["Status"].ToString();
+                            mDiscountMaster.ShowName = rootDiscountMaster[i]["ShowName"].ToString();
                             //mDiscountMaster.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
                             //mDiscountMaster.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
