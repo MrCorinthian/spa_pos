@@ -5149,6 +5149,7 @@ namespace Urban
             //For backdoor
         }
 
+        //VIPMember functional start here
         private async void vipBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             VIPwaitingGrid.Visibility = Visibility.Visible;
@@ -5183,29 +5184,98 @@ namespace Urban
 
             if (tempSplitVIP.Count()>0)
             {
-                MemberDetail currentMemberDetail = this.db.checkMemberDataFromCard(tempSplitVIP[0]);
-                if (currentMemberDetail != null)
+
+                try
                 {
-                    
-                    vipInputTbx.Text = "";
-                    vipBtn.Visibility = Visibility.Collapsed;
-                    cancelVipBtn.Visibility = Visibility.Visible;
-                    GlobalValue.Instance.usingMember = currentMemberDetail;
-                    clearSelectedBtn.Visibility = Visibility.Collapsed;
-                    clearSelectedForVIPBtn.Visibility = Visibility.Visible;
 
-                    Member profile = this.db.getMemberProfile(tempSplitVIP[0]);
-
-                    MessageBox.Show("Welcome VIP!!\n"+profile.Title+" "+profile.FirstName+" "+profile.FamilyName);
-
-                    //Send priviledge data to front
-                    clearAllSelectedAndBalanceForVIP(currentMemberDetail.MemberGroupId);
-                }
-                else
+                    var client = new HttpClient();
+                    var values = new Dictionary<string, string>
                 {
-                    MessageBox.Show("No member found!!");
-                    vipInputTbx.Text = "";
+                    {"memberNo",tempSplitVIP[0] }
+                };
+                    var content = new MyFormUrlEncodedContent(values);
+                    var response = await client.PostAsync(GlobalValue.Instance.Url_VerifyMember, content);
+                    var resultAuthen = await response.Content.ReadAsStringAsync();
+
+                    var parseJson = JObject.Parse(resultAuthen);
+
+                    //var rootMassageTopic = parseJson["MassageTopic"];
+                    //for (int i = 0; i < rootMassageTopic.Count(); i++)
+                    //{
+                    //    MassageTopic mTopic = new MassageTopic();
+                    //    mTopic.Id = (int)rootMassageTopic[i]["Id"];
+                    //    mTopic.Name = rootMassageTopic[i]["Name"].ToString();
+                    //    mTopic.HeaderColor = rootMassageTopic[i]["HeaderColor"].ToString();
+                    //    mTopic.ChildColor = rootMassageTopic[i]["ChildColor"].ToString();
+                    //    mTopic.CreateDateTime = ConvertDateTime(rootMassageTopic[i]["CreateDateTime"].ToString());
+
+                    //    this.db.InsertMassageTopic(mTopic);
+                    //}
+
+                    string checkStatus = (string)parseJson["Status"];
+                    if (checkStatus.Equals("true"))
+                    {
+                        MemberDetail currentMemberDetail = new MemberDetail();
+                        currentMemberDetail.Id = (int)parseJson["MemberDetails"]["Id"];
+                        currentMemberDetail.MemberId = (int)parseJson["MemberDetails"]["MemberId"];
+                        currentMemberDetail.MemberGroupId = (int)parseJson["MemberDetails"]["MemberGroupId"];
+                        currentMemberDetail.StartDate = ConvertDate(parseJson["MemberDetails"]["StartDate"].ToString());
+                        currentMemberDetail.ExpireDate = ConvertDate(parseJson["MemberDetails"]["ExpireDate"].ToString());
+                        currentMemberDetail.Status = (string)parseJson["MemberDetails"]["Status"];
+
+                        vipInputTbx.Text = "";
+                        vipBtn.Visibility = Visibility.Collapsed;
+                        cancelVipBtn.Visibility = Visibility.Visible;
+                        GlobalValue.Instance.usingMember = currentMemberDetail;
+                        clearSelectedBtn.Visibility = Visibility.Collapsed;
+                        clearSelectedForVIPBtn.Visibility = Visibility.Visible;
+
+                        //Member profile = this.db.getMemberProfile(tempSplitVIP[0]);
+                        string memTitle = (string)parseJson["Title"];
+                        string memFirstName = (string)parseJson["FirstName"];
+                        string memFamilyName = (string)parseJson["FamilyName"];
+
+                        MessageBox.Show("Welcome VIP!!\n" + memTitle + " " + memFirstName + " " + memFamilyName);
+
+                        //Send priviledge data to front
+                        clearAllSelectedAndBalanceForVIP(currentMemberDetail.MemberGroupId);
+
+                    }
+                    else if(checkStatus.Equals("false"))
+                    {
+                        MessageBox.Show("No member found!!");
+                        vipInputTbx.Text = "";
+                    }
+
                 }
+                catch (Exception ex)
+                {
+                    MemberDetail currentMemberDetail = this.db.checkMemberDataFromCard(tempSplitVIP[0]);
+                    if (currentMemberDetail != null)
+                    {
+
+                        vipInputTbx.Text = "";
+                        vipBtn.Visibility = Visibility.Collapsed;
+                        cancelVipBtn.Visibility = Visibility.Visible;
+                        GlobalValue.Instance.usingMember = currentMemberDetail;
+                        clearSelectedBtn.Visibility = Visibility.Collapsed;
+                        clearSelectedForVIPBtn.Visibility = Visibility.Visible;
+
+                        Member profile = this.db.getMemberProfile(tempSplitVIP[0]);
+
+                        MessageBox.Show("Welcome VIP!!\n" + profile.Title + " " + profile.FirstName + " " + profile.FamilyName);
+
+                        //Send priviledge data to front
+                        clearAllSelectedAndBalanceForVIP(currentMemberDetail.MemberGroupId);
+                    }
+                    else
+                    {
+                        MessageBox.Show("No member found!!");
+                        vipInputTbx.Text = "";
+                    }
+                }
+
+                
             }
             else
             {

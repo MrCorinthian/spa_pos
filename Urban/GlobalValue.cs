@@ -25,6 +25,7 @@ namespace Urban
 
         //Url
         public string Url_GetBranchData = "http://spabackoffice2019.azurewebsites.net/API/GetBranchData";
+        public string Url_VerifyMember = "http://spabackoffice2019.azurewebsites.net/API/VerifyMember";
         public string Url_SendData = "http://spabackoffice2019.azurewebsites.net/API/SendData";
         public string Url_SendOtherSaleData = "http://spabackoffice2019.azurewebsites.net/API/SendOtherSaleData";
         public string Url_SendDiscountData = "http://spabackoffice2019.azurewebsites.net/API/SendDiscountData";

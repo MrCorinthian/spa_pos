@@ -619,7 +619,7 @@
         <Grid x:Name="VIPwaitingGrid" Background="#E5FFFFFF" Grid.RowSpan="3" Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid>
-                    <TextBox x:Name="vipInputTbx" TextChanged="vipInputTbx_TextChanged" />
+                    <TextBox x:Name="vipInputTbx" TextChanged="vipInputTbx_TextChanged" Width="400" Height="100" />
                     <TextBlock x:Name="showVipInputTbl" />
                     <ProgressBar x:Name="VIPloadingBar" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1000" Height="40" Foreground="#FFF74205" IsIndeterminate="True" />
                 </Grid>
