@@ -2806,7 +2806,7 @@ namespace Urban
                     }
                     else
                     {
-                        Application.Current.Shutdown();
+                        //Application.Current.Shutdown();
                         //------------------------------------------------------ Test please uncomment before release -----------------------------------
                         if (GlobalValue.Instance.report100.Equals("false"))
                         {
