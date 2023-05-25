@@ -24,6 +24,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -31,6 +32,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Urban.Model;
+using ZXing;
+using ZXing.Common;
 
 namespace Urban
 {
@@ -1629,8 +1632,13 @@ namespace Urban
 
             await Task.Delay(500);
 
+            //string receiptCode = GenerateRandomString(64);
+
+            SaveReceiptToDB();
+
             SaveOrderToDB("cash");
             SaveDiscountToDB("cash");
+            
             PrintReceipt();
             PrintCommission();
 
@@ -1651,8 +1659,13 @@ namespace Urban
 
             await Task.Delay(500);
 
+            //string receiptCode = GenerateRandomString(64);
+
+            SaveReceiptToDB();
+
             SaveOrderToDB("credit");
             SaveDiscountToDB("credit");
+            
             PrintReceipt();
             PrintCommission();
 
@@ -2060,6 +2073,8 @@ namespace Urban
         public void SaveOrderToDB(string paymentType)
         {
             Account getUnSendAc = this.db.getLatestAcount();
+            Receipt getLatestRcpt = this.db.getLatestReceipt();
+
             if(getUnSendAc.SendStatus.Equals("false"))
             {
                 InsertAccountToServer();
@@ -2079,10 +2094,12 @@ namespace Urban
                 if(paymentType.Equals("credit"))
                 {
                     prepareOrder[i].IsCreditCard = "true";
+                    prepareOrder[i].ReceiptId = getLatestRcpt.Id;
                 }
                 else
                 {
                     prepareOrder[i].IsCreditCard = "false";
+                    prepareOrder[i].ReceiptId = getLatestRcpt.Id;
                 }
                 
                 this.db.saveOrder(prepareOrder[i]);
@@ -2226,8 +2243,9 @@ namespace Urban
 
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
 
-            //For testing
-            //MessageBox.Show(sb.ToString());
+            //Print QR code image here
+            string textToEncode = GenerateRandomString(64);
+            myQr.Source = GenerateQRCode(textToEncode);
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
@@ -2287,6 +2305,7 @@ namespace Urban
             //
 
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
+            
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
@@ -2761,7 +2780,7 @@ namespace Urban
 
             //Process.Start(filename);
 
-            //**For test pdf do not forget to uncomment these**
+            
             try
             {
                 string curDateTime = getCurDateTime();
@@ -2806,8 +2825,7 @@ namespace Urban
                     }
                     else
                     {
-                        //Application.Current.Shutdown();
-                        //------------------------------------------------------ Test please uncomment before release -----------------------------------
+
                         if (GlobalValue.Instance.report100.Equals("false"))
                         {
                             Application.Current.Shutdown();
@@ -4824,7 +4842,8 @@ namespace Urban
                 CancelStatus = getOrd.CancelStatus,
                 CreateDateTime = getOrd.CreateDateTime,
                 UpdateDateTime = getOrd.UpdateDateTime,
-                MemberId = getOrd.MemberId
+                MemberId = getOrd.MemberId,
+                ReceiptId = getOrd.ReceiptId
             };
 
             listOrders.Add(ords);
@@ -4891,7 +4910,9 @@ namespace Urban
                     IsCreditCard = getOrd.IsCreditCard,
                     CancelStatus = getOrd.CancelStatus,
                     CreateDateTime = getOrd.CreateDateTime,
-                    UpdateDateTime = getOrd.UpdateDateTime
+                    UpdateDateTime = getOrd.UpdateDateTime,
+                    MemberId = getOrd.MemberId,
+                    ReceiptId = getOrd.ReceiptId
                 };
 
                 var obj = new OrderUpdateSerializer
@@ -5316,6 +5337,145 @@ namespace Urban
         {
             Button btn = (Button)sender;
             showInitMoneyTb.Text += btn.Content;
+        }
+
+        //Create QR code
+        public BitmapSource GenerateQRCode(string textToEncode)
+        {
+            var writer = new BarcodeWriter
+            {
+                Format = BarcodeFormat.QR_CODE,
+                Options = new EncodingOptions
+                {
+                    Height = 300,
+                    Width = 300,
+                    Margin = 1
+                }
+            };
+
+            using (var bitmap = writer.Write(textToEncode))
+            {
+                var hBitmap = bitmap.GetHbitmap();
+
+                try
+                {
+                    return Imaging.CreateBitmapSourceFromHBitmap(hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                }
+                finally
+                {
+                    DeleteObject(hBitmap);
+                }
+            }
+        }
+
+        // For the DeleteObject method we need to import gdi32
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+
+        static string GenerateRandomString(int length)
+        {
+            // Initialize a string of characters to choose from.
+            string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+            // Initialize a random number generator.
+            Random random = new Random();
+
+            // Select characters from 'chars' at random and add to 'result'.
+            char[] result = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = chars[random.Next(chars.Length)];
+            }
+
+            // Return the result as a string.
+            return new string(result);
+        }
+
+        public void SaveReceiptToDB()
+        {
+            string curDateTime = getCurDateTime();
+            string receiptCode = GenerateRandomString(64);
+
+            ////Check unsent discount then send to the server
+            //if (this.db.getAllUnSendDiscountRecord(currentUseAccountId).Count() != 0)
+            //{
+            //    List<DiscountRecord> listUnsendDiscountRecord = this.db.getAllUnSendDiscountRecord(currentUseAccountId);
+            //    for (int k = 0; k < listUnsendDiscountRecord.Count(); k++)
+            //    {
+            //        DiscountRecord myDiscount = listUnsendDiscountRecord[k];
+            //        InsertDiscountRecordToServer(myDiscount);
+            //    }
+            //}
+
+
+            //Save Receipt to local db then sent to server
+            Receipt rcpt = new Receipt()
+            {
+                Code = receiptCode,
+                Created = curDateTime,
+                Updated = curDateTime
+            };
+
+            this.db.saveReceipt(rcpt);
+
+            InsertReceiptToServer();
+        }
+
+        public async void InsertReceiptToServer()
+        {
+            string curDateTime = getCurDateTime();
+            Receipt getLatestReceipt = this.db.getLatestReceipt();
+
+            ReceiptSerialize rcsr = new ReceiptSerialize()
+            {
+                Id = getLatestReceipt.Id,
+                Code = getLatestReceipt.Code,
+                Created = getLatestReceipt.Created,
+                Updated = getLatestReceipt.Updated
+            };
+
+            try
+            {
+                var obj = new SerializeClassForReceipt
+                {
+                    ReceiptData = rcsr
+                };
+
+                string serializeString = JsonConvert.SerializeObject(obj);
+
+                string sendDataUrl = GlobalValue.Instance.Url_SendReeipt;
+
+                var client = new HttpClient();
+                var values = new Dictionary<string, string>
+                {
+                    {"data",serializeString }
+                };
+                var content = new MyFormUrlEncodedContent(values);
+                var response = await client.PostAsync(sendDataUrl, content);
+                var resultAuthen = await response.Content.ReadAsStringAsync();
+
+                var parseJson = JObject.Parse(resultAuthen);
+
+                string checkStatus = (string)parseJson["Status"];
+                if (checkStatus.Equals("true"))
+                {
+                    //Update to local DB if send complete
+                    //DiscountRecord newForUpdate = dcrd;
+                    //newForUpdate.SendStatus = "true";
+                    //newForUpdate.UpdateDateTime = getCurDateTime();
+                    //this.db.updateDiscountRecord(newForUpdate);
+                }
+                else
+                {
+                    MessageBox.Show("insert order fail" + "\nError : " + (string)parseJson["Error_Message"]);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("insert order fail" + "\nError : " + ex.ToString());
+            }
+
         }
     }
 }

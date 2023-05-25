@@ -130,6 +130,12 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="zxing, Version=0.16.9.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZXing.Net.0.16.9\lib\net45\zxing.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing.presentation, Version=0.16.9.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZXing.Net.0.16.9\lib\net45\zxing.presentation.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -151,10 +157,12 @@
     <Compile Include="Model\OrderRecordWithDiscountSerialize.cs" />
     <Compile Include="Model\OrderUpdateSerializer.cs" />
     <Compile Include="Model\OtherSaleRecordSerialize.cs" />
+    <Compile Include="Model\ReceiptSerialize.cs" />
     <Compile Include="Model\SerializeClass.cs" />
     <Compile Include="Model\SerializeClassForDiscount.cs" />
     <Compile Include="Model\SerializeClassForOrderRecordWithDiscount.cs" />
     <Compile Include="Model\SerializeClassForOtherSale.cs" />
+    <Compile Include="Model\SerializeClassForReceipt.cs" />
     <Compile Include="Model\ShortMassageTopic.cs" />
     <Compile Include="MyFormUrlEncodedContent.cs" />
     <Compile Include="RawPrinterHelper.cs" />

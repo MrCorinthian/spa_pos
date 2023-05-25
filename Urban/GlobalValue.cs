@@ -32,6 +32,7 @@ namespace Urban
         public string Url_SendOrderRecordWithDiscountData = "http://spabackoffice2019.azurewebsites.net/API/SendOrderRecordWithDiscountData";
         public string Url_UpdateAccount = "http://spabackoffice2019.azurewebsites.net/API/UpdateAccount";
         public string Url_UpdateOrderRecord = "http://spabackoffice2019.azurewebsites.net/API/UpdateOrderRecord";
+        public string Url_SendReeipt = "http://spabackoffice2019.azurewebsites.net/API/SendReceiptData";
 
         //Test Url
         //public string Url_GetBranchData = "http://localhost:49393/API/GetBranchData";
@@ -70,5 +71,6 @@ namespace Urban
         public string report25 { get; set; }
         public string reportDetail { get; set; }
         public Model.MemberDetail usingMember { get; set; }
+        public Model.Receipt latestReceipt { get; set; }
     }
 }

@@ -70,6 +70,7 @@
             <Border BorderBrush="Black" BorderThickness="1" Grid.Column="1" Margin="72,12" Background="#FFE4E4E4">
                 <TextBlock x:Name="currentBalanceTxt" TextWrapping="Wrap" Text="ราคาทั้งหมด / Total" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe UI Light" FontSize="40" Foreground="#FF8D8D8D"/>
             </Border>
+            <Image x:Name="myQr" HorizontalAlignment="Left" Height="126" Margin="159,24,0,-30" VerticalAlignment="Top" Width="126"/>
 
         </Grid>
         <Grid Grid.Row="1" Margin="12">

@@ -1052,6 +1052,25 @@ namespace Urban
             }
         }
 
+        public void saveReceipt(Receipt rcpt)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(rcpt);
+
+            }
+        }
+
+        public Receipt getLatestReceipt()
+        {
+            Receipt rcpt = new Receipt();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                rcpt = db.Table<Receipt>().OrderByDescending(b => b.Created).FirstOrDefault();
+            }
+
+            return rcpt;
+        }
 
     }
 }

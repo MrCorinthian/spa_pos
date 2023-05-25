@@ -22,5 +22,6 @@ namespace Urban.Model
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
         public int MemberId { get; set; }
+        public int ReceiptId { get; set; }
     }
 }

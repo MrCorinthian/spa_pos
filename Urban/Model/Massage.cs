@@ -175,6 +175,7 @@ namespace Urban.Model
         public string UpdateDateTime { get; set; }
         public int MemberId { get; set; }
         public string MemberDiscountAmount { get; set; }
+        public int ReceiptId { get; set; }
     }
 
     public class OtherSale
@@ -367,6 +368,18 @@ namespace Urban.Model
         public string ExpireDate { get; set; }
         [NotNull]
         public string Status { get; set; }
+    }
+
+    public class Receipt
+    {
+        [PrimaryKey, NotNull, AutoIncrement]
+        public int Id { get; set; }
+        public string Code { get; set; }
+        public string UsedStatus { get; set; }
+        public string Created { get; set; }
+        public string CreatedBy { get; set; }
+        public string Updated { get; set; }
+        public string UpdatedBy { get; set; }
     }
 
     public class Setting
