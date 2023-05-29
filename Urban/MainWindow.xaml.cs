@@ -2217,6 +2217,8 @@ namespace Urban
 
         public void PrintReceipt()
         {
+            Receipt getLatestReceipt = this.db.getLatestReceipt();
+
             string getReceipt = getListItemInInvoice();
             //string thReplaceMin = TheSlip.getInvoice().Replace("นาที", "mins");
             //string thReplaceHr = thReplaceMin.Replace("ชั่วโมง", "hr");
@@ -2236,16 +2238,32 @@ namespace Urban
             sb.AppendLine("\n");
             sb.AppendLine(" Thank you for using our service");
             sb.AppendLine("      Please come back again");
-            sb.AppendLine("\n\n\n\n");
-            sb.AppendLine("\x1b" + "\x69");
+            sb.AppendLine("\n");
+            //sb.AppendLine("\x1b" + "\x69");
             //PrintDialog pd = new PrintDialog();
             //
 
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
 
+            bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
+            if (success)
+            {
+                //Console.WriteLine("QR code sent to printer successfully.");
+                //MessageBox.Show("QR code sent to printer successfully");
+            }
+            else
+            {
+                //Console.WriteLine("Failed to send QR code to printer.");
+                //MessageBox.Show("Fail");
+            }
+
+            var _sb = new StringBuilder();
+            _sb.AppendLine("\n\n\n\n");
+            _sb.AppendLine("\x1b" + "\x69");
+            RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
+
             //Print QR code image here
-            string textToEncode = GenerateRandomString(64);
-            myQr.Source = GenerateQRCode(textToEncode);
+            //myQr.Source = GenerateQRCode(textToEncode);
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
@@ -5396,6 +5414,9 @@ namespace Urban
             string curDateTime = getCurDateTime();
             string receiptCode = GenerateRandomString(64);
 
+            //Generate QR Code
+            myQr.Source = GenerateQRCode(receiptCode);
+
             ////Check unsent discount then send to the server
             //if (this.db.getAllUnSendDiscountRecord(currentUseAccountId).Count() != 0)
             //{
@@ -5431,7 +5452,9 @@ namespace Urban
                 Id = getLatestReceipt.Id,
                 Code = getLatestReceipt.Code,
                 Created = getLatestReceipt.Created,
-                Updated = getLatestReceipt.Updated
+                CreatedBy = "POS_ID_"+this.db.getBranch().Id,
+                Updated = getLatestReceipt.Updated,
+                UpdatedBy = "POS_Id_" + this.db.getBranch().Id,
             };
 
             try

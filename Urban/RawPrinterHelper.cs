@@ -122,5 +122,63 @@ namespace Urban
             Marshal.FreeCoTaskMem(pBytes);
             return true;
         }
+
+        public static bool SendQrCodeToPrinter(string szPrinterName, string data)
+        {
+            byte[] qrCodeCommand = GenerateQrCode(data);
+            IntPtr pBytes = Marshal.AllocCoTaskMem(qrCodeCommand.Length);
+            Marshal.Copy(qrCodeCommand, 0, pBytes, qrCodeCommand.Length);
+            bool success = SendBytesToPrinter(szPrinterName, pBytes, qrCodeCommand.Length);
+            Marshal.FreeCoTaskMem(pBytes);
+            return success;
+        }
+
+        public static byte[] GenerateQrCode(string data)
+        {
+            var enc = new System.Text.ASCIIEncoding();
+            List<byte> command = new List<byte>();
+
+            // Set QR Code size
+            command.Add(29);
+            command.Add((byte)'(');
+            command.Add((byte)'k');
+            command.Add(3);
+            command.Add(0);
+            command.Add(49);
+            command.Add(67);
+            command.Add(10);
+
+            // Set QR Code error correction level
+            command.Add(29);
+            command.Add((byte)'(');
+            command.Add((byte)'k');
+            command.Add(3);
+            command.Add(0);
+            command.Add(49);
+            command.Add(69);
+            command.Add(48);
+
+            // Store QR Code data
+            command.Add(29);
+            command.Add((byte)'(');
+            command.Add((byte)'k');
+            command.AddRange(BitConverter.GetBytes((ushort)(3 + data.Length)));
+            command.Add(49);
+            command.Add(80);
+            command.Add(48);
+            command.AddRange(enc.GetBytes(data));
+
+            // Print QR Code
+            command.Add(29);
+            command.Add((byte)'(');
+            command.Add((byte)'k');
+            command.Add(3);
+            command.Add(0);
+            command.Add(49);
+            command.Add(81);
+            command.Add(48);
+
+            return command.ToArray();
+        }
     }
 }
