@@ -9,6 +9,7 @@ namespace Urban.Model
     public class ReceiptSerialize
     {
         public int Id { get; set; }
+        public int BranchId { get; set; }
         public string Code { get; set; }
         public string UsedStatus { get; set; }
         public string Created { get; set; }

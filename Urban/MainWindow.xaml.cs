@@ -5450,6 +5450,7 @@ namespace Urban
             ReceiptSerialize rcsr = new ReceiptSerialize()
             {
                 Id = getLatestReceipt.Id,
+                BranchId = this.db.getBranch().Id,
                 Code = getLatestReceipt.Code,
                 Created = getLatestReceipt.Created,
                 CreatedBy = "POS_ID_"+this.db.getBranch().Id,
