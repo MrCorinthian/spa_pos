@@ -3,6 +3,8 @@ using Newtonsoft.Json.Linq;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -2864,12 +2866,7 @@ namespace Urban
                             {
                                 mail.To.Add(receiverSet[i]);
                             }
-                            //mail.To.Add("pascal_tober@hotmail.com");
-                            //mail.To.Add("armaz@hotmail.fr");
-                            //mail.To.Add("nit_sisuwan@hotmail.fr");
-                            //mail.To.Add("panuwatdethfung@outlook.com");
-                            //mail.To.Add("fa9fa9fa9@gmail.com");
-                            //mail.To.Add("t.jaturong@outlook.com");
+
                             mail.Subject = currentBranchName + " - Daily Report(" + fullDate + ")";
                             mail.Body = "This daily report email is auto sent by Spa POS Program (" + currentBranchName + ")";
 
@@ -2956,7 +2953,7 @@ namespace Urban
             catch (Exception pp)
             {
                 //MessageBox.Show(pp.ToString());
-                MessageBox.Show("ไม่สามารถส่ง Email ได้เนื่องจากไม่มี Internet กรุณาติดต่อผู้ดูแลระบบ");
+                MessageBox.Show("ไม่สามารถส่ง Email ได้เนื่องจากไม่มี Internet กรุณาติดต่อผู้ดูแลระบบ"+pp);
 
                 //exportPDF25Detail();
                 Application.Current.Shutdown();
@@ -4057,12 +4054,12 @@ namespace Urban
                 mail.Subject = currentBranchName + " - Daily Report(" + fullDate + ")";
                 mail.Body = "This daily report email is auto sent by Spa POS Program (" + currentBranchName + ")";
 
-                Attachment attachment;
-                attachment = new Attachment(filename);
-                Attachment attachment25;
-                attachment25 = new Attachment(filename25);
-                Attachment attachment25Details;
-                attachment25Details = new Attachment(filenameDetail25);
+                System.Net.Mail.Attachment attachment;
+                attachment = new System.Net.Mail.Attachment(filename);
+                System.Net.Mail.Attachment attachment25;
+                attachment25 = new System.Net.Mail.Attachment(filename25);
+                System.Net.Mail.Attachment attachment25Details;
+                attachment25Details = new System.Net.Mail.Attachment(filenameDetail25);
 
                 if (GlobalValue.Instance.report100.Equals("true"))
                 {
