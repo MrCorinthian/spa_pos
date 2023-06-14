@@ -3,8 +3,6 @@ using Newtonsoft.Json.Linq;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -74,9 +72,10 @@ namespace Urban
         {
             InitializeComponent();
 
+            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
             //MessageBox.Show(Application.Current.MainWindow.Height + "//" + Application.Current.MainWindow.Width);
             //Check resolution
-            if(Application.Current.MainWindow.Height != 1080)
+            if (Application.Current.MainWindow.Height != 1080)
             {
                 MainScrollview.Height = 636;
                 MainScrollview.Width = 1556;
@@ -2224,6 +2223,26 @@ namespace Urban
             string getReceipt = getListItemInInvoice();
             //string thReplaceMin = TheSlip.getInvoice().Replace("นาที", "mins");
             //string thReplaceHr = thReplaceMin.Replace("ชั่วโมง", "hr");
+
+            //Print QR Code before sold items
+            bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
+            if (success)
+            {
+                //Console.WriteLine("QR code sent to printer successfully.");
+                //MessageBox.Show("QR code sent to printer successfully");
+            }
+            else
+            {
+                //Console.WriteLine("Failed to send QR code to printer.");
+                //MessageBox.Show("Fail");
+            }
+
+            //Add black row between QR code and sold items
+            var _sb = new StringBuilder();
+            _sb.AppendLine("\n\n");
+            RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
+
+            //Print sold items
             var sb = new StringBuilder();
             sb.AppendLine("      " + this.db.getBranchCompanyName().Value);
             sb.AppendLine("       " + this.db.getBranchAddress1().Value);
@@ -2240,29 +2259,12 @@ namespace Urban
             sb.AppendLine("\n");
             sb.AppendLine(" Thank you for using our service");
             sb.AppendLine("      Please come back again");
-            sb.AppendLine("\n");
-            //sb.AppendLine("\x1b" + "\x69");
+            sb.AppendLine("\n\n\n");
+            sb.AppendLine("\x1b" + "\x69");
             //PrintDialog pd = new PrintDialog();
             //
 
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
-
-            bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
-            if (success)
-            {
-                //Console.WriteLine("QR code sent to printer successfully.");
-                //MessageBox.Show("QR code sent to printer successfully");
-            }
-            else
-            {
-                //Console.WriteLine("Failed to send QR code to printer.");
-                //MessageBox.Show("Fail");
-            }
-
-            var _sb = new StringBuilder();
-            _sb.AppendLine("\n\n\n\n");
-            _sb.AppendLine("\x1b" + "\x69");
-            RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
 
             //Print QR code image here
             //myQr.Source = GenerateQRCode(textToEncode);
