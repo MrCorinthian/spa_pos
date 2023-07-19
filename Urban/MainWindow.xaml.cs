@@ -72,7 +72,6 @@ namespace Urban
         {
             InitializeComponent();
 
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
             //MessageBox.Show(Application.Current.MainWindow.Height + "//" + Application.Current.MainWindow.Width);
             //Check resolution
             if (Application.Current.MainWindow.Height != 1080)
@@ -2244,11 +2243,11 @@ namespace Urban
 
             //Print sold items
             var sb = new StringBuilder();
-            sb.AppendLine("      " + this.db.getBranchCompanyName().Value);
-            sb.AppendLine("       " + this.db.getBranchAddress1().Value);
-            sb.AppendLine("       " + this.db.getBranchAddress2().Value);
-            sb.AppendLine("          " + this.db.getBranchAddress3().Value);
-            sb.AppendLine("     TAX ID : " + this.db.getBranchTaxId().Value);
+            sb.AppendLine("   " + this.db.getBranchCompanyName().Value);
+            sb.AppendLine("    " + this.db.getBranchAddress1().Value);
+            sb.AppendLine("    " + this.db.getBranchAddress2().Value);
+            sb.AppendLine("       " + this.db.getBranchAddress3().Value);
+            sb.AppendLine("    TAX ID : " + this.db.getBranchTaxId().Value);
             sb.AppendLine("     " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
             sb.AppendLine("===============================");
             //sb.AppendLine("\n");
@@ -2834,6 +2833,9 @@ namespace Urban
                 //int nextDayMonth = Int32.Parse(nextDT);
                 int useMonth = Int32.Parse(sGetLatestMonth[1]);
                 int useMonthPlus1Day = Int32.Parse(usingMonthAddTmr);
+
+                //Fix SendGrid TLS from 1.1 to 1.2
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
 
                 if (useMonth != curMonth)
                 {
@@ -4383,7 +4385,7 @@ namespace Urban
         public void SendTextToMonitor(String[] tagArray)
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11)
             {
                 try
                 {
@@ -4499,7 +4501,7 @@ namespace Urban
         public void SendTextTotal()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11)
             {
                 try
                 {
@@ -4560,7 +4562,7 @@ namespace Urban
         public void SendTextTotalWithDiscount()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11)
             {
                 try
                 {
@@ -4621,7 +4623,7 @@ namespace Urban
         public void ClearText()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11)
             {
                 try
                 {
