@@ -797,6 +797,15 @@ namespace Urban
             }
             return conFig;
         }
+        public Setting getCurrentMobileQrEnable()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "MobileQrEnable").FirstOrDefault();
+            }
+            return conFig;
+        }
 
         //public Setting getCurrentSystemVersion()
         //{

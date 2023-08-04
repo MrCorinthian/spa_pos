@@ -16,7 +16,7 @@
             <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="progressBar">
                 <DiscreteObjectKeyFrame KeyTime="0:0:1.6" Value="{x:Static Visibility.Visible}"/>
             </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="textBlock1">
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="statusTxt">
                 <DiscreteObjectKeyFrame KeyTime="0:0:1.6" Value="{x:Static Visibility.Visible}"/>
             </ObjectAnimationUsingKeyFrames>
         </Storyboard>
@@ -28,16 +28,16 @@
     </Window.Triggers>
 
     <Grid x:Name="grid" Opacity="0">
-        <Grid Opacity="0.2">
+        <Grid x:Name="splashGrid" Opacity="0.2">
             <Grid.Background>
-                <ImageBrush Stretch="UniformToFill" ImageSource="Images/spabg2.jpg"/>
+                <ImageBrush Stretch="UniformToFill" ImageSource="Images/defaultBG.jpg"/>
             </Grid.Background>
         </Grid>
 
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Spa &amp; Massage POS System" FontSize="72" Foreground="#FF0AA835" FontFamily="Forte"/>
+            <TextBlock x:Name="displayNameTxt" TextWrapping="Wrap" Text=" " FontSize="72" Foreground="#FF0AA835" FontFamily="Forte"/>
             <ProgressBar x:Name="progressBar" IsIndeterminate="True" Height="20" Margin="0,150,0,0" Visibility="Hidden"/>
-            <TextBlock x:Name="textBlock1" TextWrapping="Wrap" Text="Checking data version.." HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,12,0,0" FontSize="24" Visibility="Hidden"/>
+            <TextBlock x:Name="statusTxt" TextWrapping="Wrap" Text="Checking data version.." HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,12,0,0" FontSize="24" Visibility="Hidden"/>
         </StackPanel>
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,12" Orientation="Horizontal">
             <TextBlock x:Name="vTxt" TextWrapping="Wrap" Text="Version " VerticalAlignment="Center" HorizontalAlignment="Center"/>

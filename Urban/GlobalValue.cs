@@ -72,5 +72,8 @@ namespace Urban
         public string reportDetail { get; set; }
         public Model.MemberDetail usingMember { get; set; }
         public Model.Receipt latestReceipt { get; set; }
+
+        //System config
+        public string MobileQrEnable { get; set; }
     }
 }

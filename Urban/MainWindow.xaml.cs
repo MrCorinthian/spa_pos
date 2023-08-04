@@ -143,6 +143,7 @@ namespace Urban
                     GlobalValue.Instance.report100 = this.db.getCurrentReport100Status().Value;
                     GlobalValue.Instance.report25 = this.db.getCurrentReport25Status().Value;
                     GlobalValue.Instance.reportDetail = this.db.getCurrentReportDetailStatus().Value;
+                    GlobalValue.Instance.MobileQrEnable = this.db.getCurrentMobileQrEnable().Value;
                 }
                 else
                 {
@@ -448,6 +449,7 @@ namespace Urban
                     GlobalValue.Instance.report100 = this.db.getCurrentReport100Status().Value;
                     GlobalValue.Instance.report25 = this.db.getCurrentReport25Status().Value;
                     GlobalValue.Instance.reportDetail = this.db.getCurrentReportDetailStatus().Value;
+                    GlobalValue.Instance.MobileQrEnable = this.db.getCurrentMobileQrEnable().Value;
                 }
             }
             catch (Exception o)
@@ -467,6 +469,7 @@ namespace Urban
                 GlobalValue.Instance.report100 = this.db.getCurrentReport100Status().Value;
                 GlobalValue.Instance.report25 = this.db.getCurrentReport25Status().Value;
                 GlobalValue.Instance.reportDetail = this.db.getCurrentReportDetailStatus().Value;
+                GlobalValue.Instance.MobileQrEnable = this.db.getCurrentMobileQrEnable().Value;
 
                 MessageBox.Show("Check version fail, Please check your internet connection");
             }
@@ -1634,7 +1637,15 @@ namespace Urban
 
             //string receiptCode = GenerateRandomString(64);
 
-            SaveReceiptToDB();
+            //Check Mobile QR feature is enable or not
+            if(GlobalValue.Instance.MobileQrEnable.Equals("false"))
+            {
+
+            }
+            else
+            {
+                SaveReceiptToDB();
+            }
 
             SaveOrderToDB("cash");
             SaveDiscountToDB("cash");
@@ -1661,7 +1672,15 @@ namespace Urban
 
             //string receiptCode = GenerateRandomString(64);
 
-            SaveReceiptToDB();
+            //Check Mobile QR feature is enable or not
+            if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
+            {
+
+            }
+            else
+            {
+                SaveReceiptToDB();
+            }
 
             SaveOrderToDB("credit");
             SaveDiscountToDB("credit");
@@ -2094,12 +2113,31 @@ namespace Urban
                 if(paymentType.Equals("credit"))
                 {
                     prepareOrder[i].IsCreditCard = "true";
-                    prepareOrder[i].ReceiptId = getLatestRcpt.Id;
+
+                    //Check qr code function is enable
+                    if(GlobalValue.Instance.MobileQrEnable.Equals("false"))
+                    {
+
+                    }
+                    else
+                    {
+                        prepareOrder[i].ReceiptId = getLatestRcpt.Id;
+                    }
+                    
                 }
                 else
                 {
                     prepareOrder[i].IsCreditCard = "false";
-                    prepareOrder[i].ReceiptId = getLatestRcpt.Id;
+                    
+                    //Check qr code function is enable
+                    if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
+                    {
+
+                    }
+                    else
+                    {
+                        prepareOrder[i].ReceiptId = getLatestRcpt.Id;
+                    }
                 }
                 
                 this.db.saveOrder(prepareOrder[i]);
@@ -2217,29 +2255,37 @@ namespace Urban
 
         public void PrintReceipt()
         {
-            Receipt getLatestReceipt = this.db.getLatestReceipt();
-
             string getReceipt = getListItemInInvoice();
             //string thReplaceMin = TheSlip.getInvoice().Replace("นาที", "mins");
             //string thReplaceHr = thReplaceMin.Replace("ชั่วโมง", "hr");
 
-            //Print QR Code before sold items
-            bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
-            if (success)
+            //Check QR code feature is enable
+            if(GlobalValue.Instance.MobileQrEnable.Equals("false"))
             {
-                //Console.WriteLine("QR code sent to printer successfully.");
-                //MessageBox.Show("QR code sent to printer successfully");
+
             }
             else
             {
-                //Console.WriteLine("Failed to send QR code to printer.");
-                //MessageBox.Show("Fail");
-            }
+                //Print QR Code before sold items
+                Receipt getLatestReceipt = this.db.getLatestReceipt();
 
-            //Add black row between QR code and sold items
-            var _sb = new StringBuilder();
-            _sb.AppendLine("\n\n");
-            RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
+                bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
+                if (success)
+                {
+                    //Console.WriteLine("QR code sent to printer successfully.");
+                    //MessageBox.Show("QR code sent to printer successfully");
+                }
+                else
+                {
+                    //Console.WriteLine("Failed to send QR code to printer.");
+                    //MessageBox.Show("Fail");
+                }
+
+                //Add black row between QR code and sold items
+                var _sb = new StringBuilder();
+                _sb.AppendLine("\n\n");
+                RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
+            }
 
             //Print sold items
             var sb = new StringBuilder();
@@ -2331,69 +2377,69 @@ namespace Urban
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
 
-        public void PrintEndDay()
-        {
-            Account acct = this.db.getAccountFromId(currentUseAccountId);
-            List<OrderRecord> recordNumIncCancelled = this.db.getAllOrderRecord(currentUseAccountId);
-            List<OrderRecord> recordNum = this.db.getAllOrderRecordExceptCancelled(currentUseAccountId);
-            int totalCancelled = recordNumIncCancelled.Count() - recordNum.Count();
+        //public void PrintEndDay()
+        //{
+        //    Account acct = this.db.getAccountFromId(currentUseAccountId);
+        //    List<OrderRecord> recordNumIncCancelled = this.db.getAllOrderRecord(currentUseAccountId);
+        //    List<OrderRecord> recordNum = this.db.getAllOrderRecordExceptCancelled(currentUseAccountId);
+        //    int totalCancelled = recordNumIncCancelled.Count() - recordNum.Count();
 
-            int startMoney = Int32.Parse(acct.StartMoney);
-            int totalSale = getTotalSale();
-            int numStaff = currentStaffNo;
-            int oil = currentStaffNo * GlobalValue.Instance.oilPrice;
-            int commission = getTotalCommission();
-            int numCustomer = recordNum.Count();
-            int grandOthersales = getGrandTotalOtherRecord();
+        //    int startMoney = Int32.Parse(acct.StartMoney);
+        //    int totalSale = getTotalSale();
+        //    int numStaff = currentStaffNo;
+        //    int oil = currentStaffNo * GlobalValue.Instance.oilPrice;
+        //    int commission = getTotalCommission();
+        //    int numCustomer = recordNum.Count();
+        //    int grandOthersales = getGrandTotalOtherRecord();
 
-            int netBalance = (totalSale + oil + grandOthersales) - commission;
+        //    int netBalance = (totalSale + oil + grandOthersales) - commission;
 
-            var sb = new StringBuilder();
-            sb.AppendLine("               " + currentBranchName);
-            sb.AppendLine("            " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
-            sb.AppendLine("                 <End Day Slip>");
-            sb.AppendLine("    =========================================");
-            sb.AppendLine("Initial Money");
-            sb.AppendLine(String.Format("{0:n}", startMoney));
-            sb.AppendLine("\n");
-            sb.AppendLine("Total Sale");
-            sb.AppendLine(String.Format("{0:n}", totalSale));
-            sb.AppendLine("\n");
-            sb.AppendLine("Total Staff");
-            sb.AppendLine(numStaff.ToString());
-            sb.AppendLine("\n");
-            sb.AppendLine("Total Pax");
-            sb.AppendLine(numCustomer.ToString());
-            sb.AppendLine("\n");
-            sb.AppendLine("Total Oil Income");
-            sb.AppendLine(String.Format("{0:n}", oil));
-            sb.AppendLine("\n");
-            sb.AppendLine("Total Commission");
-            sb.AppendLine(String.Format("{0:n}", commission));
-            sb.AppendLine("\n");
-            sb.AppendLine("Total Other Sale(Uniform, Tiger Balm, etc.)");
-            sb.AppendLine(String.Format("{0:n}", grandOthersales));
-            sb.AppendLine("\n");
-            sb.AppendLine("                Balance Net");
-            sb.AppendLine("              " + String.Format("{0:n}", netBalance) + " Baht");
-            sb.AppendLine("\n");
-            sb.AppendLine("---------------------------------------------");
-            sb.AppendLine("Total Cancelled");
-            sb.AppendLine(totalCancelled.ToString());
-            sb.AppendLine("\n");
-            sb.AppendLine("           Don't loose this ticket");
-            sb.AppendLine("\n");
-            sb.AppendLine("_____________________________________________");
-            sb.AppendLine("\n\n\n");
-            sb.AppendLine("\x1b" + "\x69");
-            //PrintDialog pd = new PrintDialog();
+        //    var sb = new StringBuilder();
+        //    sb.AppendLine("               " + currentBranchName);
+        //    sb.AppendLine("            " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
+        //    sb.AppendLine("                 <End Day Slip>");
+        //    sb.AppendLine("    =========================================");
+        //    sb.AppendLine("Initial Money");
+        //    sb.AppendLine(String.Format("{0:n}", startMoney));
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("Total Sale");
+        //    sb.AppendLine(String.Format("{0:n}", totalSale));
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("Total Staff");
+        //    sb.AppendLine(numStaff.ToString());
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("Total Pax");
+        //    sb.AppendLine(numCustomer.ToString());
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("Total Oil Income");
+        //    sb.AppendLine(String.Format("{0:n}", oil));
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("Total Commission");
+        //    sb.AppendLine(String.Format("{0:n}", commission));
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("Total Other Sale(Uniform, Tiger Balm, etc.)");
+        //    sb.AppendLine(String.Format("{0:n}", grandOthersales));
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("                Balance Net");
+        //    sb.AppendLine("              " + String.Format("{0:n}", netBalance) + " Baht");
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("---------------------------------------------");
+        //    sb.AppendLine("Total Cancelled");
+        //    sb.AppendLine(totalCancelled.ToString());
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("           Don't loose this ticket");
+        //    sb.AppendLine("\n");
+        //    sb.AppendLine("_____________________________________________");
+        //    sb.AppendLine("\n\n\n");
+        //    sb.AppendLine("\x1b" + "\x69");
+        //    //PrintDialog pd = new PrintDialog();
 
-            RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.commissionPrinter, sb.ToString());
+        //    RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.commissionPrinter, sb.ToString());
 
-            exportPDF();
+        //    exportPDF();
 
 
-        }
+        //}
 
         public async void exportPDF()
         {

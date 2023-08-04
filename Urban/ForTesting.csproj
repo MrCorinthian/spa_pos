@@ -236,6 +236,8 @@
     <Resource Include="Images\reportlisticon.png" />
     <Resource Include="Images\closeicon.png" />
     <Resource Include="Images\spabg2.jpg" />
+    <Resource Include="Images\salonbg1.jpg" />
+    <Resource Include="Images\defaultBG.jpg" />
     <Content Include="sqlite3.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
