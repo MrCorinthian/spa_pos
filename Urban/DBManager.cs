@@ -817,6 +817,26 @@ namespace Urban
             return conFig;
         }
 
+        public Setting getCurrentSystemNameTxtColor()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "SystemDisplayNameTxtColor").FirstOrDefault();
+            }
+            return conFig;
+        }
+
+        public Setting getCurrentMainPageBgImage()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "MainPageBgImage").FirstOrDefault();
+            }
+            return conFig;
+        }
+
         //public Setting getCurrentSystemVersion()
         //{
         //    Setting conFig = new Setting();

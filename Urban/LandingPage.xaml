@@ -41,7 +41,7 @@
         </StackPanel>
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,12" Orientation="Horizontal">
             <TextBlock x:Name="vTxt" TextWrapping="Wrap" Text="Version " VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            <TextBlock x:Name="systemVersion" TextWrapping="Wrap" Text="8" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="systemVersion" TextWrapping="Wrap" Text="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </StackPanel>
         <TextBlock x:Name="textBlock3" TextWrapping="Wrap" Text="Copyright © 2023. Urban Partners Group. All rights reserved." VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,12" FontSize="16"/>
 

@@ -483,10 +483,44 @@ namespace Urban
 
         public void InitialInterface()
         {
+            //Set Main page BG image
+            try
+            {
+                ImageBrush imgBrush = new ImageBrush();
+
+                // Point to the path of the image inside the project
+                imgBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/" + this.db.getCurrentMainPageBgImage().Value));
+                this.Background = imgBrush;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
             //List<Branch> listBranch = this.db.getAllBranch();
             branchNameTxt.Text = this.db.getBranch().Name;
             reportBranchNameTxt.Text = this.db.getBranch().Name;
             currentBranchName = this.db.getBranch().Name;
+
+            //Set Branch Label color
+            try
+            {
+                String[] displayNameSplit = this.db.getCurrentSystemNameTxtColor().Value.Split('/');
+                int _r = Int32.Parse(displayNameSplit[0]);
+                int _g = Int32.Parse(displayNameSplit[1]);
+                int _b = Int32.Parse(displayNameSplit[2]);
+                branchLabel.Background = new SolidColorBrush(Color.FromArgb(255, (byte)_r, (byte)_g, (byte)_b));
+                staffAddBtn.Background = new SolidColorBrush(Color.FromArgb(255, (byte)_r, (byte)_g, (byte)_b));
+                reportBtn.Background = new SolidColorBrush(Color.FromArgb(255, (byte)_r, (byte)_g, (byte)_b));
+                otherSaleBtn.Background = new SolidColorBrush(Color.FromArgb(255, (byte)_r, (byte)_g, (byte)_b));
+                dateTxt.Foreground = new SolidColorBrush(Color.FromArgb(255, (byte)_r, (byte)_g, (byte)_b));
+                timeTxt.Foreground = new SolidColorBrush(Color.FromArgb(255, (byte)_r, (byte)_g, (byte)_b));
+            }
+            catch(Exception _e)
+            {
+                Console.WriteLine(_e.ToString());
+            }
+            
 
             DateTime current = DateTime.Now;
             dateTxt.Text = current.ToString("dd MMMM yyyy");

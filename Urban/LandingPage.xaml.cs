@@ -81,7 +81,7 @@ namespace Urban
                 statusTxt.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
 
                 // Point to the path of the image inside the project
-                imgBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/spabg2.jpg"));
+                imgBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/defaultBG.jpg"));
                 splashGrid.Background = imgBrush;
             }
             else

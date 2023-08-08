@@ -60,7 +60,7 @@
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border BorderThickness="0" Background="#FF08B190" CornerRadius="40" Margin="24" MouseLeftButtonDown="Border_MouseLeftButtonDown">
+            <Border x:Name="branchLabel" BorderThickness="0" Background="#FF08B190" CornerRadius="40" Margin="24" MouseLeftButtonDown="Border_MouseLeftButtonDown">
                 <TextBlock x:Name="branchNameTxt" TextWrapping="Wrap" Text="Branch Name" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Foreground="White" FontFamily="Segoe UI Light"/>
             </Border>
             <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -228,11 +228,11 @@
                     <ColumnDefinition Width="1000"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Grid x:Name="CheckoutHeader" Background="#FF08B190">
+                <Grid x:Name="CheckoutHeader" Background="#FF616161">
                     <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="สรุปยอด และรายการทั้งหมด / Checkout Summary" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" FontFamily="Segoe UI Light" Foreground="White"/>
                 </Grid>
                 <StackPanel Grid.Row="1">
-                    <Grid Height="41" Background="#FFDFEEEB">
+                    <Grid Height="41" Background="#FFEAEAEA">
                         <TextBlock x:Name="textBlockSubTitle" TextWrapping="Wrap" Text="รายการขาย / Sell item" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="22" FontFamily="Segoe UI Light" Foreground="Black" Margin="24,0,0,0"/>
                     </Grid>
                     <ScrollViewer PanningMode="VerticalOnly" Height="300">
@@ -240,7 +240,7 @@
                     </ScrollViewer>
                 </StackPanel>
                 <StackPanel Grid.Row="2">
-                    <Grid Height="40" Background="#FFDFEEEB">
+                    <Grid Height="40" Background="#FFEAEAEA">
                         <TextBlock x:Name="textBlockSubTitleDiscount" TextWrapping="Wrap" Text="รายการส่วนลด / Discount item" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="22" FontFamily="Segoe UI Light" Foreground="Black" Margin="24,0,0,0"/>
                     </Grid>
                     <ScrollViewer PanningMode="VerticalOnly" Height="170">
@@ -279,7 +279,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="90"/>
                 </Grid.RowDefinitions>
-                <Grid Background="#FF08B190">
+                <Grid Background="#FF616161">
                     <TextBlock x:Name="textBlocka" TextWrapping="Wrap" Text="รายการขายอื่นๆ / Other Sale List" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" FontFamily="Segoe UI Light" Foreground="White"/>
                 </Grid>
                 <ScrollViewer Grid.Row="1" PanningMode="VerticalOnly">
@@ -298,7 +298,7 @@
                     <RowDefinition Height="130"/>
                     <RowDefinition Height="90"/>
                 </Grid.RowDefinitions>
-                <Grid Background="#FF08B190">
+                <Grid Background="#FF616161">
                     <TextBlock x:Name="textBlockb" TextWrapping="Wrap" Text="สรุปยอด และรายการทั้งหมด / Checkout Summary" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" FontFamily="Segoe UI Light" Foreground="White"/>
                 </Grid>
                 <ScrollViewer Grid.Row="1" PanningMode="VerticalOnly" Height="351">
@@ -410,7 +410,7 @@
                     <RowDefinition Height="70"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Background="#FF08B190"  Grid.Row="1">
+                <Grid Background="#FFACACAC"  Grid.Row="1">
                     <TextBlock x:Name="textBlock5" TextWrapping="Wrap" Text="รายงาน / Report" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" FontFamily="Segoe UI Light" Foreground="White"/>
                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0">
                         <TextBlock x:Name="reportDateTxt" TextWrapping="Wrap" Text="1 January 2016" FontSize="16" HorizontalAlignment="Center" Foreground="White"/>
@@ -488,7 +488,7 @@
                         </Button.Template>
                     </Button>
                 </StackPanel>
-                <Grid Background="#FF0E7E68">
+                <Grid Background="#FF616161">
                     <TextBlock x:Name="reportBranchNameTxt" TextWrapping="Wrap" Text="Branch Name" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="18"/>
                 </Grid>
             </Grid>
@@ -499,7 +499,7 @@
                     <RowDefinition Height="79"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Background="#FF08B190">
+                <Grid Background="#FF616161">
                     <TextBlock x:Name="textBlock13" TextWrapping="Wrap" Text="ยืนยันการจบการทำงาน / Check out &amp; Exit Confirmation" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" FontFamily="Segoe UI Light" Foreground="White"/>
                 </Grid>
                 <StackPanel Grid.Row="1" VerticalAlignment="Top">
@@ -526,7 +526,7 @@
                     <RowDefinition Height="79"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Background="#FF08B190">
+                <Grid Background="#FF616161">
                     <TextBlock x:Name="textBlock13s" TextWrapping="Wrap" Text="ยืนยันการเพิ่มจำนวนพนักงาน / Staff Adding Confirmation" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" FontFamily="Segoe UI Light" Foreground="White"/>
                 </Grid>
                 <StackPanel Grid.Row="1" VerticalAlignment="Top">
@@ -590,7 +590,7 @@
                     <RowDefinition Height="79"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Background="#FF08B190">
+                <Grid Background="#FF616161">
                     <TextBlock x:Name="textBlockC1" TextWrapping="Wrap" Text="ยืนยันการยกเลิกรายการการขาย / Cancel Sold Record Confirmation" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" FontFamily="Segoe UI Light" Foreground="White"/>
                 </Grid>
                 <StackPanel Grid.Row="1" VerticalAlignment="Top">
