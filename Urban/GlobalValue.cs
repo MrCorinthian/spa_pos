@@ -75,5 +75,6 @@ namespace Urban
 
         //System config
         public string MobileQrEnable { get; set; }
+        public string VIPCardEnable { get; set; }
     }
 }

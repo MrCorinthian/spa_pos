@@ -807,6 +807,16 @@ namespace Urban
             return conFig;
         }
 
+        public Setting getCurrentVIPCardEnable()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "VIPCardEnable").FirstOrDefault();
+            }
+            return conFig;
+        }
+
         //public Setting getCurrentSystemVersion()
         //{
         //    Setting conFig = new Setting();
