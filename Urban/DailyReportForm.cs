@@ -22,6 +22,8 @@ namespace Urban
         public string TotalCancelled { get; set; }
         public string TotalUniform { get; set; }
         public string TotalTigerBalm { get; set; }
+        public string TotalOtherSale { get; set; }
+        public string WorkBonus { get; set; }
         public string BalanceNet { get; set; }
     }
 }

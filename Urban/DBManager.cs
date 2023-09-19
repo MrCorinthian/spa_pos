@@ -366,6 +366,26 @@ namespace Urban
             }
         }
 
+        public int getMassagePrice(int TopicId, int PlanId)
+        {
+            MassageSet msgSet = new MassageSet();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                msgSet = db.Table<MassageSet>().Where(b => b.MassageTopicId == TopicId && b.MassagePlanId == PlanId).FirstOrDefault();
+            }
+            //if (msgSet == null)
+            //{
+            //    return Int32.Parse(msgSet.Price);
+            //}
+            //else
+            //{
+            //    return 0;
+            //}
+
+            return Int32.Parse(msgSet.Price);
+
+        }
+
 
         public void clearData()
         {

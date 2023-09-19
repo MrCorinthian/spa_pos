@@ -138,6 +138,12 @@ namespace Urban
             var enc = new System.Text.ASCIIEncoding();
             List<byte> command = new List<byte>();
 
+            // Add multiple horizontal tabs to increase the shift
+            command.Add(0x09);
+            command.Add(0x09);
+            command.Add(0x09);
+            //command.Add(0x09);
+
             // Set QR Code size
             command.Add(29);
             command.Add((byte)'(');
@@ -146,7 +152,7 @@ namespace Urban
             command.Add(0);
             command.Add(49);
             command.Add(67);
-            command.Add(10);
+            command.Add(15); //size
 
             // Set QR Code error correction level
             command.Add(29);

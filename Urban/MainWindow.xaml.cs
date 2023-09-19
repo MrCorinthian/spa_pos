@@ -68,6 +68,7 @@ namespace Urban
 
         List<MassageTopic> globalListMassageTopic;
         //List<MassagePlan> globalListMassagePlan;
+        string printString;
 
 
         public MainWindow()
@@ -1681,15 +1682,43 @@ namespace Urban
             await Task.Delay(500);
 
             //string receiptCode = GenerateRandomString(64);
+            
 
             //Check Mobile QR feature is enable or not
             if(GlobalValue.Instance.MobileQrEnable.Equals("false"))
             {
-
+                //Mobile Qr is disable
             }
             else
             {
-                SaveReceiptToDB();
+                //Mobile Qr is enable
+
+                //Check VIP function is enable or not
+                if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
+                {
+                    //VIP function is disable
+                    //Save receipt normally
+                    SaveReceiptToDB();
+                }
+                else
+                {
+                    //VIP function is enable
+
+                    //Check VIP is used or not
+                    if (vipBtn.Visibility == Visibility.Visible)
+                    {
+                        //VIP is not used
+                        //Save receipt normally
+                        SaveReceiptToDB();
+                    }
+                    else
+                    {
+                        //VIP is used
+                        //No save receipt because already get discount from VIP
+
+                    }
+                }
+                
             }
 
             SaveOrderToDB("cash");
@@ -1720,11 +1749,38 @@ namespace Urban
             //Check Mobile QR feature is enable or not
             if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
             {
-
+                //Mobile Qr is disable
             }
             else
             {
-                SaveReceiptToDB();
+                //Mobile Qr is enable
+
+                //Check VIP function is enable or not
+                if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
+                {
+                    //VIP function is disable
+                    //Save receipt normally
+                    SaveReceiptToDB();
+                }
+                else
+                {
+                    //VIP function is enable
+
+                    //Check VIP is used or not
+                    if (vipBtn.Visibility == Visibility.Visible)
+                    {
+                        //VIP is not used
+                        //Save receipt normally
+                        SaveReceiptToDB();
+                    }
+                    else
+                    {
+                        //VIP is used
+                        //No save receipt because already get discount from VIP
+
+                    }
+                }
+
             }
 
             SaveOrderToDB("credit");
@@ -2168,9 +2224,11 @@ namespace Urban
                 if(paymentType.Equals("credit"))
                 {
                     prepareOrder[i].IsCreditCard = "true";
+                    int discountAmt = this.db.getMassagePrice(prepareOrder[i].MassageTopicId, prepareOrder[i].MassagePlanId) - Int32.Parse(prepareOrder[i].Price);
+                    prepareOrder[i].MemberDiscountAmount = discountAmt.ToString();
 
                     //Check qr code function is enable
-                    if(GlobalValue.Instance.MobileQrEnable.Equals("false"))
+                    if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
                     {
 
                     }
@@ -2183,7 +2241,9 @@ namespace Urban
                 else
                 {
                     prepareOrder[i].IsCreditCard = "false";
-                    
+                    int discountAmt = this.db.getMassagePrice(prepareOrder[i].MassageTopicId, prepareOrder[i].MassagePlanId) - Int32.Parse(prepareOrder[i].Price);
+                    prepareOrder[i].MemberDiscountAmount = discountAmt.ToString();
+
                     //Check qr code function is enable
                     if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
                     {
@@ -2340,6 +2400,8 @@ namespace Urban
                 var _sb = new StringBuilder();
                 _sb.AppendLine("\n\n");
                 RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
+
+                //printString = _sb.ToString();
             }
 
             //Print sold items
@@ -2364,6 +2426,11 @@ namespace Urban
             //PrintDialog pd = new PrintDialog();
             //
 
+            //printString += sb.ToString();
+
+            //Receipt _getLatestReceipt = this.db.getLatestReceipt();
+            //PrintQRCodeAndTextToPDF(_getLatestReceipt.Code,printString);
+
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
 
             //Print QR code image here
@@ -2371,6 +2438,36 @@ namespace Urban
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
+
+        //public void PrintQRCodeAndTextToPDF(string qrData, string textBelowQR)
+        //{
+        //    System.Drawing.Printing.PrintDocument printDocument = new System.Drawing.Printing.PrintDocument();
+        //    printDocument.PrinterSettings.PrinterName = "Microsoft Print to PDF";
+
+        //    if (printDocument.PrinterSettings.IsValid)
+        //    {
+        //        printDocument.PrintPage += (sender, e) => DrawQRCodeAndTextOnPage(e, qrData, textBelowQR);
+        //        printDocument.Print();
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine("Error: Cannot find the specified printer.");
+        //    }
+        //}
+
+        //private void DrawQRCodeAndTextOnPage(System.Drawing.Printing.PrintPageEventArgs e, string qrData, string textBelowQR)
+        //{
+        //    // Generate QR code as an image using ZXing.Net
+        //    BarcodeWriter writer = new BarcodeWriter();
+        //    writer.Format = BarcodeFormat.QR_CODE;
+        //    var qrCodeImage = writer.Write(qrData);
+
+        //    // Draw the image on the PDF page
+        //    e.Graphics.DrawImage(qrCodeImage, new System.Drawing.PointF(10, 10));
+
+        //    // Draw the string below the QR code. Adjust the position as necessary.
+        //    e.Graphics.DrawString(textBelowQR, new System.Drawing.Font("Arial", 12), System.Drawing.Brushes.Black, new System.Drawing.PointF(10, 10 + qrCodeImage.Height + 5));
+        //}
 
         public void PrintCommission()
         {
@@ -2530,11 +2627,11 @@ namespace Urban
             XRect TableColumnRect_AveragePerPax = new XRect(299, 77, 47, 452);
             XRect TableColumnRect_TotalWorker = new XRect(346, 77, 34, 452);
             XRect TableColumnRect_OilIncome = new XRect(380, 77, 54, 452);
-            XRect TableColumnRect_TotalIncome = new XRect(534, 77, 69, 452);//change position
-            XRect TableColumnRect_PayWorker = new XRect(603, 77, 62, 452);//change position
-            XRect TableColumnRect_TotalCancelled = new XRect(665, 77, 45, 452);//change position
-            XRect TableColumnRect_TotalUniform = new XRect(434, 77, 46, 452);//change position
-            XRect TableColumnRect_TotalTigerBalm = new XRect(480, 77, 54, 452);//change position
+            XRect TableColumnRect_TotalOtherSale = new XRect(434, 77, 54, 452);//change position
+            XRect TableColumnRect_TotalIncome = new XRect(488, 77, 69, 452);//change position
+            XRect TableColumnRect_PayWorker = new XRect(557, 77, 62, 452);//change position
+            XRect TableColumnRect_WorkerBonus = new XRect(619, 77, 58, 452);//change position
+            XRect TableColumnRect_TotalCancelled = new XRect(677, 77, 33, 452);//change position
             XRect TableColumnRect_BalanceNet = new XRect(710, 77, 70, 452);
 
             XRect TableColumnRect_Date_Text_Header = new XRect(11, 90, 27, 520);
@@ -2550,11 +2647,12 @@ namespace Urban
             XRect TableColumnRect_TotalWorker_2_Text_Header = new XRect(341, 95, 43, 520);
             XRect TableColumnRect_OilIncome_Text_Header = new XRect(390, 85, 33, 520);
             XRect TableColumnRect_OilIncome_2_Text_Header = new XRect(390, 95, 33, 520);
-            XRect TableColumnRect_TotalIncome_Text_Header = new XRect(541, 90, 56, 520);//change position
-            XRect TableColumnRect_PayWorker_Text_Header = new XRect(617, 90, 33, 520);//change position
-            XRect TableColumnRect_TotalCancelled_Text_Header = new XRect(663, 90, 50, 520);//change position
-            XRect TableColumnRect_TotalUniform_Text_Header = new XRect(433, 90, 50, 520);//change position
-            XRect TableColumnRect_TotalTigerBalm_Text_Header = new XRect(483, 90, 50, 520);//change position
+            XRect TableColumnRect_TotalOtherSale_Text_Header = new XRect(435, 90, 50, 520);//change position
+            XRect TableColumnRect_TotalIncome_Text_Header = new XRect(495, 90, 56, 520);//change position
+            XRect TableColumnRect_PayWorker_Text_Header = new XRect(571, 90, 33, 520);//change position
+            XRect TableColumnRect_WorkerBonus_Text_Header = new XRect(624, 85, 50, 520);
+            XRect TableColumnRect_WorkerBonus_2_Text_Header = new XRect(624, 95, 50, 520);
+            XRect TableColumnRect_TotalCancelled_Text_Header = new XRect(676, 90, 35, 520);//change position
             XRect TableColumnRect_BalanceNet_Text_Header = new XRect(718, 90, 56, 520);
 
             XRect TableColumnRect_Date_Text = new XRect(11, 100, 27, 520);
@@ -2564,13 +2662,13 @@ namespace Urban
             XRect TableColumnRect_Massage_Credit_Text = new XRect(199, 100, 27, 520);
             XRect TableColumnRect_Massage_Voucher_Text = new XRect(259, 100, 27, 520);
             XRect TableColumnRect_AveragePerPax_Text = new XRect(306, 100, 27, 520);
-            XRect TableColumnRect_TotalWorker_Text = new XRect(338, 100, 43, 520);
+            XRect TableColumnRect_TotalWorker_Text = new XRect(340, 100, 43, 520);
             XRect TableColumnRect_OilIncome_Text = new XRect(389, 100, 33, 520);
-            XRect TableColumnRect_TotalIncome_Text = new XRect(535, 100, 56, 520);//change position
-            XRect TableColumnRect_PayWorker_Text = new XRect(614, 100, 33, 520);//change position
-            XRect TableColumnRect_TotalCancelled_Text = new XRect(664, 100, 50, 520);//change position
-            XRect TableColumnRect_TotalUniform_Text = new XRect(438, 100, 50, 520);//change position
-            XRect TableColumnRect_TotalTigerBalm_Text = new XRect(481, 100, 50, 520);//change position
+            XRect TableColumnRect_TotalOtherSale_Text = new XRect(430, 100, 50, 520);//change position
+            XRect TableColumnRect_TotalIncome_Text = new XRect(488, 100, 56, 520);//change position
+            XRect TableColumnRect_PayWorker_Text = new XRect(570, 100, 33, 520);//change position
+            XRect TableColumnRect_WorkerBonus_Text = new XRect(622, 100, 50, 520);//change position
+            XRect TableColumnRect_TotalCancelled_Text = new XRect(674, 100, 50, 520);//change position
             XRect TableColumnRect_BalanceNet_Text = new XRect(718, 100, 56, 520);
 
             XRect TableColumnRect_No = new XRect(10, 95, 27, 520);
@@ -2635,8 +2733,8 @@ namespace Urban
             gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalIncome);
             gfx.DrawRectangle(XPens.Black, TableColumnRect_PayWorker);
             gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalCancelled);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalUniform);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalTigerBalm);
+            gfx.DrawRectangle(XPens.Black, TableColumnRect_WorkerBonus);
+            gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalOtherSale);
             gfx.DrawRectangle(XPens.Black, TableColumnRect_BalanceNet);
 
             format.LineAlignment = XLineAlignment.Near;
@@ -2657,10 +2755,11 @@ namespace Urban
             gfx.DrawString(GlobalValue.Instance.oilPrice+"B/Staff", ContentFont, BlackBrush, TableColumnRect_OilIncome_2_Text_Header, format);
             gfx.DrawString("Total Incomes", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text_Header, format);
             gfx.DrawString("Pay Workers", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text_Header, format);
-            gfx.DrawString("Cancelled", ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text_Header, format);
-            gfx.DrawString("Uniform", ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text_Header, format);
+            gfx.DrawString("Cancel", ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text_Header, format);
+            gfx.DrawString("Worker", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text_Header, format);
+            gfx.DrawString("Bonus", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_2_Text_Header, format);
             //gfx.DrawString("Tiger Balm", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
-            gfx.DrawString("Other Sale", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
+            gfx.DrawString("Other Sale", ContentFont, BlackBrush, TableColumnRect_TotalOtherSale_Text_Header, format);
             gfx.DrawString("Balance Net", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text_Header, format);
 
             int y1 = 126;
@@ -2716,14 +2815,17 @@ namespace Urban
                         int averagePax = 0;
                         if (grandIncome != 0 && pax != 0)
                         {
-                            averagePax = grandIncome / pax;
+                            double averagePax_d = (double)grandIncome / (double)pax;
+                            averagePax = (int)Math.Round(averagePax_d);
                         }
-                        int uniform = getTotalUniformFromId(listAccount[f].Id);
+                        //int uniform = getTotalUniformFromId(listAccount[f].Id);
                         //int tigerBalm = getTotalTigerBalmFromId(listAccount[f].Id);
-                        int tigerBalm = getTotalTigerBalmWithOtherSaleFromId(listAccount[f].Id);
-                        int finalIncome = grandIncome - commis + uniform + tigerBalm;
+                        int finalOtherSale = getTotalOtherSaleFromId(listAccount[f].Id);
+                        double finalWorkerBonus_d = (double)grandIncome * 0.13;
+                        int finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
+                        int finalIncome = grandIncome - commis + finalOtherSale - finalWorkerBonus;
                         int totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
-                        
+
 
                         DailyReportForm dailyForm = new DailyReportForm()
                         {
@@ -2739,8 +2841,8 @@ namespace Urban
                             TotalIncome = String.Format("{0:n}", grandIncome),
                             PayWorkers = String.Format("{0:n}", commis),
                             TotalCancelled = totalCancelled.ToString(),
-                            TotalUniform = String.Format("{0:n}", uniform),
-                            TotalTigerBalm = String.Format("{0:n}", tigerBalm),
+                            WorkBonus = String.Format("{0:n}", finalWorkerBonus),
+                            TotalOtherSale = String.Format("{0:n}", finalOtherSale),
                             BalanceNet = String.Format("{0:n}", finalIncome)
                         };
 
@@ -2770,8 +2872,8 @@ namespace Urban
                             gfx.DrawString(allDailyForm[j].TotalIncome, ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
                             gfx.DrawString(allDailyForm[j].PayWorkers, ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
                             gfx.DrawString(allDailyForm[j].TotalCancelled, ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 15, TableColumnRect_TotalCancelled_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].TotalUniform, ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text.X + 5, TableColumnRect_TotalUniform_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].TotalTigerBalm, ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text.X + 10, TableColumnRect_TotalTigerBalm_Text.Y + plusY);
+                            gfx.DrawString(allDailyForm[j].WorkBonus, ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text.X + 5, TableColumnRect_WorkerBonus_Text.Y + plusY);
+                            gfx.DrawString(allDailyForm[j].TotalOtherSale, ContentFont, BlackBrush, TableColumnRect_TotalOtherSale_Text.X + 10, TableColumnRect_TotalOtherSale_Text.Y + plusY);
                             gfx.DrawString(allDailyForm[j].BalanceNet, ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X + 6, TableColumnRect_BalanceNet_Text.Y + plusY); //edit on 3 Nov 2019
 
                         }
@@ -2821,8 +2923,10 @@ namespace Urban
             int netTotalIncome = 0;
             int netCommis = 0;
             int netCancelledPax = 0;
-            int netUniform = 0;
-            int netTigerBalm = 0;
+            //int netUniform = 0;
+            //int netTigerBalm = 0;
+            int netWorkerBonus = 0;
+            int netOtherSale = 0;
             int netBalanceNet = 0;
             for (int k = 0; k < allDailyForm.Count; k++)
             {
@@ -2836,8 +2940,8 @@ namespace Urban
                 string convertTotalIncome = allDailyForm[k].TotalIncome.Replace(".00", "");
                 string convertCommis = allDailyForm[k].PayWorkers.Replace(".00", "");
                 string convertCancelledPax = allDailyForm[k].TotalCancelled.Replace(".00", "");
-                string convertUniform = allDailyForm[k].TotalUniform.Replace(".00", "");
-                string convertTigerBalm = allDailyForm[k].TotalTigerBalm.Replace(".00", "");
+                string convertWorkerBonus = allDailyForm[k].WorkBonus.Replace(".00", "");
+                string convertOtherSale = allDailyForm[k].TotalOtherSale.Replace(".00", "");
                 string convertBalance = allDailyForm[k].BalanceNet.Replace(".00", "");
 
                 string convertTotalPaxs = convertTotalPax.Replace(",", "");
@@ -2850,8 +2954,8 @@ namespace Urban
                 string convertTotalIncomes = convertTotalIncome.Replace(",", "");
                 string convertCommiss = convertCommis.Replace(",", "");
                 string convertCancelledPaxs = convertCancelledPax.Replace(",", "");
-                string convertUniforms = convertUniform.Replace(",", "");
-                string convertTigerBalms = convertTigerBalm.Replace(",", "");
+                string convertWorkerBonuses = convertWorkerBonus.Replace(",", "");
+                string convertOtherSales = convertOtherSale.Replace(",", "");
                 string convertBalances = convertBalance.Replace(",", "");
 
                 netTotalPax += Int32.Parse(convertTotalPaxs);
@@ -2864,13 +2968,14 @@ namespace Urban
                 netTotalIncome += Int32.Parse(convertTotalIncomes);
                 netCommis += Int32.Parse(convertCommiss);
                 netCancelledPax += Int32.Parse(convertCancelledPaxs);
-                netUniform += Int32.Parse(convertUniforms);
-                netTigerBalm += Int32.Parse(convertTigerBalms);
+                netWorkerBonus += Int32.Parse(convertWorkerBonuses);
+                netOtherSale += Int32.Parse(convertOtherSales);
                 netBalanceNet += Int32.Parse(convertBalances);
             }
 
             //Updated on 04 October 2022
-            netAveragePerPax = (netTotalIncome / netTotalPax);
+            double netAveragePerPax_d = (double)netTotalIncome / (double)netTotalPax;
+            netAveragePerPax = (int)Math.Round(netAveragePerPax_d);
 
             gfx.DrawString("Total", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + 426);
             //gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + 426);
@@ -2883,9 +2988,9 @@ namespace Urban
             gfx.DrawString(String.Format("{0:n}", netOil), ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + 426);
             gfx.DrawString(String.Format("{0:n}", netTotalIncome), ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + 426);
             gfx.DrawString(String.Format("{0:n}", netCommis), ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 5, TableColumnRect_PayWorker_Text.Y + 426);
-            gfx.DrawString(netCancelledPax.ToString(), ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 20, TableColumnRect_TotalCancelled_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netUniform), ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text.X + 5, TableColumnRect_TotalUniform_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netTigerBalm), ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text.X + 10, TableColumnRect_TotalTigerBalm_Text.Y + 426);
+            gfx.DrawString(netCancelledPax.ToString(), ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 14, TableColumnRect_TotalCancelled_Text.Y + 426);
+            gfx.DrawString(String.Format("{0:n}", netWorkerBonus), ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text.X + 5, TableColumnRect_WorkerBonus_Text.Y + 426);
+            gfx.DrawString(String.Format("{0:n}", netOtherSale), ContentFont, BlackBrush, TableColumnRect_TotalOtherSale_Text.X + 10, TableColumnRect_TotalOtherSale_Text.Y + 426);
             gfx.DrawString(String.Format("{0:n}", netBalanceNet), ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X + 5, TableColumnRect_BalanceNet_Text.Y + 426);
             gfx.DrawLine(XPens.Black, 10, 529, 780, 530);
             //MessageBox.Show(dateStamp.ToString()+"//"+dateStamp.ToLongDateString());
@@ -3319,11 +3424,12 @@ namespace Urban
                         int averagePax = 0;
                         if (grandIncome != 0 && pax != 0)
                         {
-                            averagePax = grandIncome / pax;
+                            double averagePax_d = (double)grandIncome / (double)pax;
+                            averagePax = (int)Math.Round(averagePax_d);
                         }
                         int uniform = getTotalUniformFromId(listAccount[f].Id);
                         //int tigerBalm = getTotalTigerBalmFromId(listAccount[f].Id);
-                        int tigerBalm = getTotalTigerBalmWithOtherSaleFromId(listAccount[f].Id);
+                        int tigerBalm = getTotalOtherSaleExceptUniformFromId(listAccount[f].Id);
                         int finalIncome = grandIncome - commis + uniform + tigerBalm;
                         int totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
 
@@ -3473,7 +3579,8 @@ namespace Urban
             }
 
             //Updated on 04 October 2022
-            netAveragePerPax = (netTotalIncome / netTotalPax);
+            double netAveragePerPax_d = (double)netTotalIncome / (double)netTotalPax;
+            netAveragePerPax = (int)Math.Round(netAveragePerPax_d);
 
             gfx.DrawString("Total", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + 426);
             //gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + 426);
@@ -4920,6 +5027,51 @@ namespace Urban
 
         }
 
+        //public void testReceiptPDF(string val)
+        //{
+        //    List<Branch> listBranch = this.db.getAllBranch();
+
+        //    // Create a new PDF document
+        //    PdfDocument document = new PdfDocument();
+
+        //    // Create an empty page
+        //    PdfPage page = document.AddPage();
+        //    page.Orientation = PageOrientation.Portrait;
+
+        //    // Get an XGraphics object for drawing
+        //    XGraphics gfx = XGraphics.FromPdfPage(page);
+
+        //    //XRect rect = new XRect(0, 0, 250, 140);
+
+        //    //XFont font = new XFont("Verdana", 10);
+        //    //XBrush brush = XBrushes.Purple;
+
+
+
+        //    XFont BigTitleFont = new XFont("Verdana", 13);
+        //    XFont HeaderContentFont = new XFont("Verdana", 10, XFontStyle.Underline);
+        //    XFont ContentFont = new XFont("Verdana", 8);
+
+        //    XBrush BlackBrush = XBrushes.Black;
+
+        //    XStringFormat format = new XStringFormat();
+
+        //    format.LineAlignment = XLineAlignment.Center;
+        //    format.Alignment = XStringAlignment.Center;
+
+        //    gfx.DrawString(val, HeaderContentFont, BlackBrush, 20, 20);
+            
+            
+        //    //string realDate = preReal.Replace(",", "");
+        //    filename = @"C:\SpaSystem\testqr.pdf";
+
+        //    //test
+        //    document.Save(filename);
+
+            
+
+        //}
+
         public string getListItemInInvoice()
         {
             string text = "";
@@ -5091,7 +5243,41 @@ namespace Urban
             return comS+comB;
         }
 
-        public int getTotalTigerBalmWithOtherSaleFromId(int AccountId) //edit on 3 Nov 2019
+        public int getTotalOtherSaleFromId(int AccountId)
+        {
+            int comU = 0;
+            int comS = 0;
+            int comB = 0;
+            int otherS = 0;
+
+            List<OtherSaleRecord> listOrderU = this.db.getAllUniformRecordExceptCancelled(AccountId);
+            foreach (OtherSaleRecord o in listOrderU)
+            {
+                comU += Int32.Parse(o.Price);
+            }
+
+            List<OtherSaleRecord> listOrders = this.db.getAllSmallTigerBalmRecordExceptCancelled(AccountId);
+            foreach (OtherSaleRecord o in listOrders)
+            {
+                comS += Int32.Parse(o.Price);
+            }
+
+            List<OtherSaleRecord> listOrdersB = this.db.getAllBigTigerBalmRecordExceptCancelled(AccountId);
+            foreach (OtherSaleRecord ob in listOrdersB)
+            {
+                comB += Int32.Parse(ob.Price);
+            }
+
+            List<OtherSaleRecord> listOrdersOther = this.db.getAllOtherSaleRecordExceptCancelled(AccountId);
+            foreach (OtherSaleRecord os in listOrdersOther)
+            {
+                otherS += Int32.Parse(os.Price);
+            }
+
+            return comU + comS + comB + otherS;
+        }
+
+        public int getTotalOtherSaleExceptUniformFromId(int AccountId)
         {
             int comS = 0;
             int comB = 0;
@@ -5642,6 +5828,7 @@ namespace Urban
                 CreateDateTime = getOrd.CreateDateTime,
                 UpdateDateTime = getOrd.UpdateDateTime,
                 MemberId = getOrd.MemberId,
+                MemberDiscountAmount = getOrd.MemberDiscountAmount,
                 ReceiptId = getOrd.ReceiptId
             };
 
@@ -5711,6 +5898,7 @@ namespace Urban
                     CreateDateTime = getOrd.CreateDateTime,
                     UpdateDateTime = getOrd.UpdateDateTime,
                     MemberId = getOrd.MemberId,
+                    MemberDiscountAmount = getOrd.MemberDiscountAmount,
                     ReceiptId = getOrd.ReceiptId
                 };
 
@@ -5923,7 +6111,7 @@ namespace Urban
             }
             catch (Exception ex)
             {
-                MessageBox.Show("insert order fail" + "\nError : " + ex.ToString());
+                MessageBox.Show("insert order with discount fail" + "\nError : " + ex.ToString());
             }
 
         }
@@ -6272,16 +6460,17 @@ namespace Urban
                 }
                 else
                 {
-                    MessageBox.Show("insert order fail" + "\nError : " + (string)parseJson["Error_Message"]);
+                    MessageBox.Show("insert receipt fail" + "\nError : " + (string)parseJson["Error_Message"]);
                 }
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show("insert order fail" + "\nError : " + ex.ToString());
+                MessageBox.Show("insert receipt fail" + "\nError : " + ex.ToString());
             }
 
         }
+
 
         //private string ConvertFileToBase64(string filePath)
         //{
@@ -6289,7 +6478,7 @@ namespace Urban
         //    return Convert.ToBase64String(fileBytes);
         //}
 
-        
+
 
     }
 }
