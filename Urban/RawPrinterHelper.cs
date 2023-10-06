@@ -139,7 +139,7 @@ namespace Urban
             List<byte> command = new List<byte>();
 
             // Add multiple horizontal tabs to increase the shift
-            //command.Add(0x09);
+            command.Add(0x09);
             //command.Add(0x09);
             //command.Add(0x09);
             //command.Add(0x09);
@@ -152,7 +152,7 @@ namespace Urban
             command.Add(0);
             command.Add(49);
             command.Add(67);
-            command.Add(10); //size
+            command.Add(5); //size
 
             // Set QR Code error correction level
             command.Add(29);

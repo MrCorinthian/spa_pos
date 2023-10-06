@@ -2374,35 +2374,106 @@ namespace Urban
             //string thReplaceMin = TheSlip.getInvoice().Replace("นาที", "mins");
             //string thReplaceHr = thReplaceMin.Replace("ชั่วโมง", "hr");
 
-            //Check QR code feature is enable
-            if(GlobalValue.Instance.MobileQrEnable.Equals("false"))
+            //Check Mobile QR feature is enable or not
+            if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
             {
-
+                //Mobile Qr is disable
             }
             else
             {
-                //Print QR Code before sold items
-                Receipt getLatestReceipt = this.db.getLatestReceipt();
+                //Mobile Qr is enable
 
-                bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
-                if (success)
+                //Check VIP function is enable or not
+                if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
                 {
-                    //Console.WriteLine("QR code sent to printer successfully.");
-                    //MessageBox.Show("QR code sent to printer successfully");
+                    //VIP function is disable
+                    //Print QR Code before sold items
+                    Receipt getLatestReceipt = this.db.getLatestReceipt();
+
+                    bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
+                    if (success)
+                    {
+                        //Console.WriteLine("QR code sent to printer successfully.");
+                        //MessageBox.Show("QR code sent to printer successfully");
+                    }
+                    else
+                    {
+                        //Console.WriteLine("Failed to send QR code to printer.");
+                        //MessageBox.Show("Fail");
+                    }
+
+                    //Add black row between QR code and sold items
+                    var _sb = new StringBuilder();
+                    _sb.AppendLine("\n");
+                    RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
                 }
                 else
                 {
-                    //Console.WriteLine("Failed to send QR code to printer.");
-                    //MessageBox.Show("Fail");
+                    //VIP function is enable
+
+                    //Check VIP is used or not
+                    if (vipBtn.Visibility == Visibility.Visible)
+                    {
+                        //VIP is not used
+                        //Print QR Code before sold items
+                        Receipt getLatestReceipt = this.db.getLatestReceipt();
+
+                        bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
+                        if (success)
+                        {
+                            //Console.WriteLine("QR code sent to printer successfully.");
+                            //MessageBox.Show("QR code sent to printer successfully");
+                        }
+                        else
+                        {
+                            //Console.WriteLine("Failed to send QR code to printer.");
+                            //MessageBox.Show("Fail");
+                        }
+
+                        //Add black row between QR code and sold items
+                        var _sb = new StringBuilder();
+                        _sb.AppendLine("\n");
+                        RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
+                    }
+                    else
+                    {
+                        //VIP is used
+                        //No print QR code because already get discount from VIP
+
+                    }
                 }
 
-                //Add black row between QR code and sold items
-                var _sb = new StringBuilder();
-                _sb.AppendLine("\n\n");
-                RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
-
-                //printString = _sb.ToString();
             }
+
+            ////Check QR code feature is enable
+            //if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
+            //{
+
+            //}
+            //else
+            //{
+            //    //Print QR Code before sold items
+            //    Receipt getLatestReceipt = this.db.getLatestReceipt();
+
+            //    bool success = RawPrinterHelper.SendQrCodeToPrinter(GlobalValue.Instance.receiptPrinter, getLatestReceipt.Code);
+            //    if (success)
+            //    {
+            //        //Console.WriteLine("QR code sent to printer successfully.");
+            //        //MessageBox.Show("QR code sent to printer successfully");
+            //    }
+            //    else
+            //    {
+            //        //Console.WriteLine("Failed to send QR code to printer.");
+            //        //MessageBox.Show("Fail");
+            //    }
+
+            //    //Add black row between QR code and sold items
+            //    var _sb = new StringBuilder();
+            //    _sb.AppendLine("\n\n");
+            //    RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, _sb.ToString());
+
+            //    //printString = _sb.ToString();
+            //}
 
             //Print sold items
             var sb = new StringBuilder();
@@ -5079,6 +5150,28 @@ namespace Urban
 
             foreach (OrderRecord o in prepareOrder)
             {
+                if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
+                {
+                    //VIP function is disable
+
+                }
+                else
+                {
+                    //VIP function is enable
+
+                    //Check VIP is used or not
+                    if (vipBtn.Visibility == Visibility.Visible)
+                    {
+                        //VIP is not used
+
+                    }
+                    else
+                    {
+                        //VIP is used
+                        text += "  [VIP]\n";
+
+                    }
+                }
                 text += "- " + this.db.getMassageTopicName(o.MassageTopicId) +"("+this.db.getMassagePlanName(o.MassagePlanId)+")"+"\n  " + String.Format("{0:n}", Int32.Parse(o.Price)) + " Baht\n\n";
             }
 
