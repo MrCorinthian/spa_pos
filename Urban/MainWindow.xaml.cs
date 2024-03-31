@@ -5446,7 +5446,7 @@ namespace Urban
         public void SendTextToMonitor(String[] tagArray)
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12)
             {
                 try
                 {
@@ -5562,7 +5562,7 @@ namespace Urban
         public void SendTextTotal()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12)
             {
                 try
                 {
@@ -5623,7 +5623,7 @@ namespace Urban
         public void SendTextTotalWithDiscount()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12)
             {
                 try
                 {
@@ -5684,7 +5684,7 @@ namespace Urban
         public void ClearText()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12)
             {
                 try
                 {
