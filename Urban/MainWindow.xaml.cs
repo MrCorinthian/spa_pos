@@ -95,29 +95,173 @@ namespace Urban
             //StartCheckSystemVersion();
             CheckIn();
             ClearText();
-            /*
-            List<Account> listAccount = this.db.getAllAccount();
-            MessageBox.Show(listAccount.Count().ToString());
 
-            Account ac = new Account()
-            {
-                Date = "15-10-2016",
-                Time = "1.47",
-                StartMoney = "6000",
-                StaffAmount = "20",
-                Completed = "true",
-                SendStatus = "false",
-                UpdateStatus = "false"
-            };
+            // Subscribe to the Loaded event
+            Loaded += MainWindow_Loaded;
 
-            this.db.checkIn(ac);
 
-            listAccount = this.db.getAllAccount();
-            MessageBox.Show(listAccount.Count().ToString());
-            */
-            
-            
         }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string jsonString = GlobalValue.Instance.Json_MasterData; // Your JSON string here
+                var parseJson = JToken.Parse(jsonString);
+                await UpdateMemberDataAsync(parseJson);
+                //MessageBox.Show("Member data updated successfully");
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show($"Error updating member data: {ex.Message}");
+            }
+        }
+
+        public async Task UpdateMemberDataAsync(JToken parseJson)
+        {
+            await Task.Run(() => this.db.clearAllMemberRelateTable());
+
+            var rootMember = parseJson["Member"];
+            List<Member> members = new List<Member>();
+
+            foreach (var item in rootMember)
+            {
+                Member mMember = new Member
+                {
+                    Id = (int)item["Id"],
+                    MemberNo = item["MemberNo"].ToString(),
+                    Title = item["Title"].ToString(),
+                    FirstName = item["FirstName"].ToString(),
+                    FamilyName = item["FamilyName"].ToString(),
+                    AddressInTH = item["AddressInTH"].ToString(),
+                    City = item["City"].ToString(),
+                    TelephoneNo = item["TelephoneNo"].ToString(),
+                    WhatsAppId = item["WhatsAppId"].ToString(),
+                    LineId = item["LineId"].ToString(),
+                    ActiveStatus = item["ActiveStatus"].ToString()
+                };
+
+                if (!string.IsNullOrEmpty(item["Birth"].ToString()))
+                {
+                    mMember.Birth = ConvertDate(item["Birth"].ToString());
+                }
+
+                members.Add(mMember);
+            }
+
+            await Task.Run(() => this.db.InsertMembers(members));
+
+            var rootMemberGroupPriviledge = parseJson["MemberGroupPriviledge"];
+            List<MemberGroupPriviledge> memberGroupPriviledges = new List<MemberGroupPriviledge>();
+
+            foreach (var item in rootMemberGroupPriviledge)
+            {
+                MemberGroupPriviledge mMemberGroupPriviledge = new MemberGroupPriviledge
+                {
+                    Id = (int)item["Id"],
+                    MemberGroupId = (int)item["MemberGroupId"],
+                    MemberPriviledgeId = (int)item["MemberPriviledgeId"],
+                    Status = item["Status"].ToString()
+                };
+
+                memberGroupPriviledges.Add(mMemberGroupPriviledge);
+            }
+
+            await Task.Run(() => this.db.InsertMemberGroupPriviledges(memberGroupPriviledges));
+
+            var rootMemberDetail = parseJson["MemberDetail"];
+            List<MemberDetail> memberDetails = new List<MemberDetail>();
+
+            foreach (var item in rootMemberDetail)
+            {
+                MemberDetail mMemberDetail = new MemberDetail
+                {
+                    Id = (int)item["Id"],
+                    MemberId = (int)item["MemberId"],
+                    MemberGroupId = (int)item["MemberGroupId"],
+                    Status = item["Status"].ToString()
+                };
+
+                if (!string.IsNullOrEmpty(item["StartDate"].ToString()))
+                {
+                    mMemberDetail.StartDate = ConvertDate(item["StartDate"].ToString());
+                }
+
+                if (!string.IsNullOrEmpty(item["ExpireDate"].ToString()))
+                {
+                    mMemberDetail.ExpireDate = ConvertDate(item["ExpireDate"].ToString());
+                }
+
+                memberDetails.Add(mMemberDetail);
+            }
+
+            await Task.Run(() => this.db.InsertMemberDetails(memberDetails));
+
+            var rootMemberGroup = parseJson["MemberGroup"];
+            List<MemberGroup> memberGroups = new List<MemberGroup>();
+
+            foreach (var item in rootMemberGroup)
+            {
+                MemberGroup mMemberGroup = new MemberGroup
+                {
+                    Id = (int)item["Id"],
+                    Name = item["Name"].ToString(),
+                    ShowName = item["ShowName"].ToString(),
+                    Status = item["Status"].ToString()
+                };
+
+                memberGroups.Add(mMemberGroup);
+            }
+
+            await Task.Run(() => this.db.InsertMemberGroups(memberGroups));
+
+            var rootMemberPriviledge = parseJson["MemberPriviledge"];
+            List<MemberPriviledge> memberPriviledges = new List<MemberPriviledge>();
+
+            foreach (var item in rootMemberPriviledge)
+            {
+                MemberPriviledge mMemberPriviledge = new MemberPriviledge
+                {
+                    Id = (int)item["Id"],
+                    PriviledgeTypeId = (int)item["PriviledgeTypeId"],
+                    ShowName = item["ShowName"].ToString(),
+                    Value = (int)item["Value"],
+                    Status = item["Status"].ToString()
+                };
+
+                if (!string.IsNullOrEmpty(item["StartDate"].ToString()))
+                {
+                    mMemberPriviledge.StartDate = ConvertDate(item["StartDate"].ToString());
+                }
+
+                if (!string.IsNullOrEmpty(item["ExpireDate"].ToString()))
+                {
+                    mMemberPriviledge.ExpireDate = ConvertDate(item["ExpireDate"].ToString());
+                }
+
+                memberPriviledges.Add(mMemberPriviledge);
+            }
+
+            await Task.Run(() => this.db.InsertMemberPriviledges(memberPriviledges));
+
+            var rootPriviledgeType = parseJson["PriviledgeType"];
+            List<PriviledgeType> priviledgeTypes = new List<PriviledgeType>();
+
+            foreach (var item in rootPriviledgeType)
+            {
+                PriviledgeType mPriviledgeType = new PriviledgeType
+                {
+                    Id = (int)item["Id"],
+                    Name = item["Name"].ToString(),
+                    Status = item["Status"].ToString()
+                };
+
+                priviledgeTypes.Add(mPriviledgeType);
+            }
+
+            await Task.Run(() => this.db.InsertPriviledgeTypes(priviledgeTypes));
+        }
+
 
         public void CheckDataSetVersion()
         {
@@ -318,127 +462,128 @@ namespace Urban
                         this.db.InsertSystemSetting(mSetting);
                     }
 
-                    //Insert and Update Member data
-                    this.db.clearAllMemberRelateTable();
 
-                    //Reset Seq
-                    //sqlite_sequence settingSeq = this.db.getSettingSeq();
-                    //if (settingSeq != null)
+                    ////Insert and Update Member data
+                    //this.db.clearAllMemberRelateTable();
+
+                    ////Reset Seq
+                    ////sqlite_sequence settingSeq = this.db.getSettingSeq();
+                    ////if (settingSeq != null)
+                    ////{
+                    ////    settingSeq.seq = "0";
+                    ////    this.db.updateSettingSeq(settingSeq);
+                    ////}
+
+                    //var rootMember = parseJson["Member"];
+                    //for (int i = 0; i < rootMember.Count(); i++)
                     //{
-                    //    settingSeq.seq = "0";
-                    //    this.db.updateSettingSeq(settingSeq);
+                    //    Member mMember = new Member();
+                    //    mMember.Id = (int)rootMember[i]["Id"];
+                    //    mMember.MemberNo = rootMember[i]["MemberNo"].ToString();
+                    //    mMember.Title = rootMember[i]["Title"].ToString();
+                    //    mMember.FirstName = rootMember[i]["FirstName"].ToString();
+                    //    mMember.FamilyName = rootMember[i]["FamilyName"].ToString();
+                    //    if(!string.IsNullOrEmpty(rootMember[i]["Birth"].ToString()))
+                    //    {
+                    //        mMember.Birth = ConvertDate(rootMember[i]["Birth"].ToString());
+                    //    }
+                    //    mMember.AddressInTH = rootMember[i]["AddressInTH"].ToString();
+                    //    mMember.City = rootMember[i]["City"].ToString();
+                    //    mMember.TelephoneNo = rootMember[i]["TelephoneNo"].ToString();
+                    //    mMember.WhatsAppId = rootMember[i]["WhatsAppId"].ToString();
+                    //    mMember.LineId = rootMember[i]["LineId"].ToString();
+                    //    mMember.ActiveStatus = rootMember[i]["ActiveStatus"].ToString();
+                    //    //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                    //    //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+
+                    //    this.db.InsertMember(mMember);
                     //}
 
-                    var rootMember = parseJson["Member"];
-                    for (int i = 0; i < rootMember.Count(); i++)
-                    {
-                        Member mMember = new Member();
-                        mMember.Id = (int)rootMember[i]["Id"];
-                        mMember.MemberNo = rootMember[i]["MemberNo"].ToString();
-                        mMember.Title = rootMember[i]["Title"].ToString();
-                        mMember.FirstName = rootMember[i]["FirstName"].ToString();
-                        mMember.FamilyName = rootMember[i]["FamilyName"].ToString();
-                        if(!string.IsNullOrEmpty(rootMember[i]["Birth"].ToString()))
-                        {
-                            mMember.Birth = ConvertDate(rootMember[i]["Birth"].ToString());
-                        }
-                        mMember.AddressInTH = rootMember[i]["AddressInTH"].ToString();
-                        mMember.City = rootMember[i]["City"].ToString();
-                        mMember.TelephoneNo = rootMember[i]["TelephoneNo"].ToString();
-                        mMember.WhatsAppId = rootMember[i]["WhatsAppId"].ToString();
-                        mMember.LineId = rootMember[i]["LineId"].ToString();
-                        mMember.ActiveStatus = rootMember[i]["ActiveStatus"].ToString();
-                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
-                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+                    //var rootMemberGroup = parseJson["MemberGroup"];
+                    //for (int i = 0; i < rootMemberGroup.Count(); i++)
+                    //{
+                    //    MemberGroup mMemberGroup = new MemberGroup();
+                    //    mMemberGroup.Id = (int)rootMemberGroup[i]["Id"];
+                    //    mMemberGroup.Name = rootMemberGroup[i]["Name"].ToString();
+                    //    mMemberGroup.ShowName = rootMemberGroup[i]["ShowName"].ToString();
+                    //    mMemberGroup.Status = rootMemberGroup[i]["Status"].ToString();
+                    //    //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                    //    //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
-                        this.db.InsertMember(mMember);
-                    }
+                    //    this.db.InsertMemberGroup(mMemberGroup);
+                    //}
 
-                    var rootMemberGroup = parseJson["MemberGroup"];
-                    for (int i = 0; i < rootMemberGroup.Count(); i++)
-                    {
-                        MemberGroup mMemberGroup = new MemberGroup();
-                        mMemberGroup.Id = (int)rootMemberGroup[i]["Id"];
-                        mMemberGroup.Name = rootMemberGroup[i]["Name"].ToString();
-                        mMemberGroup.ShowName = rootMemberGroup[i]["ShowName"].ToString();
-                        mMemberGroup.Status = rootMemberGroup[i]["Status"].ToString();
-                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
-                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+                    //var rootMemberPriviledge = parseJson["MemberPriviledge"];
+                    //for (int i = 0; i < rootMemberPriviledge.Count(); i++)
+                    //{
+                    //    MemberPriviledge mMemberPriviledge = new MemberPriviledge();
+                    //    mMemberPriviledge.Id = (int)rootMemberPriviledge[i]["Id"];
+                    //    mMemberPriviledge.PriviledgeTypeId = (int)rootMemberPriviledge[i]["PriviledgeTypeId"];
+                    //    mMemberPriviledge.ShowName = rootMemberPriviledge[i]["ShowName"].ToString();
+                    //    mMemberPriviledge.Value = (int)rootMemberPriviledge[i]["Value"];
+                    //    if (!string.IsNullOrEmpty(rootMemberPriviledge[i]["StartDate"].ToString()))
+                    //    {
+                    //        mMemberPriviledge.StartDate = ConvertDate(rootMemberPriviledge[i]["StartDate"].ToString());
+                    //    }
+                    //    if (!string.IsNullOrEmpty(rootMemberPriviledge[i]["ExpireDate"].ToString()))
+                    //    {
+                    //        mMemberPriviledge.ExpireDate = ConvertDate(rootMemberPriviledge[i]["ExpireDate"].ToString());
+                    //    }
+                    //    mMemberPriviledge.Status = rootMemberPriviledge[i]["Status"].ToString();
+                    //    //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                    //    //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
-                        this.db.InsertMemberGroup(mMemberGroup);
-                    }
+                    //    this.db.InsertMemberPriviledge(mMemberPriviledge);
+                    //}
 
-                    var rootMemberPriviledge = parseJson["MemberPriviledge"];
-                    for (int i = 0; i < rootMemberPriviledge.Count(); i++)
-                    {
-                        MemberPriviledge mMemberPriviledge = new MemberPriviledge();
-                        mMemberPriviledge.Id = (int)rootMemberPriviledge[i]["Id"];
-                        mMemberPriviledge.PriviledgeTypeId = (int)rootMemberPriviledge[i]["PriviledgeTypeId"];
-                        mMemberPriviledge.ShowName = rootMemberPriviledge[i]["ShowName"].ToString();
-                        mMemberPriviledge.Value = (int)rootMemberPriviledge[i]["Value"];
-                        if (!string.IsNullOrEmpty(rootMemberPriviledge[i]["StartDate"].ToString()))
-                        {
-                            mMemberPriviledge.StartDate = ConvertDate(rootMemberPriviledge[i]["StartDate"].ToString());
-                        }
-                        if (!string.IsNullOrEmpty(rootMemberPriviledge[i]["ExpireDate"].ToString()))
-                        {
-                            mMemberPriviledge.ExpireDate = ConvertDate(rootMemberPriviledge[i]["ExpireDate"].ToString());
-                        }
-                        mMemberPriviledge.Status = rootMemberPriviledge[i]["Status"].ToString();
-                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
-                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+                    //var rootPriviledgeType = parseJson["PriviledgeType"];
+                    //for (int i = 0; i < rootPriviledgeType.Count(); i++)
+                    //{
+                    //    PriviledgeType mPriviledgeType = new PriviledgeType();
+                    //    mPriviledgeType.Id = (int)rootPriviledgeType[i]["Id"];
+                    //    mPriviledgeType.Name = rootPriviledgeType[i]["Name"].ToString();
+                    //    mPriviledgeType.Status = rootPriviledgeType[i]["Status"].ToString();
+                    //    //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                    //    //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
-                        this.db.InsertMemberPriviledge(mMemberPriviledge);
-                    }
+                    //    this.db.InsertPriviledgeType(mPriviledgeType);
+                    //}
 
-                    var rootPriviledgeType = parseJson["PriviledgeType"];
-                    for (int i = 0; i < rootPriviledgeType.Count(); i++)
-                    {
-                        PriviledgeType mPriviledgeType = new PriviledgeType();
-                        mPriviledgeType.Id = (int)rootPriviledgeType[i]["Id"];
-                        mPriviledgeType.Name = rootPriviledgeType[i]["Name"].ToString();
-                        mPriviledgeType.Status = rootPriviledgeType[i]["Status"].ToString();
-                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
-                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+                    //var rootMemberGroupPriviledge = parseJson["MemberGroupPriviledge"];
+                    //for (int i = 0; i < rootMemberGroupPriviledge.Count(); i++)
+                    //{
+                    //    MemberGroupPriviledge mMemberGroupPriviledge = new MemberGroupPriviledge();
+                    //    mMemberGroupPriviledge.Id = (int)rootMemberGroupPriviledge[i]["Id"];
+                    //    mMemberGroupPriviledge.MemberGroupId = (int)rootMemberGroupPriviledge[i]["MemberGroupId"];
+                    //    mMemberGroupPriviledge.MemberPriviledgeId = (int)rootMemberGroupPriviledge[i]["MemberPriviledgeId"];
+                    //    mMemberGroupPriviledge.Status = rootMemberGroupPriviledge[i]["Status"].ToString();
+                    //    //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                    //    //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
-                        this.db.InsertPriviledgeType(mPriviledgeType);
-                    }
+                    //    this.db.InsertMemberGroupPriviledge(mMemberGroupPriviledge);
+                    //}
 
-                    var rootMemberGroupPriviledge = parseJson["MemberGroupPriviledge"];
-                    for (int i = 0; i < rootMemberGroupPriviledge.Count(); i++)
-                    {
-                        MemberGroupPriviledge mMemberGroupPriviledge = new MemberGroupPriviledge();
-                        mMemberGroupPriviledge.Id = (int)rootMemberGroupPriviledge[i]["Id"];
-                        mMemberGroupPriviledge.MemberGroupId = (int)rootMemberGroupPriviledge[i]["MemberGroupId"];
-                        mMemberGroupPriviledge.MemberPriviledgeId = (int)rootMemberGroupPriviledge[i]["MemberPriviledgeId"];
-                        mMemberGroupPriviledge.Status = rootMemberGroupPriviledge[i]["Status"].ToString();
-                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
-                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
+                    //var rootMemberDetail = parseJson["MemberDetail"];
+                    //for (int i = 0; i < rootMemberDetail.Count(); i++)
+                    //{
+                    //    MemberDetail mMemberDetail = new MemberDetail();
+                    //    mMemberDetail.Id = (int)rootMemberDetail[i]["Id"];
+                    //    mMemberDetail.MemberId = (int)rootMemberDetail[i]["MemberId"];
+                    //    mMemberDetail.MemberGroupId = (int)rootMemberDetail[i]["MemberGroupId"];
+                    //    if (!string.IsNullOrEmpty(rootMemberDetail[i]["StartDate"].ToString()))
+                    //    {
+                    //        mMemberDetail.StartDate = ConvertDate(rootMemberDetail[i]["StartDate"].ToString());
+                    //    }
+                    //    if (!string.IsNullOrEmpty(rootMemberDetail[i]["ExpireDate"].ToString()))
+                    //    {
+                    //        mMemberDetail.ExpireDate = ConvertDate(rootMemberDetail[i]["ExpireDate"].ToString());
+                    //    }
+                    //    mMemberDetail.Status = rootMemberDetail[i]["Status"].ToString();
+                    //    //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                    //    //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
-                        this.db.InsertMemberGroupPriviledge(mMemberGroupPriviledge);
-                    }
-
-                    var rootMemberDetail = parseJson["MemberDetail"];
-                    for (int i = 0; i < rootMemberDetail.Count(); i++)
-                    {
-                        MemberDetail mMemberDetail = new MemberDetail();
-                        mMemberDetail.Id = (int)rootMemberDetail[i]["Id"];
-                        mMemberDetail.MemberId = (int)rootMemberDetail[i]["MemberId"];
-                        mMemberDetail.MemberGroupId = (int)rootMemberDetail[i]["MemberGroupId"];
-                        if (!string.IsNullOrEmpty(rootMemberDetail[i]["StartDate"].ToString()))
-                        {
-                            mMemberDetail.StartDate = ConvertDate(rootMemberDetail[i]["StartDate"].ToString());
-                        }
-                        if (!string.IsNullOrEmpty(rootMemberDetail[i]["ExpireDate"].ToString()))
-                        {
-                            mMemberDetail.ExpireDate = ConvertDate(rootMemberDetail[i]["ExpireDate"].ToString());
-                        }
-                        mMemberDetail.Status = rootMemberDetail[i]["Status"].ToString();
-                        //mSetting.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
-                        //mSetting.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
-
-                        this.db.InsertMemberDetail(mMemberDetail);
-                    }
+                    //    this.db.InsertMemberDetail(mMemberDetail);
+                    //}
 
                     GlobalValue.Instance.emailServer = this.db.getCurrentEmailServer().Value;
                     GlobalValue.Instance.senderEmail = this.db.getCurrentSenderEmail().Value;
@@ -1722,6 +1867,9 @@ namespace Urban
                 
             }
 
+            //Generate ReceiptNo
+            string currentDateYYMM = DateTime.Now.ToString("yyMM");
+
             SaveOrderToDB("cash");
             SaveDiscountToDB("cash");
             
@@ -2151,10 +2299,24 @@ namespace Urban
             Grid getCurItem = (Grid)sender;
             getCancelParams = (CancelRecordParam)getCurItem.Tag;
 
-            if((getCancelParams.ItemNo==getCancelParams.TotalItems)&&getCancelParams.CancelStatus.Equals("false"))
+            OrderRecord getO = this.db.getOrderRecordtFromIdAndAccountId(getCancelParams.OrderRecordId, getCancelParams.AccountId);
+
+            string checkCurTime = DateTime.Now.ToString("HH:mm:ss");
+            string transacTime = getO.Time.ToString();
+
+            TimeSpan parsedTime1 = TimeSpan.Parse(checkCurTime);
+            TimeSpan parsedTime2 = TimeSpan.Parse(transacTime);
+            TimeSpan interval = TimeSpan.FromMinutes(16);
+
+            if (((parsedTime1 - parsedTime2) < interval)&&(getO.CancelStatus.Equals("false")))
             {
                 deleteRecordConfirmGrid.Visibility = Visibility.Visible;
             }
+
+            //if ((getCancelParams.ItemNo==getCancelParams.TotalItems)&&getCancelParams.CancelStatus.Equals("false"))
+            //{
+            //    deleteRecordConfirmGrid.Visibility = Visibility.Visible;
+            //}
 
             //MessageBox.Show("id=" + getCancelParams.OrderRecordId + "\n" +
             //                "accountid=" + getCancelParams.AccountId + "\n" +
@@ -2180,6 +2342,10 @@ namespace Urban
             }
 
             deleteRecordConfirmGrid.Visibility = Visibility.Collapsed;
+
+            //Print cancel receipt and commission
+            //prepa
+            PrintCancel();
 
             //Initial Sold List After Cancelled
             InitSoldList();
@@ -2490,6 +2656,7 @@ namespace Urban
             sb.AppendLine(getReceipt);
             sb.AppendLine("------------------------------");
             sb.AppendLine("       Total     " + String.Format("{0:n}", finalBalance) + " Baht");
+            sb.AppendLine("           VAT INCLUDED      ");
             sb.AppendLine("\n");
             sb.AppendLine(" Thank you for using our service");
             sb.AppendLine("      Please come back again");
@@ -2587,6 +2754,7 @@ namespace Urban
             sb.AppendLine("- " + this.db.getOtherSaleNameFromId(centralOsr.OtherSaleId) + "\n  " + String.Format("{0:n}", Int32.Parse(centralOsr.Price)) + " Baht\n\n");
             sb.AppendLine("------------------------------");
             sb.AppendLine("       Total     " + String.Format("{0:n}", Int32.Parse(centralOsr.Price)) + " Baht");
+            sb.AppendLine("           VAT INCLUDED      ");
             sb.AppendLine("\n");
             sb.AppendLine(" Thank you for using our service");
             sb.AppendLine("      Please come back again");
@@ -2597,6 +2765,39 @@ namespace Urban
 
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
             
+
+            transactionLoadingGrid.Visibility = Visibility.Collapsed;
+        }
+
+        public void PrintCancel()
+        {
+            string getReceipt = getListItemInInvoice();
+
+            //Print sold items
+            var sb = new StringBuilder();
+            sb.AppendLine("       *** CANCELLED ***");
+            sb.AppendLine("\n");
+            sb.AppendLine("   " + this.db.getBranchCompanyName().Value);
+            sb.AppendLine("    " + this.db.getBranchAddress1().Value);
+            sb.AppendLine("    " + this.db.getBranchAddress2().Value);
+            sb.AppendLine("       " + this.db.getBranchAddress3().Value);
+            sb.AppendLine("    TAX ID : " + this.db.getBranchTaxId().Value);
+            sb.AppendLine("     " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
+            sb.AppendLine("===============================");
+            //sb.AppendLine("\n");
+            sb.AppendLine("           < Receipt >");
+            sb.AppendLine(getReceipt);
+            sb.AppendLine("------------------------------");
+            sb.AppendLine("       Total     " + String.Format("{0:n}", finalBalance) + " Baht");
+            sb.AppendLine("           VAT INCLUDED      ");
+            sb.AppendLine("\n");
+            sb.AppendLine(" Thank you for using our service");
+            sb.AppendLine("      Please come back again");
+            sb.AppendLine("\n\n\n");
+            sb.AppendLine("\x1b" + "\x69");
+            //PrintDialog pd = new PrintDialog();
+
+            RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
@@ -5446,7 +5647,7 @@ namespace Urban
         public void SendTextToMonitor(String[] tagArray)
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13)
             {
                 try
                 {
@@ -5562,7 +5763,7 @@ namespace Urban
         public void SendTextTotal()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13)
             {
                 try
                 {
@@ -5623,7 +5824,7 @@ namespace Urban
         public void SendTextTotalWithDiscount()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13)
             {
                 try
                 {
@@ -5684,7 +5885,7 @@ namespace Urban
         public void ClearText()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13)
             {
                 try
                 {

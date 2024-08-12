@@ -986,6 +986,91 @@ namespace Urban
             }
         }
 
+        //New set from ChatGPT suggestion
+        public void InsertMembers(List<Member> members)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.RunInTransaction(() =>
+                {
+                    foreach (var member in members)
+                    {
+                        db.Insert(member);
+                    }
+                });
+            }
+        }
+
+        public void InsertMemberGroupPriviledges(List<MemberGroupPriviledge> memberGroupPriviledges)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.RunInTransaction(() =>
+                {
+                    foreach (var priviledge in memberGroupPriviledges)
+                    {
+                        db.Insert(priviledge);
+                    }
+                });
+            }
+        }
+
+        public void InsertMemberDetails(List<MemberDetail> memberDetails)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.RunInTransaction(() =>
+                {
+                    foreach (var detail in memberDetails)
+                    {
+                        db.Insert(detail);
+                    }
+                });
+            }
+        }
+
+        public void InsertMemberGroups(List<MemberGroup> memberGroups)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.RunInTransaction(() =>
+                {
+                    foreach (var group in memberGroups)
+                    {
+                        db.Insert(group);
+                    }
+                });
+            }
+        }
+
+        public void InsertMemberPriviledges(List<MemberPriviledge> memberPriviledges)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.RunInTransaction(() =>
+                {
+                    foreach (var priviledge in memberPriviledges)
+                    {
+                        db.Insert(priviledge);
+                    }
+                });
+            }
+        }
+
+        public void InsertPriviledgeTypes(List<PriviledgeType> priviledgeTypes)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.RunInTransaction(() =>
+                {
+                    foreach (var type in priviledgeTypes)
+                    {
+                        db.Insert(type);
+                    }
+                });
+            }
+        }
+
         public void InsertMember(Member MemberData)
         {
             using (var db = new SQLiteConnection(dbname))

@@ -176,6 +176,7 @@ namespace Urban.Model
         public int MemberId { get; set; }
         public string MemberDiscountAmount { get; set; }
         public int ReceiptId { get; set; }
+        public string SoldReceiptNo { get; set; }
     }
 
     public class OtherSale
