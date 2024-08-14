@@ -1828,47 +1828,47 @@ namespace Urban
             await Task.Delay(500);
 
             //string receiptCode = GenerateRandomString(64);
-            
+
 
             //Check Mobile QR feature is enable or not
-            if(GlobalValue.Instance.MobileQrEnable.Equals("false"))
-            {
-                //Mobile Qr is disable
-            }
-            else
-            {
-                //Mobile Qr is enable
+            //if(GlobalValue.Instance.MobileQrEnable.Equals("false"))
+            //{
+            //    //Mobile Qr is disable
+            //}
+            //else
+            //{
+            //    //Mobile Qr is enable
 
-                //Check VIP function is enable or not
-                if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
-                {
-                    //VIP function is disable
-                    //Save receipt normally
-                    SaveReceiptToDB();
-                }
-                else
-                {
-                    //VIP function is enable
+            //    //Check VIP function is enable or not
+            //    if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
+            //    {
+            //        //VIP function is disable
+            //        //Save receipt normally
+            //        SaveReceiptToDB();
+            //    }
+            //    else
+            //    {
+            //        //VIP function is enable
 
-                    //Check VIP is used or not
-                    if (vipBtn.Visibility == Visibility.Visible)
-                    {
-                        //VIP is not used
-                        //Save receipt normally
-                        SaveReceiptToDB();
-                    }
-                    else
-                    {
-                        //VIP is used
-                        //No save receipt because already get discount from VIP
+            //        //Check VIP is used or not
+            //        if (vipBtn.Visibility == Visibility.Visible)
+            //        {
+            //            //VIP is not used
+            //            //Save receipt normally
+            //            SaveReceiptToDB();
+            //        }
+            //        else
+            //        {
+            //            //VIP is used
+            //            //No save receipt because already get discount from VIP
 
-                    }
-                }
-                
-            }
+            //        }
+            //    }
 
-            //Generate ReceiptNo
-            string currentDateYYMM = DateTime.Now.ToString("yyMM");
+            //}
+
+            SaveReceiptToDB();
+            SaveOrderReceiptToDB();
 
             SaveOrderToDB("cash");
             SaveDiscountToDB("cash");
@@ -1896,41 +1896,44 @@ namespace Urban
             //string receiptCode = GenerateRandomString(64);
 
             //Check Mobile QR feature is enable or not
-            if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
-            {
-                //Mobile Qr is disable
-            }
-            else
-            {
-                //Mobile Qr is enable
+            //if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
+            //{
+            //    //Mobile Qr is disable
+            //}
+            //else
+            //{
+            //    //Mobile Qr is enable
 
-                //Check VIP function is enable or not
-                if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
-                {
-                    //VIP function is disable
-                    //Save receipt normally
-                    SaveReceiptToDB();
-                }
-                else
-                {
-                    //VIP function is enable
+            //    //Check VIP function is enable or not
+            //    if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
+            //    {
+            //        //VIP function is disable
+            //        //Save receipt normally
+            //        SaveReceiptToDB();
+            //    }
+            //    else
+            //    {
+            //        //VIP function is enable
 
-                    //Check VIP is used or not
-                    if (vipBtn.Visibility == Visibility.Visible)
-                    {
-                        //VIP is not used
-                        //Save receipt normally
-                        SaveReceiptToDB();
-                    }
-                    else
-                    {
-                        //VIP is used
-                        //No save receipt because already get discount from VIP
+            //        //Check VIP is used or not
+            //        if (vipBtn.Visibility == Visibility.Visible)
+            //        {
+            //            //VIP is not used
+            //            //Save receipt normally
+            //            SaveReceiptToDB();
+            //        }
+            //        else
+            //        {
+            //            //VIP is used
+            //            //No save receipt because already get discount from VIP
 
-                    }
-                }
+            //        }
+            //    }
 
-            }
+            //}
+
+            SaveReceiptToDB();
+            SaveOrderReceiptToDB();
 
             SaveOrderToDB("credit");
             SaveDiscountToDB("credit");
@@ -2280,6 +2283,70 @@ namespace Urban
                 itemGrid.Children.Add(massagePriceItemTxt);
                 soldItemStack.Children.Add(itemGrid);
             }
+
+            //New logical
+            List<OrderReceipt> ordRcList = this.db.getOrderReciptByAcc(currentUseAccountId);
+            for (int u = 0; u < ordRcList.Count(); u++)
+            {
+                CancelRecordParam cancelParams = new CancelRecordParam()
+                {
+                    OrderRecordId = ordRecList[u].Id,
+                    AccountId = ordRecList[u].AccountId,
+                    ItemNo = u + 1,
+                    TotalItems = ordRecList.Count(),
+                    CancelStatus = ordRecList[u].CancelStatus
+                };
+
+                Grid itemGrid = new Grid()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Tag = cancelParams
+                };
+
+                TextBlock massageNameItemTxt = new TextBlock()
+                {
+                    Text = this.db.getMassageTopicName(ordRecList[u].MassageTopicId) + " (" + this.db.getMassagePlanName(ordRecList[u].MassagePlanId) + ")" + "\nTime : " + ordRecList[u].Time + "   Commission : " + String.Format("{0:n}", Int32.Parse(ordRecList[u].Commission)) + " ฿",
+                    FontSize = 15,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    TextWrapping = TextWrapping.Wrap,
+                    TextTrimming = TextTrimming.None,
+                    Width = 300,
+                    Padding = new Thickness(8, 8, 0, 8)
+                };
+
+                TextBlock massagePriceItemTxt = new TextBlock()
+                {
+                    Text = String.Format("{0:n}", Int32.Parse(ordRecList[u].Price)) + " ฿",
+                    FontSize = 15,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    TextWrapping = TextWrapping.Wrap,
+                    TextTrimming = TextTrimming.None,
+                    Width = 100,
+                    Padding = new Thickness(0, 8, 8, 8),
+                    TextAlignment = TextAlignment.Right
+                };
+
+                if (ordRecList[u].CancelStatus.Equals("true"))
+                {
+                    itemGrid.Background = new SolidColorBrush(Colors.Red);
+                    massageNameItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                    massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                }
+                else
+                {
+                    massageNameItemTxt.Foreground = new SolidColorBrush(Colors.Black);
+                    massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.Blue);
+                }
+
+                itemGrid.MouseLeftButtonDown += ItemGrid_MouseLeftButtonDown;
+
+                itemGrid.Children.Add(massageNameItemTxt);
+                itemGrid.Children.Add(massagePriceItemTxt);
+                soldItemStack.Children.Add(itemGrid);
+            }
         }
 
         private void reportListBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2345,7 +2412,7 @@ namespace Urban
 
             //Print cancel receipt and commission
             //prepa
-            PrintCancel();
+            //PrintCancel();
 
             //Initial Sold List After Cancelled
             InitSoldList();
@@ -2371,6 +2438,7 @@ namespace Urban
         {
             Account getUnSendAc = this.db.getLatestAcount();
             Receipt getLatestRcpt = this.db.getLatestReceipt();
+            OrderReceipt getLatestOrcpt = this.db.getLatestOrderReceipt();
 
             if(getUnSendAc.SendStatus.Equals("false"))
             {
@@ -2395,15 +2463,18 @@ namespace Urban
                     prepareOrder[i].MemberDiscountAmount = discountAmt.ToString();
 
                     //Check qr code function is enable
-                    if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
-                    {
+                    //if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
+                    //{
 
-                    }
-                    else
-                    {
-                        prepareOrder[i].ReceiptId = getLatestRcpt.Id;
-                    }
-                    
+                    //}
+                    //else
+                    //{
+                    //    prepareOrder[i].ReceiptId = getLatestRcpt.Id;
+                    //}
+
+                    prepareOrder[i].ReceiptId = getLatestRcpt.Id;
+                    prepareOrder[i].OrderReceiptId = getLatestOrcpt.Id;
+
                 }
                 else
                 {
@@ -2412,14 +2483,16 @@ namespace Urban
                     prepareOrder[i].MemberDiscountAmount = discountAmt.ToString();
 
                     //Check qr code function is enable
-                    if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
-                    {
+                    //if (GlobalValue.Instance.MobileQrEnable.Equals("false"))
+                    //{
 
-                    }
-                    else
-                    {
-                        prepareOrder[i].ReceiptId = getLatestRcpt.Id;
-                    }
+                    //}
+                    //else
+                    //{
+                    //    prepareOrder[i].ReceiptId = getLatestRcpt.Id;
+                    //}
+                    prepareOrder[i].ReceiptId = getLatestRcpt.Id;
+                    prepareOrder[i].OrderReceiptId = getLatestOrcpt.Id;
                 }
                 
                 this.db.saveOrder(prepareOrder[i]);
@@ -2652,7 +2725,7 @@ namespace Urban
             sb.AppendLine("     " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
             sb.AppendLine("===============================");
             //sb.AppendLine("\n");
-            sb.AppendLine("           < Receipt >");
+            sb.AppendLine(" < Receipt no. "+this.db.getLatestOrderReceipt().ReceiptNo+">");
             sb.AppendLine(getReceipt);
             sb.AppendLine("------------------------------");
             sb.AppendLine("       Total     " + String.Format("{0:n}", finalBalance) + " Baht");
@@ -2663,7 +2736,9 @@ namespace Urban
             sb.AppendLine("\n\n\n");
             sb.AppendLine("\x1b" + "\x69");
             //PrintDialog pd = new PrintDialog();
-            //
+
+            //For test printing
+            MessageBox.Show(sb.ToString(), "Receipt Preview");
 
             //printString += sb.ToString();
 
@@ -6680,7 +6755,7 @@ namespace Urban
             string receiptCode = GenerateRandomString(64);
 
             //Generate QR Code
-            myQr.Source = GenerateQRCode(receiptCode);
+            //myQr.Source = GenerateQRCode(receiptCode);
 
             ////Check unsent discount then send to the server
             //if (this.db.getAllUnSendDiscountRecord(currentUseAccountId).Count() != 0)
@@ -6767,14 +6842,87 @@ namespace Urban
 
         }
 
+        public void SaveOrderReceiptToDB()
+        {
+            string curDateTime = getCurDateTime();
+            int usingAccountId = this.db.getLatestAcount().Id;
+            //Generate ReceiptNo
+            string currentDateYYMM = DateTime.Now.ToString("yyMM");
 
-        //private string ConvertFileToBase64(string filePath)
-        //{
-        //    byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
-        //    return Convert.ToBase64String(fileBytes);
-        //}
 
+            //Save OrderReceipt to local db then sent to server
+            OrderReceipt oRcpt = new OrderReceipt()
+            {
+                AccountId = usingAccountId,
+                ReceiptNo = "R"+currentDateYYMM+this.db.getOrderReceiptRunning(usingAccountId),
+                CancelStatus = "false",
+                CreateDateTime = curDateTime,
+                UpdateDateTime = curDateTime
+            };
 
+            this.db.saveOrderReceipt(oRcpt);
+
+            InsertOrderReceiptToServer(oRcpt);
+        }
+
+        public async void InsertOrderReceiptToServer(OrderReceipt orcpt)
+        {
+            string curDateTime = getCurDateTime();
+
+            OrderReceiptSerialize osz = new OrderReceiptSerialize()
+            {
+                Id = orcpt.Id,
+                BranchId = this.db.getBranch().Id,
+                AccountId = orcpt.AccountId,
+                ReceiptNo = orcpt.ReceiptNo,
+                CancelStatus = orcpt.CancelStatus,
+                CreateDateTime = orcpt.CreateDateTime,
+                UpdateDateTime = orcpt.UpdateDateTime
+            };
+
+            try
+            {
+                var obj = new SerializeClassForOrderReceipt
+                {
+                    OrderReceiptData = osz
+                };
+
+                string serializeString = JsonConvert.SerializeObject(obj);
+
+                string sendDataUrl = GlobalValue.Instance.Url_SendOrderReceipt;
+
+                var client = new HttpClient();
+                var values = new Dictionary<string, string>
+                {
+                    {"data",serializeString }
+                };
+                var content = new MyFormUrlEncodedContent(values);
+                var response = await client.PostAsync(sendDataUrl, content);
+                var resultAuthen = await response.Content.ReadAsStringAsync();
+
+                var parseJson = JObject.Parse(resultAuthen);
+
+                string checkStatus = (string)parseJson["Status"];
+                if (checkStatus.Equals("true"))
+                {
+                    //Update to local DB if send complete
+                    //DiscountRecord newForUpdate = dcrd;
+                    //newForUpdate.SendStatus = "true";
+                    //newForUpdate.UpdateDateTime = getCurDateTime();
+                    //this.db.updateDiscountRecord(newForUpdate);
+                }
+                else
+                {
+                    MessageBox.Show("insert order receipt fail" + "\nError : " + (string)parseJson["Error_Message"]);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("insert order receipt fail" + "\nError : " + ex.ToString());
+            }
+
+        }
 
     }
 }

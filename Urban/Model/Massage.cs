@@ -176,7 +176,7 @@ namespace Urban.Model
         public int MemberId { get; set; }
         public string MemberDiscountAmount { get; set; }
         public int ReceiptId { get; set; }
-        public string SoldReceiptNo { get; set; }
+        public int OrderReceiptId { get; set; }
     }
 
     public class OtherSale
@@ -381,6 +381,19 @@ namespace Urban.Model
         public string CreatedBy { get; set; }
         public string Updated { get; set; }
         public string UpdatedBy { get; set; }
+    }
+    public class OrderReceipt
+    {
+        [PrimaryKey, NotNull, AutoIncrement]
+        public int Id { get; set; }
+        [NotNull]
+        public int AccountId { get; set; }
+        [NotNull]
+        public string ReceiptNo { get; set; }
+        [NotNull]
+        public string CancelStatus { get; set; }
+        public string CreateDateTime { get; set; }
+        public string UpdateDateTime { get; set; }
     }
 
     public class Setting

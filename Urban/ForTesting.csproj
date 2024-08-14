@@ -164,6 +164,7 @@
     <Compile Include="Model\CancelRecordParam.cs" />
     <Compile Include="Model\DiscountRecordSerialize.cs" />
     <Compile Include="Model\MonthConvertor.cs" />
+    <Compile Include="Model\OrderReceiptSerialize.cs" />
     <Compile Include="Model\OrderRecordSerialize.cs" />
     <Compile Include="Model\OrderRecordWithDiscountSerialize.cs" />
     <Compile Include="Model\OrderUpdateSerializer.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="Model\ReceiptSerialize.cs" />
     <Compile Include="Model\SerializeClass.cs" />
     <Compile Include="Model\SerializeClassForDiscount.cs" />
+    <Compile Include="Model\SerializeClassForOrderReceipt.cs" />
     <Compile Include="Model\SerializeClassForOrderRecordWithDiscount.cs" />
     <Compile Include="Model\SerializeClassForOtherSale.cs" />
     <Compile Include="Model\SerializeClassForReceipt.cs" />

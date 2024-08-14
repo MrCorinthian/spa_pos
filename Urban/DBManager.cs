@@ -1216,5 +1216,62 @@ namespace Urban
             return rcpt;
         }
 
+        public void saveOrderReceipt(OrderReceipt orcpt)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(orcpt);
+
+            }
+        }
+        public string getOrderReceiptRunning(int accountId)
+        {
+            int count = 0;
+            string runningNo;
+
+            using (var db = new SQLiteConnection(dbname))
+            {
+               count = db.Table<OrderReceipt>().Count(x => x.AccountId == accountId);
+            }
+
+            count++;
+
+            if(count<10)
+            {
+                runningNo = "000" + count;
+            }
+            else if(count<100)
+            {
+                runningNo = "00" + count;
+            }
+            else
+            {
+                runningNo = "0" + count;
+            }
+
+            return runningNo;
+        }
+
+        public OrderReceipt getLatestOrderReceipt()
+        {
+            OrderReceipt rcpt = new OrderReceipt();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                rcpt = db.Table<OrderReceipt>().Last();
+            }
+
+            return rcpt;
+        }
+
+        public List<OrderReceipt> getOrderReciptByAcc(int AccountId)
+        {
+            List<OrderReceipt> OrderReceipts;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                OrderReceipts = db.Table<OrderReceipt>().Where(b => b.AccountId == AccountId).ToList();
+            }
+            return OrderReceipts;
+        }
+
     }
 }
