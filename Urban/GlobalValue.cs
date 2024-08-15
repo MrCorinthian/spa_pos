@@ -34,6 +34,7 @@ namespace Urban
         public string Url_UpdateOrderRecord = "http://spabackoffice2019.azurewebsites.net/API/UpdateOrderRecord";
         public string Url_SendReeipt = "http://spabackoffice2019.azurewebsites.net/API/SendReceiptData";
         public string Url_SendOrderReceipt = "http://spabackoffice2019.azurewebsites.net/API/SendOrderReceiptData";
+        public string Url_UpdateOrderReceipt = "http://spabackoffice2019.azurewebsites.net/API/UpdateOrderReceipt";
 
         //Test Url
         //public string Url_GetBranchData = "http://localhost:49393/API/GetBranchData";
@@ -77,5 +78,8 @@ namespace Urban
         //System config
         public string MobileQrEnable { get; set; }
         public string VIPCardEnable { get; set; }
+
+        //Etc
+        public int TargetOrderReceiptId { get; set; }
     }
 }

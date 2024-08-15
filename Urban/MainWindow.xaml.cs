@@ -1,5 +1,6 @@
 ﻿using Mailjet.Client;
 using Mailjet.Client.Resources;
+using Mailjet.Client.Resources.SMS;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PdfSharp;
@@ -12,6 +13,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.IO.Ports;
@@ -65,7 +67,7 @@ namespace Urban
 
         bool soldPanelToggle = false;
 
-        CancelRecordParam getCancelParams;
+        //CancelRecordParam getCancelParams;
 
         List<MassageTopic> globalListMassageTopic;
         //List<MassagePlan> globalListMassagePlan;
@@ -2221,79 +2223,8 @@ namespace Urban
         {
             soldItemStack.Children.Clear();
 
-            List<OrderRecord> ordRecList = this.db.getAllOrderRecord(currentUseAccountId);
-            for (int u = 0; u < ordRecList.Count(); u++)
-            {
-                CancelRecordParam cancelParams = new CancelRecordParam()
-                {
-                    OrderRecordId = ordRecList[u].Id,
-                    AccountId = ordRecList[u].AccountId,
-                    ItemNo = u + 1,
-                    TotalItems = ordRecList.Count(),
-                    CancelStatus = ordRecList[u].CancelStatus
-                };
-
-                Grid itemGrid = new Grid()
-                {
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    Tag = cancelParams
-                };
-
-                Border gridBorder = new Border
-                {
-                    BorderBrush = new SolidColorBrush(Colors.Black), // Set the color of the border
-                    BorderThickness = new Thickness(0, 0, 0, 2), // Set the bottom border thickness to 2 (or any value you prefer)
-                    Child = itemGrid // Set the Grid as the child of the Border
-                };
-
-                TextBlock massageNameItemTxt = new TextBlock()
-                {
-                    Text = this.db.getMassageTopicName(ordRecList[u].MassageTopicId) + " (" + this.db.getMassagePlanName(ordRecList[u].MassagePlanId) + ")" + "\nTime : " + ordRecList[u].Time + "   Commission : " + String.Format("{0:n}", Int32.Parse(ordRecList[u].Commission)) + " ฿",
-                    FontSize = 15,
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    TextWrapping = TextWrapping.Wrap,
-                    TextTrimming = TextTrimming.None,
-                    Width = 300,
-                    Padding = new Thickness(8,8,0,8)
-                };
-
-                TextBlock massagePriceItemTxt = new TextBlock()
-                {
-                    Text = String.Format("{0:n}", Int32.Parse(ordRecList[u].Price)) + " ฿",
-                    FontSize = 15,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    TextWrapping = TextWrapping.Wrap,
-                    TextTrimming = TextTrimming.None,
-                    Width = 100,
-                    Padding = new Thickness(0, 8, 8, 8),
-                    TextAlignment = TextAlignment.Right
-                };
-
-                if (ordRecList[u].CancelStatus.Equals("true"))
-                {
-                    itemGrid.Background = new SolidColorBrush(Colors.Red);
-                    massageNameItemTxt.Foreground = new SolidColorBrush(Colors.White);
-                    massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.White);
-                }
-                else
-                {
-                    massageNameItemTxt.Foreground = new SolidColorBrush(Colors.Black);
-                    massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.Blue);
-                }
-
-                itemGrid.MouseLeftButtonDown += ItemGrid_MouseLeftButtonDown;
-
-                itemGrid.Children.Add(massageNameItemTxt);
-                itemGrid.Children.Add(massagePriceItemTxt);
-                soldItemStack.Children.Add(gridBorder);
-            }
-
-            //New logical
-            //List<OrderReceipt> ordRcList = this.db.getOrderReciptByAcc(currentUseAccountId);
-            //for (int u = 0; u < ordRcList.Count(); u++)
+            //List<OrderRecord> ordRecList = this.db.getAllOrderRecord(currentUseAccountId);
+            //for (int u = 0; u < ordRecList.Count(); u++)
             //{
             //    CancelRecordParam cancelParams = new CancelRecordParam()
             //    {
@@ -2311,7 +2242,12 @@ namespace Urban
             //        Tag = cancelParams
             //    };
 
-                
+            //    Border gridBorder = new Border
+            //    {
+            //        BorderBrush = new SolidColorBrush(Colors.Black), // Set the color of the border
+            //        BorderThickness = new Thickness(0, 0, 0, 2), // Set the bottom border thickness to 2 (or any value you prefer)
+            //        Child = itemGrid // Set the Grid as the child of the Border
+            //    };
 
             //    TextBlock massageNameItemTxt = new TextBlock()
             //    {
@@ -2322,7 +2258,7 @@ namespace Urban
             //        TextWrapping = TextWrapping.Wrap,
             //        TextTrimming = TextTrimming.None,
             //        Width = 300,
-            //        Padding = new Thickness(8, 8, 0, 8)
+            //        Padding = new Thickness(8,8,0,8)
             //    };
 
             //    TextBlock massagePriceItemTxt = new TextBlock()
@@ -2354,8 +2290,164 @@ namespace Urban
 
             //    itemGrid.Children.Add(massageNameItemTxt);
             //    itemGrid.Children.Add(massagePriceItemTxt);
-            //    soldItemStack.Children.Add(itemGrid);
+            //    soldItemStack.Children.Add(gridBorder);
             //}
+
+            //New logical
+            List<OrderReceipt> ordRcptList = this.db.getOrderReciptByAcc(currentUseAccountId);
+            for (int u = 0; u < ordRcptList.Count(); u++)
+            {
+
+                StackPanel itemGrid = new StackPanel()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Tag = ordRcptList[u].Id
+                };
+
+                Border gridBorder = new Border
+                {
+                    BorderBrush = new SolidColorBrush(Colors.Black), // Set the color of the border
+                    BorderThickness = new Thickness(0, 0, 0, 2), // Set the bottom border thickness to 2 (or any value you prefer)
+                    Child = itemGrid // Set the Grid as the child of the Border
+                };
+
+                TextBlock receiptDetialTxt = new TextBlock()
+                {
+                    Text = "Receipt no. " + ordRcptList[u].ReceiptNo + "\nDateTime : " + ordRcptList[u].CreateDateTime,
+                    FontSize = 15,
+                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF084DB1")),
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    TextWrapping = TextWrapping.Wrap,
+                    TextTrimming = TextTrimming.None,
+                    Width = 300,
+                    Padding = new Thickness(8, 8, 0, 8)
+
+                };
+
+                itemGrid.Children.Add(receiptDetialTxt);
+
+                //Get list of order in each Order Receipt
+                List<OrderRecord> orderList = this.db.getOrderRecordFromOrderReceipt(ordRcptList[u].Id);
+
+                for (int v=0;v< orderList.Count();v++)
+                {
+                    Grid subItemGrid = new Grid()
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        //Tag = cancelParams
+                    };
+
+                    TextBlock massageNameItemTxt = new TextBlock()
+                    {
+                        Text = this.db.getMassageTopicName(orderList[v].MassageTopicId) + " (" + this.db.getMassagePlanName(orderList[v].MassagePlanId) + ")\n" + "Commission : " + String.Format("{0:n}", Int32.Parse(orderList[v].Commission)) + " ฿",
+                        FontSize = 15,
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.None,
+                        Width = 300,
+                        Padding = new Thickness(8, 8, 0, 8)
+                    };
+
+                    TextBlock massagePriceItemTxt = new TextBlock()
+                    {
+                        Text = String.Format("{0:n}", Int32.Parse(orderList[v].Price)) + " ฿",
+                        FontSize = 15,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.None,
+                        Width = 100,
+                        Padding = new Thickness(0, 8, 8, 8),
+                        TextAlignment = TextAlignment.Right
+                    };
+
+                    if (orderList[v].CancelStatus.Equals("true"))
+                    {
+                        massageNameItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                        massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                    }
+                    else
+                    {
+                        massageNameItemTxt.Foreground = new SolidColorBrush(Colors.Black);
+                        massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.Blue);
+                    }
+
+                    subItemGrid.Children.Add(massageNameItemTxt);
+                    subItemGrid.Children.Add(massagePriceItemTxt);
+                    itemGrid.Children.Add(subItemGrid);
+                }
+
+                //Get list of order in each Order Receipt
+                List<DiscountRecord> discountList = this.db.getDiscountRecordFromOrderReceipt(ordRcptList[u].Id);
+                ทำถึงตรงนี้
+
+                for (int v=0;v< discountList.Count();v++)
+                {
+                    Grid subItemGrid = new Grid()
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        //Tag = cancelParams
+                    };
+
+                    TextBlock massageNameItemTxt = new TextBlock()
+                    {
+                        Text = this.db.getMassageTopicName(orderList[v].MassageTopicId) + " (" + this.db.getMassagePlanName(orderList[v].MassagePlanId) + ")\n" + "Commission : " + String.Format("{0:n}", Int32.Parse(orderList[v].Commission)) + " ฿",
+                        FontSize = 15,
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.None,
+                        Width = 300,
+                        Padding = new Thickness(8, 8, 0, 8)
+                    };
+
+                    TextBlock massagePriceItemTxt = new TextBlock()
+                    {
+                        Text = String.Format("{0:n}", Int32.Parse(orderList[v].Price)) + " ฿",
+                        FontSize = 15,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.None,
+                        Width = 100,
+                        Padding = new Thickness(0, 8, 8, 8),
+                        TextAlignment = TextAlignment.Right
+                    };
+
+                    if (orderList[v].CancelStatus.Equals("true"))
+                    {
+                        massageNameItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                        massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                    }
+                    else
+                    {
+                        massageNameItemTxt.Foreground = new SolidColorBrush(Colors.Black);
+                        massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.Blue);
+                    }
+
+                    subItemGrid.Children.Add(massageNameItemTxt);
+                    subItemGrid.Children.Add(massagePriceItemTxt);
+                    itemGrid.Children.Add(subItemGrid);
+                }
+
+                if (ordRcptList[u].CancelStatus.Equals("true"))
+                {
+                    itemGrid.Background = new SolidColorBrush(Colors.Red);
+                    receiptDetialTxt.Foreground = new SolidColorBrush(Colors.White);
+                }
+
+                itemGrid.MouseLeftButtonDown += ItemGrid_MouseLeftButtonDown;
+
+
+                soldItemStack.Children.Add(gridBorder);
+
+            }
+
         }
 
         private void reportListBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2372,13 +2464,14 @@ namespace Urban
 
         private void ItemGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Grid getCurItem = (Grid)sender;
-            getCancelParams = (CancelRecordParam)getCurItem.Tag;
+            StackPanel getCurItem = (StackPanel)sender;
+            GlobalValue.Instance.TargetOrderReceiptId = (int)getCurItem.Tag;
 
-            OrderRecord getO = this.db.getOrderRecordtFromIdAndAccountId(getCancelParams.OrderRecordId, getCancelParams.AccountId);
+            OrderReceipt getOrderR = this.db.getOrderReciptById(GlobalValue.Instance.TargetOrderReceiptId);
+            //OrderRecord getO = this.db.getOrderRecordtFromIdAndAccountId(getCancelParams.OrderRecordId, getCancelParams.AccountId);
 
             string checkCurTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            string transacTime = getO.CreateDateTime.ToString();
+            string transacTime = getOrderR.CreateDateTime.ToString();
 
             // Parse the date strings to DateTime objects
             DateTime date1 = DateTime.ParseExact(checkCurTime, "yyyy-MM-dd HH:mm:ss", null);
@@ -2386,7 +2479,7 @@ namespace Urban
 
             TimeSpan interval = date1 - date2;
 
-            if((interval.TotalMinutes < 16)&&(getO.CancelStatus.Equals("false")))
+            if((interval.TotalMinutes < 16)&&(getOrderR.CancelStatus.Equals("false")))
             {
                 //Show cancel popup
                 deleteRecordConfirmGrid.Visibility = Visibility.Visible;
@@ -2398,12 +2491,24 @@ namespace Urban
             try
             {
 
-                OrderRecord getSelectedRecordForUpdate = this.db.getOrderRecordtFromIdAndAccountId(getCancelParams.OrderRecordId, getCancelParams.AccountId);
-                getSelectedRecordForUpdate.CancelStatus = "true";
-                getSelectedRecordForUpdate.UpdateDateTime = getCurDateTime();
+                OrderReceipt getSelectedOrderR = this.db.getOrderReciptById(GlobalValue.Instance.TargetOrderReceiptId);
+                getSelectedOrderR.CancelStatus = "true";
+                getSelectedOrderR.UpdateDateTime = getCurDateTime();
+                this.db.updateOrderReceipt(getSelectedOrderR);
+                UpdateOrderReceiptToServer(getSelectedOrderR);
 
-                this.db.updateOrderRecord(getSelectedRecordForUpdate);
-                UpdateOrderRecordToServer(getSelectedRecordForUpdate);
+                List<OrderRecord> getOrderInReceipt = this.db.getOrderRecordFromOrderReceipt(GlobalValue.Instance.TargetOrderReceiptId);
+                for(int i=0;i<getOrderInReceipt.Count();i++)
+                {
+                    getOrderInReceipt[i].CancelStatus = "true";
+                    getOrderInReceipt[i].UpdateDateTime = getCurDateTime();
+                    this.db.updateOrderRecord(getOrderInReceipt[i]);
+                    UpdateOrderRecordToServer(getOrderInReceipt[i]);
+                }
+
+                PrintCancel();
+
+
             }
             catch(Exception io)
             {
@@ -2542,6 +2647,7 @@ namespace Urban
         {
             string curDateTime = getCurDateTime();
             List<OrderRecordWithDiscount> listOrderWithDiscount = new List<OrderRecordWithDiscount>();
+            OrderReceipt getLatestOrcpt = this.db.getLatestOrderReceipt();
 
             Account getUnSendAc = this.db.getLatestAcount();
             if (getUnSendAc.SendStatus.Equals("false"))
@@ -2577,10 +2683,12 @@ namespace Urban
                 if (paymentType.Equals("credit"))
                 {
                     prepareDiscount[i].IsCreditCard = "true";
+                    prepareDiscount[i].OrderReceiptId = getLatestOrcpt.Id;
                 }
                 else
                 {
                     prepareDiscount[i].IsCreditCard = "false";
+                    prepareDiscount[i].OrderReceiptId = getLatestOrcpt.Id;
                 }
 
                 this.db.saveDiscountRecord(prepareDiscount[i]);
@@ -2725,7 +2833,7 @@ namespace Urban
             sb.AppendLine("       " + this.db.getBranchAddress3().Value);
             sb.AppendLine("    TAX ID : " + this.db.getBranchTaxId().Value);
             sb.AppendLine("     " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
-            sb.AppendLine("===============================");
+            sb.AppendLine("==============================");
             //sb.AppendLine("\n");
             sb.AppendLine(" < Receipt no. "+this.db.getLatestOrderReceipt().ReceiptNo+">");
             sb.AppendLine(getReceipt);
@@ -2810,6 +2918,10 @@ namespace Urban
                 sb.AppendLine("\x1b" + "\x69");
                 //PrintDialog pd = new PrintDialog();
                 //MessageBox.Show(paxBeforeCalculate+"");
+
+                //For test printing
+                MessageBox.Show(sb.ToString(), "Commission Preview");
+
                 RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.commissionPrinter, sb.ToString());
 
             }
@@ -2848,24 +2960,26 @@ namespace Urban
 
         public void PrintCancel()
         {
-            string getReceipt = getListItemInInvoice();
+            string getReceipt = getCancelItemInInvoice();
+            OrderReceipt orDetail = this.db.getOrderReciptById(GlobalValue.Instance.TargetOrderReceiptId);
+            DateTime dateTimeR = DateTime.ParseExact(orDetail.CreateDateTime, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+            string receiptDate = dateTimeR.ToString("dd MMMM yyyy    HH:mm", CultureInfo.InvariantCulture);
 
             //Print sold items
             var sb = new StringBuilder();
             sb.AppendLine("       *** CANCELLED ***");
-            sb.AppendLine("\n");
             sb.AppendLine("   " + this.db.getBranchCompanyName().Value);
             sb.AppendLine("    " + this.db.getBranchAddress1().Value);
             sb.AppendLine("    " + this.db.getBranchAddress2().Value);
             sb.AppendLine("       " + this.db.getBranchAddress3().Value);
             sb.AppendLine("    TAX ID : " + this.db.getBranchTaxId().Value);
-            sb.AppendLine("     " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
-            sb.AppendLine("===============================");
+            sb.AppendLine("     " + receiptDate);
+            sb.AppendLine("==============================");
             //sb.AppendLine("\n");
-            sb.AppendLine("           < Receipt >");
+            sb.AppendLine(" < Receipt no. " + orDetail.ReceiptNo + ">");
             sb.AppendLine(getReceipt);
             sb.AppendLine("------------------------------");
-            sb.AppendLine("       Total     " + String.Format("{0:n}", finalBalance) + " Baht");
+            sb.AppendLine("       Total     " + String.Format("{0:n}", this.db.finalBalanceCalculate(GlobalValue.Instance.TargetOrderReceiptId)) + " Baht");
             sb.AppendLine("           VAT INCLUDED      ");
             sb.AppendLine("\n");
             sb.AppendLine(" Thank you for using our service");
@@ -2874,7 +2988,18 @@ namespace Urban
             sb.AppendLine("\x1b" + "\x69");
             //PrintDialog pd = new PrintDialog();
 
+            //For test printing
+            MessageBox.Show(sb.ToString(), "Cancel Preview");
+
+            //printString += sb.ToString();
+
+            //Receipt _getLatestReceipt = this.db.getLatestReceipt();
+            //PrintQRCodeAndTextToPDF(_getLatestReceipt.Code,printString);
+
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
+
+            //Print QR code image here
+            //myQr.Source = GenerateQRCode(textToEncode);
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
@@ -5467,6 +5592,53 @@ namespace Urban
             return text;
         }
 
+        public string getCancelItemInInvoice()
+        {
+            string text = "";
+            int discountValue = 0;
+
+            List<OrderRecord> getItems = this.db.getOrderRecordFromOrderReceipt(GlobalValue.Instance.TargetOrderReceiptId);
+            List<DiscountRecord> getDisItems = this.db.getDiscountRecordFromOrderReceipt(GlobalValue.Instance.TargetOrderReceiptId);
+
+            foreach (OrderRecord o in getItems)
+            {
+                if (GlobalValue.Instance.VIPCardEnable.Equals("false"))
+                {
+                    //VIP function is disable
+
+                }
+                else
+                {
+                    //VIP function is enable
+
+                    //Check VIP is used or not
+                    if (vipBtn.Visibility == Visibility.Visible)
+                    {
+                        //VIP is not used
+
+                    }
+                    else
+                    {
+                        //VIP is used
+                        text += "  [VIP]\n";
+
+                    }
+                }
+                text += "- " + this.db.getMassageTopicName(o.MassageTopicId) + "(" + this.db.getMassagePlanName(o.MassagePlanId) + ")" + "\n  " + String.Format("{0:n}", Int32.Parse(o.Price)) + " Baht\n\n";
+            }
+
+            if (getDisItems.Count() > 0)
+            {
+                foreach (DiscountRecord p in getDisItems)
+                {
+                    discountValue = Int32.Parse(p.Value);
+                    text += "- " + this.db.getDiscountMasterFromId(p.DiscountMasterId).ShowName + "\n  " + "-" + String.Format("{0:n}", discountValue) + " Baht\n\n";
+                }
+            }
+
+            return text;
+        }
+
         public int getTotalSale()
         {
             int sale = 0;
@@ -6851,12 +7023,22 @@ namespace Urban
             //Generate ReceiptNo
             string currentDateYYMM = DateTime.Now.ToString("yyMM");
 
+            int bID = this.db.getBranch().Id;
+            string bCode = "";
+            if (bID < 10)
+            {
+                bCode = "0" + bID;
+            }
+            else
+            {
+                bCode = "" + bID;
+            }
 
             //Save OrderReceipt to local db then sent to server
             OrderReceipt oRcpt = new OrderReceipt()
             {
                 AccountId = usingAccountId,
-                ReceiptNo = "R"+currentDateYYMM+this.db.getOrderReceiptRunning(usingAccountId),
+                ReceiptNo = "R"+ bCode + currentDateYYMM+this.db.getOrderReceiptRunning(usingAccountId),
                 CancelStatus = "false",
                 CreateDateTime = curDateTime,
                 UpdateDateTime = curDateTime
@@ -6926,5 +7108,65 @@ namespace Urban
 
         }
 
+        public async void UpdateOrderReceiptToServer(OrderReceipt getOrdR)
+        {
+            try
+            {
+
+                OrderReceiptSerialize osz = new OrderReceiptSerialize()
+                {
+                    Id = getOrdR.Id,
+                    BranchId = this.db.getBranch().Id,
+                    AccountId = getOrdR.AccountId,
+                    ReceiptNo = getOrdR.ReceiptNo,
+                    CancelStatus = getOrdR.CancelStatus,
+                    CreateDateTime = getOrdR.CreateDateTime,
+                    UpdateDateTime = getOrdR.UpdateDateTime
+                };
+
+                var obj = new OrderReceiptUpdateSerializer
+                {
+                    OrderReceiptData = osz
+                };
+
+                string serializeString = JsonConvert.SerializeObject(obj);
+
+                string updateOrderUrl = GlobalValue.Instance.Url_UpdateOrderReceipt;
+                var client = new HttpClient();
+                var values = new Dictionary<string, string>
+                    {
+                        {"orderReceiptData" ,serializeString}
+                    };
+                var content = new FormUrlEncodedContent(values);
+                var response = await client.PostAsync(updateOrderUrl, content);
+                var resultAuthen = await response.Content.ReadAsStringAsync();
+
+                var parseJson = JObject.Parse(resultAuthen);
+
+                string checkStatus = (string)parseJson["Status"];
+                if (checkStatus.Equals("true"))
+                {
+
+                }
+                else
+                {
+                    //MessageBox.Show("update order fail" + "\nError : " + (string)parseJson["Error_Message"]);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show("update order fail \nError : " + ex.Message.ToString());
+            }
+
+        }
+
+        private void soldItemStack_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            soldSV.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                soldSV.ScrollToEnd();
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+        }
     }
 }

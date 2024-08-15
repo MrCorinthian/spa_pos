@@ -267,6 +267,17 @@ namespace Urban
             return ordrc;
         }
 
+        public List<OrderRecord> getOrderRecordFromOrderReceipt(int OrderReceiptId)
+        {
+            List<OrderRecord> OrderRecords;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                OrderRecords = db.Table<OrderRecord>().Where(b => b.OrderReceiptId == OrderReceiptId).ToList();
+            }
+
+            return OrderRecords;
+        }
+
         public void updateOrderRecord(OrderRecord orderRecord)
         {
             using (var db = new SQLiteConnection(dbname))
@@ -574,6 +585,17 @@ namespace Urban
             }
 
             return dmd;
+        }
+
+        public List<DiscountRecord> getDiscountRecordFromOrderReceipt(int OrderReceiptId)
+        {
+            List<DiscountRecord> listDR = new List<DiscountRecord>();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                listDR = db.Table<DiscountRecord>().Where(b => b.OrderReceiptId == OrderReceiptId).ToList();
+            }
+
+            return listDR;
         }
 
         public int getAllDiscountWithCashFromAccountID(int AccountId)
@@ -1238,15 +1260,15 @@ namespace Urban
 
             if(count<10)
             {
-                runningNo = "000" + count;
+                runningNo = "00" + count;
             }
             else if(count<100)
             {
-                runningNo = "00" + count;
+                runningNo = "0" + count;
             }
             else
             {
-                runningNo = "0" + count;
+                runningNo = ""+count;
             }
 
             return runningNo;
@@ -1271,6 +1293,43 @@ namespace Urban
                 OrderReceipts = db.Table<OrderReceipt>().Where(b => b.AccountId == AccountId).ToList();
             }
             return OrderReceipts;
+        }
+
+        public OrderReceipt getOrderReciptById(int OrderReceiptId)
+        {
+            OrderReceipt rcpt = new OrderReceipt();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                rcpt = db.Table<OrderReceipt>().Where(b => b.Id == OrderReceiptId).FirstOrDefault();
+            }
+            return rcpt;
+        }
+
+        public void updateOrderReceipt(OrderReceipt orderReceipt)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Update(orderReceipt);
+            }
+        }
+
+        public int finalBalanceCalculate(int OrderReceiptId)
+        {
+            List<OrderRecord> OrderRecords;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                OrderRecords = db.Table<OrderRecord>().Where(b => b.OrderReceiptId == OrderReceiptId).ToList();
+            }
+
+            List<DiscountRecord> listDR = new List<DiscountRecord>();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                listDR = db.Table<DiscountRecord>().Where(b => b.OrderReceiptId == OrderReceiptId).ToList();
+            }
+
+            int finalBalance = OrderRecords.Sum(sale => int.Parse(sale.Price)) - listDR.Sum(discount => int.Parse(discount.Value));
+
+            return finalBalance;
         }
 
     }

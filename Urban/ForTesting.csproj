@@ -165,6 +165,7 @@
     <Compile Include="Model\DiscountRecordSerialize.cs" />
     <Compile Include="Model\MonthConvertor.cs" />
     <Compile Include="Model\OrderReceiptSerialize.cs" />
+    <Compile Include="Model\OrderReceiptUpdateSerializer.cs" />
     <Compile Include="Model\OrderRecordSerialize.cs" />
     <Compile Include="Model\OrderRecordWithDiscountSerialize.cs" />
     <Compile Include="Model\OrderUpdateSerializer.cs" />
