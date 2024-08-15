@@ -408,6 +408,8 @@ namespace Urban
                 db.DeleteAll<OtherSale>();
                 db.DeleteAll<DiscountMaster>();
                 db.DeleteAll<DiscountMasterDetail>();
+                db.DeleteAll<EmployeeType>();
+                db.DeleteAll<SellItemType>();
             }
         }
 
@@ -934,11 +936,29 @@ namespace Urban
             }
         }
 
-        public void InsertDiscountMasterDetail(DiscountMasterDetail discountMasterDetail)
+        //public void InsertDiscountMasterDetail(DiscountMasterDetail discountMasterDetail)
+        //{
+        //    using (var db = new SQLiteConnection(dbname))
+        //    {
+        //        db.Insert(discountMasterDetail);
+
+        //    }
+        //}
+
+        public void InsertEmployeeType(EmployeeType employeeType)
         {
             using (var db = new SQLiteConnection(dbname))
             {
-                db.Insert(discountMasterDetail);
+                db.Insert(employeeType);
+
+            }
+        }
+
+        public void InsertSellItemType(SellItemType sellItemType)
+        {
+            using (var db = new SQLiteConnection(dbname))
+            {
+                db.Insert(sellItemType);
 
             }
         }
@@ -1340,6 +1360,25 @@ namespace Urban
             int finalBalance = OrderRecords.Sum(sale => int.Parse(sale.Price)) - listDR.Sum(discount => int.Parse(discount.Value));
 
             return finalBalance;
+        }
+        public int getSellItemTypeIdbyMassageTopicId(int MassageTopicId)
+        {
+            MassageTopic topic = new MassageTopic();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                topic = db.Table<MassageTopic>().Where(b => b.Id == MassageTopicId).FirstOrDefault();
+            }
+            return topic.SellItemTypeId;
+        }
+
+        public string getEmployeeTypeShowNameById(int empTypeId)
+        {
+            EmployeeType empType = new EmployeeType();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                empType = db.Table<EmployeeType>().Where(b => b.Id == empTypeId).FirstOrDefault();
+            }
+            return empType.ShowName;
         }
 
     }

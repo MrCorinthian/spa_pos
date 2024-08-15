@@ -656,5 +656,26 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
+        <Grid x:Name="employeeTypeGrid" Background="#CC707070" Grid.RowSpan="3" Visibility="Collapsed">
+            <Grid Width="800" Height="400" Background="White" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="80"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Image x:Name="empType1" VerticalAlignment="Center" HorizontalAlignment="Center" MouseLeftButtonDown="empType1_MouseLeftButtonDown" Margin="24"/>
+                <Image x:Name="empType2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonDown="empType2_MouseLeftButtonDown" Margin="24"/>
+
+                <Grid Grid.Row="1" Margin="12" Background="#FF1290F9" >
+                    <TextBlock x:Name="empTypeTxt1" TextWrapping="Wrap" FontSize="20" Foreground="White" MouseLeftButtonDown="empTypeTxt1_MouseLeftButtonDown" TextAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Grid.Column="1" Grid.Row="1" Margin="12" Background="#FF09C4D6">
+                    <TextBlock x:Name="empTypeTxt2" TextWrapping="Wrap" FontSize="20" Foreground="White" MouseLeftButtonDown="empTypeTxt2_MouseLeftButtonDown" TextAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

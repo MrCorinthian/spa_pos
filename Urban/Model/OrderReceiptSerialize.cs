@@ -15,6 +15,7 @@ namespace Urban.Model
         public string CancelStatus { get; set; }
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
+        public int EmployeeTypeId { get; set; }
 
     }
 }

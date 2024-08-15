@@ -82,5 +82,6 @@ namespace Urban
 
         //Etc
         public int TargetOrderReceiptId { get; set; }
+        public int SelectedEmployeeId { get; set; }
     }
 }

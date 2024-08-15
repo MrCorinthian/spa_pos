@@ -122,6 +122,7 @@ namespace Urban.Model
         public string HeaderColor { get; set; }
         public string ChildColor { get; set; }
         public string CreateDateTime { get; set; }
+        public int SellItemTypeId { get; set; }
     }
 
     public class MassagePlan
@@ -393,6 +394,33 @@ namespace Urban.Model
         public string ReceiptNo { get; set; }
         [NotNull]
         public string CancelStatus { get; set; }
+        public string CreateDateTime { get; set; }
+        public string UpdateDateTime { get; set; }
+        public int EmployeeTypeId { get; set; }
+    }
+    public class SellItemType
+    {
+        [PrimaryKey, NotNull]
+        public int Id { get; set; }
+        [NotNull]
+        public string Type { get; set; }
+        [NotNull]
+        public string ShowName { get; set; }
+        [NotNull]
+        public string Active { get; set; }
+        public string CreateDateTime { get; set; }
+        public string UpdateDateTime { get; set; }
+    }
+    public class EmployeeType
+    {
+        [PrimaryKey, NotNull]
+        public int Id { get; set; }
+        [NotNull]
+        public string Type { get; set; }
+        [NotNull]
+        public string ShowName { get; set; }
+        [NotNull]
+        public string Active { get; set; }
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
     }

@@ -251,6 +251,8 @@
     <Resource Include="Images\salonbg1.jpg" />
     <Resource Include="Images\defaultBG.jpg" />
     <Resource Include="Images\bgpink.jpg" />
+    <Resource Include="Images\1.png" />
+    <Resource Include="Images\2.png" />
     <Content Include="sqlite3.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
