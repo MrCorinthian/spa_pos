@@ -35,6 +35,7 @@ namespace Urban
         public string Url_SendReeipt = "http://spabackoffice2019.azurewebsites.net/API/SendReceiptData";
         public string Url_SendOrderReceipt = "http://spabackoffice2019.azurewebsites.net/API/SendOrderReceiptData";
         public string Url_UpdateOrderReceipt = "http://spabackoffice2019.azurewebsites.net/API/UpdateOrderReceipt";
+        public string Url_UpdateDiscountRecord = "http://spabackoffice2019.azurewebsites.net/API/UpdateDiscountRecord";
 
         //Test Url
         //public string Url_GetBranchData = "http://localhost:49393/API/GetBranchData";

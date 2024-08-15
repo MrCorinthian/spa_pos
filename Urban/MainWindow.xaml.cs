@@ -2383,8 +2383,6 @@ namespace Urban
 
                 //Get list of order in each Order Receipt
                 List<DiscountRecord> discountList = this.db.getDiscountRecordFromOrderReceipt(ordRcptList[u].Id);
-                
-                //ทำถึงตรงนี้
 
                 for (int v=0;v< discountList.Count();v++)
                 {
@@ -2395,9 +2393,9 @@ namespace Urban
                         //Tag = cancelParams
                     };
 
-                    TextBlock massageNameItemTxt = new TextBlock()
+                    TextBlock discountTypeTxt = new TextBlock()
                     {
-                        Text = this.db.getMassageTopicName(orderList[v].MassageTopicId) + " (" + this.db.getMassagePlanName(orderList[v].MassagePlanId) + ")\n" + "Commission : " + String.Format("{0:n}", Int32.Parse(orderList[v].Commission)) + " ฿",
+                        Text = this.db.getDiscountType(discountList[v].DiscountMasterId),
                         FontSize = 15,
                         HorizontalAlignment = HorizontalAlignment.Left,
                         VerticalAlignment = VerticalAlignment.Top,
@@ -2407,9 +2405,9 @@ namespace Urban
                         Padding = new Thickness(8, 8, 0, 8)
                     };
 
-                    TextBlock massagePriceItemTxt = new TextBlock()
+                    TextBlock discountValueTxt = new TextBlock()
                     {
-                        Text = String.Format("{0:n}", Int32.Parse(orderList[v].Price)) + " ฿",
+                        Text = "-"+String.Format("{0:n}", Int32.Parse(discountList[v].Value)) + " ฿",
                         FontSize = 15,
                         HorizontalAlignment = HorizontalAlignment.Right,
                         VerticalAlignment = VerticalAlignment.Top,
@@ -2420,19 +2418,19 @@ namespace Urban
                         TextAlignment = TextAlignment.Right
                     };
 
-                    if (orderList[v].CancelStatus.Equals("true"))
+                    if (discountList[v].CancelStatus.Equals("true"))
                     {
-                        massageNameItemTxt.Foreground = new SolidColorBrush(Colors.White);
-                        massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                        discountTypeTxt.Foreground = new SolidColorBrush(Colors.White);
+                        discountValueTxt.Foreground = new SolidColorBrush(Colors.White);
                     }
                     else
                     {
-                        massageNameItemTxt.Foreground = new SolidColorBrush(Colors.Black);
-                        massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.Blue);
+                        discountTypeTxt.Foreground = new SolidColorBrush(Colors.Black);
+                        discountValueTxt.Foreground = new SolidColorBrush(Colors.OrangeRed);
                     }
 
-                    subItemGrid.Children.Add(massageNameItemTxt);
-                    subItemGrid.Children.Add(massagePriceItemTxt);
+                    subItemGrid.Children.Add(discountTypeTxt);
+                    subItemGrid.Children.Add(discountValueTxt);
                     itemGrid.Children.Add(subItemGrid);
                 }
 
@@ -2505,6 +2503,15 @@ namespace Urban
                     getOrderInReceipt[i].UpdateDateTime = getCurDateTime();
                     this.db.updateOrderRecord(getOrderInReceipt[i]);
                     UpdateOrderRecordToServer(getOrderInReceipt[i]);
+                }
+
+                List<DiscountRecord> getDiscountInReceipt = this.db.getDiscountRecordFromOrderReceipt(GlobalValue.Instance.TargetOrderReceiptId);
+                for (int j = 0; j < getDiscountInReceipt.Count(); j++)
+                {
+                    getDiscountInReceipt[j].CancelStatus = "true";
+                    getDiscountInReceipt[j].UpdateDateTime = getCurDateTime();
+                    this.db.updateDiscountRecord(getDiscountInReceipt[j]);
+                    UpdateDiscountRecordToServer(getDiscountInReceipt[j]);
                 }
 
                 PrintCancel();
@@ -6560,7 +6567,8 @@ namespace Urban
                 IsCreditCard = dcrd.IsCreditCard,
                 CancelStatus = dcrd.CancelStatus,
                 CreateDateTime = dcrd.CreateDateTime,
-                UpdateDateTime = dcrd.UpdateDateTime
+                UpdateDateTime = dcrd.UpdateDateTime,
+                OrderReceiptId = dcrd.OrderReceiptId
             };
 
             try
@@ -6602,6 +6610,64 @@ namespace Urban
             catch (Exception ex)
             {
                 //MessageBox.Show("insert order fail" + "\nError : " + ex.ToString());
+            }
+
+        }
+
+        public async void UpdateDiscountRecordToServer(DiscountRecord dcrd)
+        {
+            try
+            {
+
+                DiscountRecordSerialize dcsr = new DiscountRecordSerialize()
+                {
+                    Id = dcrd.Id,
+                    BranchId = this.db.getBranch().Id,
+                    AccountId = dcrd.AccountId,
+                    Date = dcrd.Date,
+                    Time = dcrd.Time,
+                    DiscountMasterId = dcrd.DiscountMasterId,
+                    DiscountMasterDetailId = dcrd.DiscountMasterDetailId,
+                    Value = dcrd.Value,
+                    IsCreditCard = dcrd.IsCreditCard,
+                    CancelStatus = dcrd.CancelStatus,
+                    CreateDateTime = dcrd.CreateDateTime,
+                    UpdateDateTime = dcrd.UpdateDateTime
+                };
+
+                var obj = new DiscountRecordUpdateSerializer
+                {
+                    DiscountRecordData = dcsr
+                };
+
+                string serializeString = JsonConvert.SerializeObject(obj);
+
+                string updateOrderUrl = GlobalValue.Instance.Url_UpdateDiscountRecord;
+                var client = new HttpClient();
+                var values = new Dictionary<string, string>
+                    {
+                        {"discountRecordData" ,serializeString}
+                    };
+                var content = new FormUrlEncodedContent(values);
+                var response = await client.PostAsync(updateOrderUrl, content);
+                var resultAuthen = await response.Content.ReadAsStringAsync();
+
+                var parseJson = JObject.Parse(resultAuthen);
+
+                string checkStatus = (string)parseJson["Status"];
+                if (checkStatus.Equals("true"))
+                {
+
+                }
+                else
+                {
+                    MessageBox.Show("update order fail" + "\nError : " + (string)parseJson["Error_Message"]);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show("update order fail \nError : " + ex.Message.ToString());
             }
 
         }

@@ -528,6 +528,16 @@ namespace Urban
             return discountSrcList;
         }
 
+        public string getDiscountType(int discountMasterId)
+        {
+            DiscountMaster discountMaster;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                discountMaster = db.Table<DiscountMaster>().Where(b => b.Id == discountMasterId).FirstOrDefault();
+            }
+            return discountMaster.ShowName;
+        }
+
         public List<DiscountMasterDetail> getAllVoucherList()
         {
             List<DiscountMasterDetail> voucherList;
