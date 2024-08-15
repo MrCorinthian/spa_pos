@@ -2240,6 +2240,13 @@ namespace Urban
                     Tag = cancelParams
                 };
 
+                Border gridBorder = new Border
+                {
+                    BorderBrush = new SolidColorBrush(Colors.Black), // Set the color of the border
+                    BorderThickness = new Thickness(0, 0, 0, 2), // Set the bottom border thickness to 2 (or any value you prefer)
+                    Child = itemGrid // Set the Grid as the child of the Border
+                };
+
                 TextBlock massageNameItemTxt = new TextBlock()
                 {
                     Text = this.db.getMassageTopicName(ordRecList[u].MassageTopicId) + " (" + this.db.getMassagePlanName(ordRecList[u].MassagePlanId) + ")" + "\nTime : " + ordRecList[u].Time + "   Commission : " + String.Format("{0:n}", Int32.Parse(ordRecList[u].Commission)) + " ฿",
@@ -2281,72 +2288,74 @@ namespace Urban
 
                 itemGrid.Children.Add(massageNameItemTxt);
                 itemGrid.Children.Add(massagePriceItemTxt);
-                soldItemStack.Children.Add(itemGrid);
+                soldItemStack.Children.Add(gridBorder);
             }
 
             //New logical
-            List<OrderReceipt> ordRcList = this.db.getOrderReciptByAcc(currentUseAccountId);
-            for (int u = 0; u < ordRcList.Count(); u++)
-            {
-                CancelRecordParam cancelParams = new CancelRecordParam()
-                {
-                    OrderRecordId = ordRecList[u].Id,
-                    AccountId = ordRecList[u].AccountId,
-                    ItemNo = u + 1,
-                    TotalItems = ordRecList.Count(),
-                    CancelStatus = ordRecList[u].CancelStatus
-                };
+            //List<OrderReceipt> ordRcList = this.db.getOrderReciptByAcc(currentUseAccountId);
+            //for (int u = 0; u < ordRcList.Count(); u++)
+            //{
+            //    CancelRecordParam cancelParams = new CancelRecordParam()
+            //    {
+            //        OrderRecordId = ordRecList[u].Id,
+            //        AccountId = ordRecList[u].AccountId,
+            //        ItemNo = u + 1,
+            //        TotalItems = ordRecList.Count(),
+            //        CancelStatus = ordRecList[u].CancelStatus
+            //    };
 
-                Grid itemGrid = new Grid()
-                {
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    Tag = cancelParams
-                };
+            //    Grid itemGrid = new Grid()
+            //    {
+            //        HorizontalAlignment = HorizontalAlignment.Stretch,
+            //        VerticalAlignment = VerticalAlignment.Top,
+            //        Tag = cancelParams
+            //    };
 
-                TextBlock massageNameItemTxt = new TextBlock()
-                {
-                    Text = this.db.getMassageTopicName(ordRecList[u].MassageTopicId) + " (" + this.db.getMassagePlanName(ordRecList[u].MassagePlanId) + ")" + "\nTime : " + ordRecList[u].Time + "   Commission : " + String.Format("{0:n}", Int32.Parse(ordRecList[u].Commission)) + " ฿",
-                    FontSize = 15,
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    TextWrapping = TextWrapping.Wrap,
-                    TextTrimming = TextTrimming.None,
-                    Width = 300,
-                    Padding = new Thickness(8, 8, 0, 8)
-                };
+                
 
-                TextBlock massagePriceItemTxt = new TextBlock()
-                {
-                    Text = String.Format("{0:n}", Int32.Parse(ordRecList[u].Price)) + " ฿",
-                    FontSize = 15,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    TextWrapping = TextWrapping.Wrap,
-                    TextTrimming = TextTrimming.None,
-                    Width = 100,
-                    Padding = new Thickness(0, 8, 8, 8),
-                    TextAlignment = TextAlignment.Right
-                };
+            //    TextBlock massageNameItemTxt = new TextBlock()
+            //    {
+            //        Text = this.db.getMassageTopicName(ordRecList[u].MassageTopicId) + " (" + this.db.getMassagePlanName(ordRecList[u].MassagePlanId) + ")" + "\nTime : " + ordRecList[u].Time + "   Commission : " + String.Format("{0:n}", Int32.Parse(ordRecList[u].Commission)) + " ฿",
+            //        FontSize = 15,
+            //        HorizontalAlignment = HorizontalAlignment.Left,
+            //        VerticalAlignment = VerticalAlignment.Top,
+            //        TextWrapping = TextWrapping.Wrap,
+            //        TextTrimming = TextTrimming.None,
+            //        Width = 300,
+            //        Padding = new Thickness(8, 8, 0, 8)
+            //    };
 
-                if (ordRecList[u].CancelStatus.Equals("true"))
-                {
-                    itemGrid.Background = new SolidColorBrush(Colors.Red);
-                    massageNameItemTxt.Foreground = new SolidColorBrush(Colors.White);
-                    massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.White);
-                }
-                else
-                {
-                    massageNameItemTxt.Foreground = new SolidColorBrush(Colors.Black);
-                    massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.Blue);
-                }
+            //    TextBlock massagePriceItemTxt = new TextBlock()
+            //    {
+            //        Text = String.Format("{0:n}", Int32.Parse(ordRecList[u].Price)) + " ฿",
+            //        FontSize = 15,
+            //        HorizontalAlignment = HorizontalAlignment.Right,
+            //        VerticalAlignment = VerticalAlignment.Top,
+            //        TextWrapping = TextWrapping.Wrap,
+            //        TextTrimming = TextTrimming.None,
+            //        Width = 100,
+            //        Padding = new Thickness(0, 8, 8, 8),
+            //        TextAlignment = TextAlignment.Right
+            //    };
 
-                itemGrid.MouseLeftButtonDown += ItemGrid_MouseLeftButtonDown;
+            //    if (ordRecList[u].CancelStatus.Equals("true"))
+            //    {
+            //        itemGrid.Background = new SolidColorBrush(Colors.Red);
+            //        massageNameItemTxt.Foreground = new SolidColorBrush(Colors.White);
+            //        massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.White);
+            //    }
+            //    else
+            //    {
+            //        massageNameItemTxt.Foreground = new SolidColorBrush(Colors.Black);
+            //        massagePriceItemTxt.Foreground = new SolidColorBrush(Colors.Blue);
+            //    }
 
-                itemGrid.Children.Add(massageNameItemTxt);
-                itemGrid.Children.Add(massagePriceItemTxt);
-                soldItemStack.Children.Add(itemGrid);
-            }
+            //    itemGrid.MouseLeftButtonDown += ItemGrid_MouseLeftButtonDown;
+
+            //    itemGrid.Children.Add(massageNameItemTxt);
+            //    itemGrid.Children.Add(massagePriceItemTxt);
+            //    soldItemStack.Children.Add(itemGrid);
+            //}
         }
 
         private void reportListBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2368,14 +2377,16 @@ namespace Urban
 
             OrderRecord getO = this.db.getOrderRecordtFromIdAndAccountId(getCancelParams.OrderRecordId, getCancelParams.AccountId);
 
-            string checkCurTime = DateTime.Now.ToString("HH:mm:ss");
-            string transacTime = getO.Time.ToString();
+            string checkCurTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string transacTime = getO.CreateDateTime.ToString();
 
-            TimeSpan parsedTime1 = TimeSpan.Parse(checkCurTime);
-            TimeSpan parsedTime2 = TimeSpan.Parse(transacTime);
-            TimeSpan interval = TimeSpan.FromMinutes(16);
+            // Parse the date strings to DateTime objects
+            DateTime date1 = DateTime.ParseExact(checkCurTime, "yyyy-MM-dd HH:mm:ss", null);
+            DateTime date2 = DateTime.ParseExact(transacTime, "yyyy-MM-dd HH:mm:ss", null);
 
-            if (((parsedTime1 - parsedTime2) < interval)&&(getO.CancelStatus.Equals("false")))
+            TimeSpan interval = date1 - date2;
+
+            if((interval.TotalMinutes < 16)&&(getO.CancelStatus.Equals("false")))
             {
                 deleteRecordConfirmGrid.Visibility = Visibility.Visible;
             }
@@ -2385,10 +2396,10 @@ namespace Urban
             //    deleteRecordConfirmGrid.Visibility = Visibility.Visible;
             //}
 
-            //MessageBox.Show("id=" + getCancelParams.OrderRecordId + "\n" +
-            //                "accountid=" + getCancelParams.AccountId + "\n" +
-            //                "itemno=" + getCancelParams.ItemNo + "\n" +
-            //                "total=" + getCancelParams.TotalItems + "\n");
+                //MessageBox.Show("id=" + getCancelParams.OrderRecordId + "\n" +
+                //                "accountid=" + getCancelParams.AccountId + "\n" +
+                //                "itemno=" + getCancelParams.ItemNo + "\n" +
+                //                "total=" + getCancelParams.TotalItems + "\n");
         }
 
         private void confirmDeleteRecordBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
