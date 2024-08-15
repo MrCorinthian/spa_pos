@@ -2391,15 +2391,6 @@ namespace Urban
                 deleteRecordConfirmGrid.Visibility = Visibility.Visible;
             }
 
-            //if ((getCancelParams.ItemNo==getCancelParams.TotalItems)&&getCancelParams.CancelStatus.Equals("false"))
-            //{
-            //    deleteRecordConfirmGrid.Visibility = Visibility.Visible;
-            //}
-
-                //MessageBox.Show("id=" + getCancelParams.OrderRecordId + "\n" +
-                //                "accountid=" + getCancelParams.AccountId + "\n" +
-                //                "itemno=" + getCancelParams.ItemNo + "\n" +
-                //                "total=" + getCancelParams.TotalItems + "\n");
         }
 
         private void confirmDeleteRecordBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
