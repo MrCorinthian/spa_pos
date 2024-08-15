@@ -2383,7 +2383,8 @@ namespace Urban
 
                 //Get list of order in each Order Receipt
                 List<DiscountRecord> discountList = this.db.getDiscountRecordFromOrderReceipt(ordRcptList[u].Id);
-                ทำถึงตรงนี้
+                
+                //ทำถึงตรงนี้
 
                 for (int v=0;v< discountList.Count();v++)
                 {
