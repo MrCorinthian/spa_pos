@@ -399,19 +399,19 @@ namespace Urban
                         }
 
                         //Insert New EmployeeType
-                        var rootEmployeeType = parseJson["EmployeeType"];
-                        for (int i = 0; i < rootEmployeeType.Count(); i++)
-                        {
-                            EmployeeType mEmployeeType = new EmployeeType();
-                            mEmployeeType.Id = (int)rootEmployeeType[i]["Id"];
-                            mEmployeeType.Type = rootEmployeeType[i]["Type"].ToString();
-                            mEmployeeType.ShowName = rootEmployeeType[i]["ShowName"].ToString();
-                            mEmployeeType.Active = rootEmployeeType[i]["Active"].ToString();
-                            mEmployeeType.CreateDateTime = ConvertDateTime(rootEmployeeType[i]["CreateDateTime"].ToString());
-                            mEmployeeType.UpdateDateTime = ConvertDateTime(rootEmployeeType[i]["UpdateDateTime"].ToString());
+                        //var rootEmployeeType = parseJson["EmployeeType"];
+                        //for (int i = 0; i < rootEmployeeType.Count(); i++)
+                        //{
+                        //    EmployeeType mEmployeeType = new EmployeeType();
+                        //    mEmployeeType.Id = (int)rootEmployeeType[i]["Id"];
+                        //    mEmployeeType.Type = rootEmployeeType[i]["Type"].ToString();
+                        //    mEmployeeType.ShowName = rootEmployeeType[i]["ShowName"].ToString();
+                        //    mEmployeeType.Active = rootEmployeeType[i]["Active"].ToString();
+                        //    mEmployeeType.CreateDateTime = ConvertDateTime(rootEmployeeType[i]["CreateDateTime"].ToString());
+                        //    mEmployeeType.UpdateDateTime = ConvertDateTime(rootEmployeeType[i]["UpdateDateTime"].ToString());
 
-                            this.db.InsertEmployeeType(mEmployeeType);
-                        }
+                        //    this.db.InsertEmployeeType(mEmployeeType);
+                        //}
 
                         //Insert New SellItemType
                         var rootSellItemType = parseJson["SellItemType"];
@@ -1804,94 +1804,60 @@ namespace Urban
 
         private void checkoutSummaryBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            int checkSellItemType = 1;
-            foreach(OrderRecord odr in prepareOrder)
+            SendTextTotal();
+            summaryContainer.Children.Clear();
+            summaryDiscountContainer.Children.Clear(); //Clear discount stack panel
+            finalBalance = currentBalance;
+
+            for (int i = 0; i < prepareOrder.Count(); i++)
             {
-                if(this.db.getSellItemTypeIdbyMassageTopicId(odr.MassageTopicId)==2)
+                Grid itemInSummary = new Grid()
                 {
-                    checkSellItemType = 2;
-                }
-            }
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Margin = new Thickness(24, 6, 24, 0)
 
-            if(checkSellItemType == 2)
-            {
+                };
 
-                // Set the source for the image
-                BitmapImage bitmap1 = new BitmapImage();
-                bitmap1.BeginInit();
-                bitmap1.UriSource = new Uri("pack://application:,,,/Images/1.png");
-                bitmap1.EndInit();
-                empType1.Source = bitmap1;
-                empTypeTxt1.Text = this.db.getEmployeeTypeShowNameById(1);
-
-                BitmapImage bitmap2 = new BitmapImage();
-                bitmap2.BeginInit();
-                bitmap2.UriSource = new Uri("pack://application:,,,/Images/2.png");
-                bitmap2.EndInit();
-                empType2.Source = bitmap2;
-                empTypeTxt2.Text = this.db.getEmployeeTypeShowNameById(2);
-
-                employeeTypeGrid.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                GlobalValue.Instance.SelectedEmployeeId = 1;
-
-                SendTextTotal();
-                summaryContainer.Children.Clear();
-                summaryDiscountContainer.Children.Clear(); //Clear discount stack panel
-                finalBalance = currentBalance;
-
-                for (int i = 0; i < prepareOrder.Count(); i++)
+                TextBlock planNameTxt = new TextBlock()
                 {
-                    Grid itemInSummary = new Grid()
-                    {
-                        HorizontalAlignment = HorizontalAlignment.Stretch,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Thickness(24, 6, 24, 0)
+                    FontSize = 20,
+                    Foreground = new SolidColorBrush(Colors.Black),
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    Text = "- " + this.db.getMassageTopicName(prepareOrder[i].MassageTopicId) + " (" + this.db.getMassagePlanName(prepareOrder[i].MassagePlanId) + ")"
+                };
 
-                    };
+                TextBlock planPrice = new TextBlock()
+                {
+                    FontSize = 18,
+                    Foreground = new SolidColorBrush(Colors.Black),
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Text = String.Format("{0:n}", Int32.Parse(prepareOrder[i].Price)) + " ฿"
+                };
 
-                    TextBlock planNameTxt = new TextBlock()
-                    {
-                        FontSize = 20,
-                        Foreground = new SolidColorBrush(Colors.Black),
-                        HorizontalAlignment = HorizontalAlignment.Left,
-                        Text = "- " + this.db.getMassageTopicName(prepareOrder[i].MassageTopicId) + " (" + this.db.getMassagePlanName(prepareOrder[i].MassagePlanId) + ")"
-                    };
+                itemInSummary.Children.Add(planNameTxt);
+                itemInSummary.Children.Add(planPrice);
 
-                    TextBlock planPrice = new TextBlock()
-                    {
-                        FontSize = 18,
-                        Foreground = new SolidColorBrush(Colors.Black),
-                        HorizontalAlignment = HorizontalAlignment.Right,
-                        Text = String.Format("{0:n}", Int32.Parse(prepareOrder[i].Price)) + " ฿"
-                    };
-
-                    itemInSummary.Children.Add(planNameTxt);
-                    itemInSummary.Children.Add(planPrice);
-
-                    summaryContainer.Children.Add(itemInSummary);
-                }
-
-                summaryAmountTxt.Text = currentBalanceTxt.Text + " ฿";
-
-                summaryPopupGrid.Visibility = Visibility.Visible;
+                summaryContainer.Children.Add(itemInSummary);
             }
 
+            summaryAmountTxt.Text = currentBalanceTxt.Text + " ฿";
+
+            summaryPopupGrid.Visibility = Visibility.Visible;
+
         }
 
-        private void empType1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            GlobalValue.Instance.SelectedEmployeeId = 1;
-            initialSellSummary();
-        }
+        //private void empType1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    GlobalValue.Instance.SelectedEmployeeId = 1;
+        //    initialSellSummary();
+        //}
 
-        private void empType2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            GlobalValue.Instance.SelectedEmployeeId = 2;
-            initialSellSummary();
-        }
+        //private void empType2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    GlobalValue.Instance.SelectedEmployeeId = 2;
+        //    initialSellSummary();
+        //}
 
         private void cancelPayBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -2189,6 +2155,8 @@ namespace Urban
 
             await Task.Delay(500);
 
+            SaveOrderReceiptToDB();
+
             SaveOtherSaleOrderToDB("cash");
             PrintOtherSaleReceipt();
 
@@ -2201,6 +2169,8 @@ namespace Urban
             transactionLoadingGrid.Visibility = Visibility.Visible;
 
             await Task.Delay(500);
+
+            SaveOrderReceiptToDB();
 
             SaveOtherSaleOrderToDB("credit");
             PrintOtherSaleReceipt();
@@ -2696,6 +2666,8 @@ namespace Urban
         public void SaveOtherSaleOrderToDB(string paymentType)
         {
             Account getUnSendAc = this.db.getLatestAcount();
+            OrderReceipt getLatestOrcpt = this.db.getLatestOrderReceipt();
+
             if (getUnSendAc.SendStatus.Equals("false"))
             {
                 InsertAccountToServer();
@@ -2718,10 +2690,12 @@ namespace Urban
             if (paymentType.Equals("credit"))
             {
                 centralOsr.IsCreditCard = "true";
+                centralOsr.OrderReceiptId = getLatestOrcpt.Id;
             }
             else
             {
                 centralOsr.IsCreditCard = "false";
+                centralOsr.OrderReceiptId = getLatestOrcpt.Id;
             }
 
             this.db.saveOtherSaleOrder(centralOsr);
@@ -7186,8 +7160,8 @@ namespace Urban
                 ReceiptNo = "R"+ bCode + currentDateYYMM+this.db.getOrderReceiptRunning(usingAccountId),
                 CancelStatus = "false",
                 CreateDateTime = curDateTime,
-                UpdateDateTime = curDateTime,
-                EmployeeTypeId = GlobalValue.Instance.SelectedEmployeeId
+                UpdateDateTime = curDateTime
+                //EmployeeTypeId = GlobalValue.Instance.SelectedEmployeeId
             };
 
             this.db.saveOrderReceipt(oRcpt);
@@ -7207,8 +7181,8 @@ namespace Urban
                 ReceiptNo = orcpt.ReceiptNo,
                 CancelStatus = orcpt.CancelStatus,
                 CreateDateTime = orcpt.CreateDateTime,
-                UpdateDateTime = orcpt.UpdateDateTime,
-                EmployeeTypeId = orcpt.EmployeeTypeId
+                UpdateDateTime = orcpt.UpdateDateTime
+                //EmployeeTypeId = orcpt.EmployeeTypeId
             };
 
             try
@@ -7268,8 +7242,8 @@ namespace Urban
                     ReceiptNo = getOrdR.ReceiptNo,
                     CancelStatus = getOrdR.CancelStatus,
                     CreateDateTime = getOrdR.CreateDateTime,
-                    UpdateDateTime = getOrdR.UpdateDateTime,
-                    EmployeeTypeId = getOrdR.EmployeeTypeId
+                    UpdateDateTime = getOrdR.UpdateDateTime
+                    //EmployeeTypeId = getOrdR.EmployeeTypeId
                 };
 
                 var obj = new OrderReceiptUpdateSerializer
@@ -7317,70 +7291,70 @@ namespace Urban
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
-        private void empTypeTxt1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            GlobalValue.Instance.SelectedEmployeeId = 1;
-            initialSellSummary();
-        }
+        //private void empTypeTxt1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    GlobalValue.Instance.SelectedEmployeeId = 1;
+        //    initialSellSummary();
+        //}
 
-        private void empTypeTxt2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            GlobalValue.Instance.SelectedEmployeeId = 2;
-            initialSellSummary();
-        }
+        //private void empTypeTxt2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    GlobalValue.Instance.SelectedEmployeeId = 2;
+        //    initialSellSummary();
+        //}
 
-        public void initialSellSummary()
-        {
-            SendTextTotal();
-            summaryContainer.Children.Clear();
-            summaryDiscountContainer.Children.Clear(); //Clear discount stack panel
-            finalBalance = currentBalance;
+        //public void initialSellSummary()
+        //{
+        //    SendTextTotal();
+        //    summaryContainer.Children.Clear();
+        //    summaryDiscountContainer.Children.Clear(); //Clear discount stack panel
+        //    finalBalance = currentBalance;
 
-            for (int i = 0; i < prepareOrder.Count(); i++)
-            {
-                Grid itemInSummary = new Grid()
-                {
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    Margin = new Thickness(24, 6, 24, 0)
+        //    for (int i = 0; i < prepareOrder.Count(); i++)
+        //    {
+        //        Grid itemInSummary = new Grid()
+        //        {
+        //            HorizontalAlignment = HorizontalAlignment.Stretch,
+        //            VerticalAlignment = VerticalAlignment.Top,
+        //            Margin = new Thickness(24, 6, 24, 0)
 
-                };
+        //        };
 
-                TextBlock planNameTxt = new TextBlock()
-                {
-                    FontSize = 20,
-                    Foreground = new SolidColorBrush(Colors.Black),
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    Text = "- " + this.db.getMassageTopicName(prepareOrder[i].MassageTopicId) + " (" + this.db.getMassagePlanName(prepareOrder[i].MassagePlanId) + ")"
-                };
+        //        TextBlock planNameTxt = new TextBlock()
+        //        {
+        //            FontSize = 20,
+        //            Foreground = new SolidColorBrush(Colors.Black),
+        //            HorizontalAlignment = HorizontalAlignment.Left,
+        //            Text = "- " + this.db.getMassageTopicName(prepareOrder[i].MassageTopicId) + " (" + this.db.getMassagePlanName(prepareOrder[i].MassagePlanId) + ")"
+        //        };
 
-                TextBlock planPrice = new TextBlock()
-                {
-                    FontSize = 18,
-                    Foreground = new SolidColorBrush(Colors.Black),
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    Text = String.Format("{0:n}", Int32.Parse(prepareOrder[i].Price)) + " ฿"
-                };
+        //        TextBlock planPrice = new TextBlock()
+        //        {
+        //            FontSize = 18,
+        //            Foreground = new SolidColorBrush(Colors.Black),
+        //            HorizontalAlignment = HorizontalAlignment.Right,
+        //            Text = String.Format("{0:n}", Int32.Parse(prepareOrder[i].Price)) + " ฿"
+        //        };
 
-                itemInSummary.Children.Add(planNameTxt);
-                itemInSummary.Children.Add(planPrice);
+        //        itemInSummary.Children.Add(planNameTxt);
+        //        itemInSummary.Children.Add(planPrice);
 
-                summaryContainer.Children.Add(itemInSummary);
-            }
+        //        summaryContainer.Children.Add(itemInSummary);
+        //    }
 
-            foreach(OrderRecord or in prepareOrder)
-            {
-                if(this.db.getSellItemTypeIdbyMassageTopicId(or.MassageTopicId)==2)
-                {
-                    int newCom = Int32.Parse(or.Price) * 10 / 100;
-                    or.Commission = newCom.ToString();
-                }
-            }
+        //    foreach(OrderRecord or in prepareOrder)
+        //    {
+        //        if(this.db.getSellItemTypeIdbyMassageTopicId(or.MassageTopicId)==2)
+        //        {
+        //            int newCom = Int32.Parse(or.Price) * 10 / 100;
+        //            or.Commission = newCom.ToString();
+        //        }
+        //    }
 
-            summaryAmountTxt.Text = currentBalanceTxt.Text + " ฿";
+        //    summaryAmountTxt.Text = currentBalanceTxt.Text + " ฿";
 
-            employeeTypeGrid.Visibility = Visibility.Collapsed;
-            summaryPopupGrid.Visibility = Visibility.Visible;
-        }
+        //    employeeTypeGrid.Visibility = Visibility.Collapsed;
+        //    summaryPopupGrid.Visibility = Visibility.Visible;
+        //}
     }
 }

@@ -15,9 +15,11 @@ namespace Urban.Model
         public string Time { get; set; }
         public int OtherSaleId { get; set; }
         public string Price { get; set; }
+        public string Commission { get; set; }
         public string IsCreditCard { get; set; }
         public string CancelStatus { get; set; }
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
+        public int OrderReceiptId { get; set; }
     }
 }

@@ -191,6 +191,8 @@ namespace Urban.Model
         [NotNull]
         public string Status { get; set; }
         public string CreateDateTime { get; set; }
+        [NotNull]
+        public int CommissionPercent { get; set; }
     }
 
     public class OtherSaleRecord
@@ -207,6 +209,8 @@ namespace Urban.Model
         public int OtherSaleId { get; set; }
         [NotNull]
         public string Price { get; set; }
+        [NotNull]
+        public string Commission { get; set; }
         public string IsCreditCard { get; set; }
         [NotNull]
         public string SendStatus { get; set; }
@@ -214,6 +218,7 @@ namespace Urban.Model
         public string CancelStatus { get; set; }
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
+        public int OrderReceiptId { get; set; }
     }
 
     public class DiscountMaster
@@ -396,7 +401,7 @@ namespace Urban.Model
         public string CancelStatus { get; set; }
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
-        public int EmployeeTypeId { get; set; }
+        //public int EmployeeTypeId { get; set; }
     }
     public class SellItemType
     {
@@ -411,19 +416,19 @@ namespace Urban.Model
         public string CreateDateTime { get; set; }
         public string UpdateDateTime { get; set; }
     }
-    public class EmployeeType
-    {
-        [PrimaryKey, NotNull]
-        public int Id { get; set; }
-        [NotNull]
-        public string Type { get; set; }
-        [NotNull]
-        public string ShowName { get; set; }
-        [NotNull]
-        public string Active { get; set; }
-        public string CreateDateTime { get; set; }
-        public string UpdateDateTime { get; set; }
-    }
+    //public class EmployeeType
+    //{
+    //    [PrimaryKey, NotNull]
+    //    public int Id { get; set; }
+    //    [NotNull]
+    //    public string Type { get; set; }
+    //    [NotNull]
+    //    public string ShowName { get; set; }
+    //    [NotNull]
+    //    public string Active { get; set; }
+    //    public string CreateDateTime { get; set; }
+    //    public string UpdateDateTime { get; set; }
+    //}
 
     public class Setting
     {

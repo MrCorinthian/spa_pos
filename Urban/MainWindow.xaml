@@ -656,7 +656,7 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-        <Grid x:Name="employeeTypeGrid" Background="#CC707070" Grid.RowSpan="3" Visibility="Collapsed">
+        <!--<Grid x:Name="employeeTypeGrid" Background="#CC707070" Grid.RowSpan="3" Visibility="Collapsed">
             <Grid Width="800" Height="400" Background="White" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -676,6 +676,6 @@
                     <TextBlock x:Name="empTypeTxt2" TextWrapping="Wrap" FontSize="20" Foreground="White" MouseLeftButtonDown="empTypeTxt2_MouseLeftButtonDown" TextAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
             </Grid>
-        </Grid>
+        </Grid>-->
     </Grid>
 </Window>
