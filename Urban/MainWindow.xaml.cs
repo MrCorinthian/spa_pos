@@ -377,6 +377,7 @@ namespace Urban
                             mOtherSale.Price = rootOtherSaleMaster[i]["Price"].ToString();
                             mOtherSale.Status = rootOtherSaleMaster[i]["Status"].ToString();
                             mOtherSale.CreateDateTime = ConvertDateTime(rootOtherSaleMaster[i]["CreateDateTime"].ToString());
+                            mOtherSale.CommissionPercent = (int)rootOtherSaleMaster[i]["CommissionPercent"];
                             //mDiscountMaster.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
                             //mDiscountMaster.UpdateDateTime = ConvertDateTime(rootMassageSet[i]["UpdateDateTime"].ToString());
 
@@ -2159,6 +2160,7 @@ namespace Urban
 
             SaveOtherSaleOrderToDB("cash");
             PrintOtherSaleReceipt();
+            PrintOtherSaleCommission();
 
             summaryOtherPopupGrid.Visibility = Visibility.Collapsed;
             otherSaleListPopupGrid.Visibility = Visibility.Collapsed;
@@ -2174,6 +2176,7 @@ namespace Urban
 
             SaveOtherSaleOrderToDB("credit");
             PrintOtherSaleReceipt();
+            PrintOtherSaleCommission();
 
             summaryOtherPopupGrid.Visibility = Visibility.Collapsed;
             otherSaleListPopupGrid.Visibility = Visibility.Collapsed;
@@ -2482,6 +2485,59 @@ namespace Urban
                     itemGrid.Children.Add(subItemGrid);
                 }
 
+                //Get list of other sale record in each Order Receipt
+                List<OtherSaleRecord> otherSaleList = this.db.getOtherSaleRecordFromOrderReceipt(ordRcptList[u].Id);
+
+                for (int v = 0; v < otherSaleList.Count(); v++)
+                {
+                    Grid subItemGrid = new Grid()
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        //Tag = cancelParams
+                    };
+
+                    TextBlock otherSaleItemTxt = new TextBlock()
+                    {
+                        Text = this.db.getOtherSaleNameFromId(otherSaleList[v].OtherSaleId) + " (Other sale)\n" + "Commission : " + String.Format("{0:n}", Int32.Parse(otherSaleList[v].Commission)) + " ฿",
+                        FontSize = 15,
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.None,
+                        Width = 300,
+                        Padding = new Thickness(8, 8, 0, 8)
+                    };
+
+                    TextBlock otherSalePriceItemTxt = new TextBlock()
+                    {
+                        Text = String.Format("{0:n}", Int32.Parse(otherSaleList[v].Price)) + " ฿",
+                        FontSize = 15,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.None,
+                        Width = 100,
+                        Padding = new Thickness(0, 8, 8, 8),
+                        TextAlignment = TextAlignment.Right
+                    };
+
+                    if (otherSaleList[v].CancelStatus.Equals("true"))
+                    {
+                        otherSaleItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                        otherSalePriceItemTxt.Foreground = new SolidColorBrush(Colors.White);
+                    }
+                    else
+                    {
+                        otherSaleItemTxt.Foreground = new SolidColorBrush(Colors.Black);
+                        otherSalePriceItemTxt.Foreground = new SolidColorBrush(Colors.Blue);
+                    }
+
+                    subItemGrid.Children.Add(otherSaleItemTxt);
+                    subItemGrid.Children.Add(otherSalePriceItemTxt);
+                    itemGrid.Children.Add(subItemGrid);
+                }
+
                 if (ordRcptList[u].CancelStatus.Equals("true"))
                 {
                     itemGrid.Background = new SolidColorBrush(Colors.Red);
@@ -2560,6 +2616,15 @@ namespace Urban
                     getDiscountInReceipt[j].UpdateDateTime = getCurDateTime();
                     this.db.updateDiscountRecord(getDiscountInReceipt[j]);
                     UpdateDiscountRecordToServer(getDiscountInReceipt[j]);
+                }
+
+                List<OtherSaleRecord> getOtherSaleInReceipt = this.db.getOtherSaleRecordFromOrderReceipt(GlobalValue.Instance.TargetOrderReceiptId);
+                for (int i = 0; i < getOtherSaleInReceipt.Count(); i++)
+                {
+                    getOtherSaleInReceipt[i].CancelStatus = "true";
+                    getOtherSaleInReceipt[i].UpdateDateTime = getCurDateTime();
+                    this.db.updateOtherSaleRecord(getOtherSaleInReceipt[i]);
+                    UpdateOtherSaleRecordToServer(getOtherSaleInReceipt[i]);
                 }
 
                 PrintCancel();
@@ -2667,6 +2732,7 @@ namespace Urban
         {
             Account getUnSendAc = this.db.getLatestAcount();
             OrderReceipt getLatestOrcpt = this.db.getLatestOrderReceipt();
+            double oCommission = 0.00;
 
             if (getUnSendAc.SendStatus.Equals("false"))
             {
@@ -2682,6 +2748,9 @@ namespace Urban
                     InsertOtherSaleOrderRecordToServer(myOrder);
                 }
             }
+
+            oCommission = Int32.Parse(centralOsr.Price) * this.db.getCommissionRateFromOtherSaleId(centralOsr.OtherSaleId) / 100.00;
+            centralOsr.Commission = Math.Round(oCommission).ToString();
             //for (int i = 0; i < prepareOrder.Count(); i++)
             //{
             //    this.db.saveOrder(prepareOrder[i]);
@@ -2956,7 +3025,8 @@ namespace Urban
         public void PrintCommission()
         {
             List<OrderRecord> listOrderRecords = this.db.getAllOrderRecord(currentUseAccountId);
-            int paxBeforeCalculate = listOrderRecords.Count() - prepareOrder.Count();
+            List<OtherSaleRecord> listOrderSaleRecords = this.db.getAllOtherSaleRecord(currentUseAccountId);
+            int paxBeforeCalculate = listOrderRecords.Count() + listOrderSaleRecords.Count() - prepareOrder.Count();
 
             for (int s = 0; s < prepareOrder.Count; s++)
             {
@@ -2995,11 +3065,15 @@ namespace Urban
             //string thReplaceMin = TheSlip.getInvoice().Replace("นาที", "mins");
             //string thReplaceHr = thReplaceMin.Replace("ชั่วโมง", "hr");
             var sb = new StringBuilder();
-            sb.AppendLine("       " + currentBranchName);
+            sb.AppendLine("   " + this.db.getBranchCompanyName().Value);
+            sb.AppendLine("    " + this.db.getBranchAddress1().Value);
+            sb.AppendLine("    " + this.db.getBranchAddress2().Value);
+            sb.AppendLine("       " + this.db.getBranchAddress3().Value);
+            sb.AppendLine("    TAX ID : " + this.db.getBranchTaxId().Value);
             sb.AppendLine("     " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
-            sb.AppendLine("===============================");
+            sb.AppendLine("==============================");
             //sb.AppendLine("\n");
-            sb.AppendLine("           < Receipt >");
+            sb.AppendLine(" < Receipt no. " + this.db.getLatestOrderReceipt().ReceiptNo + ">");
             sb.AppendLine("- " + this.db.getOtherSaleNameFromId(centralOsr.OtherSaleId) + "\n  " + String.Format("{0:n}", Int32.Parse(centralOsr.Price)) + " Baht\n\n");
             sb.AppendLine("------------------------------");
             sb.AppendLine("       Total     " + String.Format("{0:n}", Int32.Parse(centralOsr.Price)) + " Baht");
@@ -3010,10 +3084,42 @@ namespace Urban
             sb.AppendLine("\n\n\n\n");
             sb.AppendLine("\x1b" + "\x69");
             //PrintDialog pd = new PrintDialog();
-            //
-
+            //Test print
+            MessageBox.Show(sb.ToString(), "Other sale receipt Preview");
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
             
+
+            transactionLoadingGrid.Visibility = Visibility.Collapsed;
+        }
+
+        public void PrintOtherSaleCommission()
+        {
+            List<OrderRecord> listOrderRecords = this.db.getAllOrderRecord(currentUseAccountId);
+            List<OtherSaleRecord> listOrderSaleRecords = this.db.getAllOtherSaleRecord(currentUseAccountId);
+            int comNo = listOrderRecords.Count() + listOrderSaleRecords.Count();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("             " + currentBranchName);
+            sb.AppendLine("           " + DateTime.Now.ToString("dd MMMM yyyy    HH:mm"));
+            sb.AppendLine("             Commission No. : " + comNo);
+            sb.AppendLine("  =======================================");
+            sb.AppendLine(" - " + this.db.getOtherSaleNameFromId(this.db.getLatestOtherSaleRecord().OtherSaleId));
+            sb.AppendLine("\n");
+            sb.AppendLine("              Total Commission");
+            sb.AppendLine("                 " + String.Format("{0:n}", Int32.Parse(this.db.getLatestOtherSaleRecord().Commission)) + " Baht");
+            sb.AppendLine("\n");
+            sb.AppendLine("          Don't loose this ticket");
+            sb.AppendLine("\n");
+            sb.AppendLine("  _______________________________________");
+            sb.AppendLine("\n\n\n");
+            sb.AppendLine("\x1b" + "\x69");
+            //PrintDialog pd = new PrintDialog();
+            //MessageBox.Show(paxBeforeCalculate+"");
+
+            //For test printing
+            MessageBox.Show(sb.ToString(), "Other Sale Commission Preview");
+
+            RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.commissionPrinter, sb.ToString());
 
             transactionLoadingGrid.Visibility = Visibility.Collapsed;
         }
@@ -5659,6 +5765,7 @@ namespace Urban
 
             List<OrderRecord> getItems = this.db.getOrderRecordFromOrderReceipt(GlobalValue.Instance.TargetOrderReceiptId);
             List<DiscountRecord> getDisItems = this.db.getDiscountRecordFromOrderReceipt(GlobalValue.Instance.TargetOrderReceiptId);
+            List<OtherSaleRecord> getOtherItems = this.db.getOtherSaleRecordFromOrderReceipt(GlobalValue.Instance.TargetOrderReceiptId);
 
             foreach (OrderRecord o in getItems)
             {
@@ -5693,6 +5800,15 @@ namespace Urban
                 {
                     discountValue = Int32.Parse(p.Value);
                     text += "- " + this.db.getDiscountMasterFromId(p.DiscountMasterId).ShowName + "\n  " + "-" + String.Format("{0:n}", discountValue) + " Baht\n\n";
+                }
+            }
+
+            if (getOtherItems.Count() > 0)
+            {
+                foreach (OtherSaleRecord ot in getOtherItems)
+                {
+                    
+                    text += "- " + this.db.getOtherSaleNameFromId(ot.OtherSaleId) + "\n" + String.Format("{0:n}", Int32.Parse(ot.Price)) + " Baht\n\n";
                 }
             }
 
@@ -6558,7 +6674,9 @@ namespace Urban
                 IsCreditCard = osrd.IsCreditCard,
                 CancelStatus = osrd.CancelStatus,
                 CreateDateTime = osrd.CreateDateTime,
-                UpdateDateTime = osrd.UpdateDateTime
+                UpdateDateTime = osrd.UpdateDateTime,
+                OrderReceiptId = osrd.OrderReceiptId,
+                Commission = osrd.Commission
             };
 
             try
@@ -6699,6 +6817,64 @@ namespace Urban
                 var values = new Dictionary<string, string>
                     {
                         {"discountRecordData" ,serializeString}
+                    };
+                var content = new FormUrlEncodedContent(values);
+                var response = await client.PostAsync(updateOrderUrl, content);
+                var resultAuthen = await response.Content.ReadAsStringAsync();
+
+                var parseJson = JObject.Parse(resultAuthen);
+
+                string checkStatus = (string)parseJson["Status"];
+                if (checkStatus.Equals("true"))
+                {
+
+                }
+                else
+                {
+                    MessageBox.Show("update order fail" + "\nError : " + (string)parseJson["Error_Message"]);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show("update order fail \nError : " + ex.Message.ToString());
+            }
+
+        }
+        public async void UpdateOtherSaleRecordToServer(OtherSaleRecord osrd)
+        {
+            try
+            {
+
+                OtherSaleRecordSerialize ords = new OtherSaleRecordSerialize()
+                {
+                    Id = osrd.Id,
+                    BranchId = this.db.getBranch().Id,
+                    AccountId = osrd.AccountId,
+                    Date = osrd.Date,
+                    Time = osrd.Time,
+                    OtherSaleId = osrd.OtherSaleId,
+                    Price = osrd.Price,
+                    IsCreditCard = osrd.IsCreditCard,
+                    CancelStatus = osrd.CancelStatus,
+                    CreateDateTime = osrd.CreateDateTime,
+                    UpdateDateTime = osrd.UpdateDateTime,
+                    OrderReceiptId = osrd.OrderReceiptId,
+                    Commission = osrd.Commission
+                };
+
+                var obj = new OtherSaleRecordUpdateSerializer
+                {
+                    otherSaleRecordData = ords
+                };
+
+                string serializeString = JsonConvert.SerializeObject(obj);
+
+                string updateOrderUrl = GlobalValue.Instance.Url_UpdateOtherSaleRecord;
+                var client = new HttpClient();
+                var values = new Dictionary<string, string>
+                    {
+                        {"otherSaleRecordData" ,serializeString}
                     };
                 var content = new FormUrlEncodedContent(values);
                 var response = await client.PostAsync(updateOrderUrl, content);

@@ -278,6 +278,17 @@ namespace Urban
             return OrderRecords;
         }
 
+        public List<OtherSaleRecord> getOtherSaleRecordFromOrderReceipt(int OrderReceiptId)
+        {
+            List<OtherSaleRecord> OtherSRecords;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                OtherSRecords = db.Table<OtherSaleRecord>().Where(b => b.OrderReceiptId == OrderReceiptId).ToList();
+            }
+
+            return OtherSRecords;
+        }
+
         public void updateOrderRecord(OrderRecord orderRecord)
         {
             using (var db = new SQLiteConnection(dbname))
@@ -408,7 +419,7 @@ namespace Urban
                 db.DeleteAll<OtherSale>();
                 db.DeleteAll<DiscountMaster>();
                 db.DeleteAll<DiscountMasterDetail>();
-                db.DeleteAll<EmployeeType>();
+                //db.DeleteAll<EmployeeType>();
                 db.DeleteAll<SellItemType>();
             }
         }
@@ -489,6 +500,16 @@ namespace Urban
                 TigerBalmRecords = db.Table<OtherSaleRecord>().Where(b => b.AccountId == AccountId && b.OtherSaleId == 5 && b.CancelStatus == "false").ToList();
             }
             return TigerBalmRecords;
+        }
+
+        public List<OtherSaleRecord> getAllOtherSaleRecord(int AccountId)
+        {
+            List<OtherSaleRecord> OtherSaleRecords;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                OtherSaleRecords = db.Table<OtherSaleRecord>().Where(b => b.AccountId == AccountId).ToList();
+            }
+            return OtherSaleRecords;
         }
 
         public List<OtherSaleRecord> getAllOtherSaleRecordExceptCancelled(int AccountId)
@@ -945,14 +966,14 @@ namespace Urban
         //    }
         //}
 
-        public void InsertEmployeeType(EmployeeType employeeType)
-        {
-            using (var db = new SQLiteConnection(dbname))
-            {
-                db.Insert(employeeType);
+        //public void InsertEmployeeType(EmployeeType employeeType)
+        //{
+        //    using (var db = new SQLiteConnection(dbname))
+        //    {
+        //        db.Insert(employeeType);
 
-            }
-        }
+        //    }
+        //}
 
         public void InsertSellItemType(SellItemType sellItemType)
         {
@@ -1314,6 +1335,16 @@ namespace Urban
 
             return rcpt;
         }
+        public OtherSaleRecord getLatestOtherSaleRecord()
+        {
+            OtherSaleRecord rcpt = new OtherSaleRecord();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                rcpt = db.Table<OtherSaleRecord>().Last();
+            }
+
+            return rcpt;
+        }
 
         public List<OrderReceipt> getOrderReciptByAcc(int AccountId)
         {
@@ -1357,7 +1388,13 @@ namespace Urban
                 listDR = db.Table<DiscountRecord>().Where(b => b.OrderReceiptId == OrderReceiptId).ToList();
             }
 
-            int finalBalance = OrderRecords.Sum(sale => int.Parse(sale.Price)) - listDR.Sum(discount => int.Parse(discount.Value));
+            List<OtherSaleRecord> OtherSaleRecords;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                OtherSaleRecords = db.Table<OtherSaleRecord>().Where(b => b.OrderReceiptId == OrderReceiptId).ToList();
+            }
+
+            int finalBalance = OrderRecords.Sum(sale => int.Parse(sale.Price)) + OtherSaleRecords.Sum(sale => int.Parse(sale.Price)) - listDR.Sum(discount => int.Parse(discount.Value));
 
             return finalBalance;
         }
@@ -1370,16 +1407,25 @@ namespace Urban
             }
             return topic.SellItemTypeId;
         }
-
-        public string getEmployeeTypeShowNameById(int empTypeId)
+        public int getCommissionRateFromOtherSaleId(int otherSaleId)
         {
-            EmployeeType empType = new EmployeeType();
+            OtherSale otherS = new OtherSale();
             using (var db = new SQLiteConnection(dbname))
             {
-                empType = db.Table<EmployeeType>().Where(b => b.Id == empTypeId).FirstOrDefault();
+                otherS = db.Table<OtherSale>().Where(b => b.Id == otherSaleId).FirstOrDefault();
             }
-            return empType.ShowName;
+            return otherS.CommissionPercent;
         }
+
+        //public string getEmployeeTypeShowNameById(int empTypeId)
+        //{
+        //    EmployeeType empType = new EmployeeType();
+        //    using (var db = new SQLiteConnection(dbname))
+        //    {
+        //        empType = db.Table<EmployeeType>().Where(b => b.Id == empTypeId).FirstOrDefault();
+        //    }
+        //    return empType.ShowName;
+        //}
 
     }
 }

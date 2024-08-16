@@ -171,6 +171,7 @@
     <Compile Include="Model\OrderRecordWithDiscountSerialize.cs" />
     <Compile Include="Model\OrderUpdateSerializer.cs" />
     <Compile Include="Model\OtherSaleRecordSerialize.cs" />
+    <Compile Include="Model\OtherSaleRecordUpdateSerializer.cs" />
     <Compile Include="Model\ReceiptSerialize.cs" />
     <Compile Include="Model\SerializeClass.cs" />
     <Compile Include="Model\SerializeClassForDiscount.cs" />
