@@ -80,6 +80,8 @@ namespace Urban
         //System config
         public string MobileQrEnable { get; set; }
         public string VIPCardEnable { get; set; }
+        public string IncludeOtherSaleCom { get; set; }
+        public string BeautySeparate { get; set; }
 
         //Etc
         public int TargetOrderReceiptId { get; set; }

@@ -306,6 +306,19 @@ namespace Urban
             }
             return MassageSets;
         }
+        public List<int> getAllMassageTopicId()
+        {
+            //List<MassageSet> MassageSets;
+            List<int> msgTopicId = new List<int>();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                msgTopicId = db.Table<MassageSet>().OrderBy(s => s.Position).GroupBy(s => s.MassageTopicId).Select(g => g.Key).ToList();
+            }
+
+            //List<int> msgTopicId = MassageSets.
+
+            return msgTopicId;
+        }
 
         public List<MassageTopic> getAllMassageTopic(List<int> topicId)
         {
@@ -892,6 +905,26 @@ namespace Urban
             return conFig;
         }
 
+        public Setting getCurrentBeautySeparate()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "BeautySeparate").FirstOrDefault();
+            }
+            return conFig;
+        }
+
+        public Setting getCurrentIncludeOtherSaleCom()
+        {
+            Setting conFig = new Setting();
+            using (var db = new SQLiteConnection(dbname))
+            {
+                conFig = db.Table<Setting>().Where(b => b.Name == "IncludeOtherSaleCom").FirstOrDefault();
+            }
+            return conFig;
+        }
+
         public Setting getCurrentSystemNameTxtColor()
         {
             Setting conFig = new Setting();
@@ -1415,6 +1448,335 @@ namespace Urban
                 otherS = db.Table<OtherSale>().Where(b => b.Id == otherSaleId).FirstOrDefault();
             }
             return otherS.CommissionPercent;
+        }
+
+        public int getSumOtherSaleRecordExceptCancelled(int AccountId)
+        {
+            //List<OtherSaleRecord> grandRecords;
+            int sumOtherS = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumOtherS = db.Table<OtherSaleRecord>().Where(b => b.AccountId == AccountId && b.CancelStatus == "false").Sum(b => int.Parse(b.Price));
+            }
+            return sumOtherS;
+        }
+
+        public int getSumOtherSaleComExceptCancelled(int AccountId)
+        {
+            //List<OtherSaleRecord> grandRecords;
+            int sumOtherCom = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumOtherCom = db.Table<OtherSaleRecord>().Where(b => b.AccountId == AccountId && b.CancelStatus == "false").Sum(b => int.Parse(b.Commission));
+            }
+            return sumOtherCom;
+        }
+
+        public int getSumOrderCommissionExceptCancelled(int AccountId)
+        {
+            //List<OtherSaleRecord> grandRecords;
+            int sumCom = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCom = db.Table<OrderRecord>().Where(b => b.AccountId == AccountId && b.CancelStatus == "false").Sum(b => int.Parse(b.Commission));
+            }
+
+            return sumCom;
+        }
+
+        public int getSumCommissionExceptCancelled(int AccountId)
+        {
+            //List<OtherSaleRecord> grandRecords;
+            int sumCom = 0;
+            int sumComOther = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCom = db.Table<OrderRecord>().Where(b => b.AccountId == AccountId && b.CancelStatus == "false").Sum(b => int.Parse(b.Commission));
+            }
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumComOther = db.Table<OtherSaleRecord>().Where(b => b.AccountId == AccountId && b.CancelStatus == "false").Sum(b => int.Parse(b.Commission));
+            }
+
+            return sumCom + sumComOther;
+        }
+
+        public int getSumOrderRecordCashExceptCancelled(int AccountId)
+        {
+            int sumCash = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCash = db.Table<OrderRecord>().Where(b => b.AccountId == AccountId && b.IsCreditCard == "false" && b.CancelStatus == "false").Sum(b => int.Parse(b.Price));
+            }
+            return sumCash;
+        }
+
+        public int getSumOrderRecordCreditExceptCancelled(int AccountId)
+        {
+            int sumCredit = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCredit = db.Table<OrderRecord>().Where(b => b.AccountId == AccountId && b.IsCreditCard == "true" && b.CancelStatus == "false").Sum(b => int.Parse(b.Price));
+            }
+            return sumCredit;
+        }
+
+        public int getSumOrderRecordCashExceptCancelled_M(int AccountId)
+        {
+            int sumCash = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCash = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.IsCreditCard == "false" && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 1
+                           select OrderList).Sum(b => int.Parse(b.Price));
+            }
+            return sumCash;
+        }
+
+        public int getSumOrderRecordCashExceptCancelled_B(int AccountId)
+        {
+            int sumCash = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCash = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.IsCreditCard == "false" && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 2
+                           select OrderList).Sum(b => int.Parse(b.Price));
+            }
+            return sumCash;
+        }
+
+        public int getSumOrderRecordCreditExceptCancelled_M(int AccountId)
+        {
+            int sumCredit = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCredit = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.IsCreditCard == "true" && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 1
+                           select OrderList).Sum(b => int.Parse(b.Price));
+            }
+            return sumCredit;
+        }
+
+        public int getSumOrderRecordCreditExceptCancelled_B(int AccountId)
+        {
+            int sumCredit = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCredit = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.IsCreditCard == "true" && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 2
+                           select OrderList).Sum(b => int.Parse(b.Price));
+            }
+            return sumCredit;
+        }
+
+        public int getSumOrderRecordComExceptCancelled_M(int AccountId)
+        {
+            int sumCash = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCash = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 1
+                           select OrderList).Sum(b => int.Parse(b.Commission));
+            }
+            return sumCash;
+        }
+
+        public int getSumOrderRecordComExceptCancelled_B(int AccountId)
+        {
+            int sumCash = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCash = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 2
+                           select OrderList).Sum(b => int.Parse(b.Commission));
+            }
+            return sumCash;
+        }
+
+        public int getSumComExceptCancelled_B(int AccountId)
+        {
+            int sumCash = 0;
+            int sumComOther = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCash = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 2
+                           select OrderList).Sum(b => int.Parse(b.Commission));
+            }
+
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumComOther = db.Table<OtherSaleRecord>().Where(b => b.AccountId == AccountId && b.CancelStatus == "false").Sum(b => int.Parse(b.Commission));
+            }
+
+            return sumCash + sumComOther;
+        }
+
+        public int getSumPaxExceptCancelled(int AccountId)
+        {
+            int sumPax = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumPax = db.Table<OrderRecord>().Where(b => b.AccountId == AccountId && b.CancelStatus == "false").Count();
+            }
+            return sumPax;
+        }
+
+        public int getSumPaxExceptCancelled_M(int AccountId)
+        {
+            int sumPax = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumPax = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 1
+                           select OrderList).Count();
+            }
+            return sumPax;
+        }
+
+        public int getSumPaxExceptCancelled_B(int AccountId)
+        {
+            int sumPax = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumPax = (from OrderList in db.Table<OrderRecord>()
+                          join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                          where OrderList.AccountId == AccountId && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 2
+                          select OrderList).Count();
+            }
+            return sumPax;
+        }
+
+        public int getSumDiscountWithCash_M(int AccountId)
+        {
+            int discountWithCash = 0;
+            List<DiscountRecord> discountRec;
+            List<DiscountRecord> discountFinal = new List<DiscountRecord>();
+            //OrderRecordWithDiscount orderW;
+
+            using (var db = new SQLiteConnection(dbname))
+            {
+                discountRec = db.Table<DiscountRecord>().Where(b => b.AccountId == AccountId && b.IsCreditCard == "false" && b.CancelStatus == "false").ToList();
+            }
+
+            foreach (DiscountRecord dr in discountRec)
+            {
+                using (var db = new SQLiteConnection(dbname))
+                {
+                    OrderRecordWithDiscount orderW = db.Table<OrderRecordWithDiscount>().Where(b => b.DiscountRecordId == dr.Id).FirstOrDefault();
+                    OrderRecord orderR = db.Table<OrderRecord>().Where(b => b.Id == orderW.OrderRecordId).FirstOrDefault();
+                    MassageTopic msgTopic = db.Table<MassageTopic>().Where(b => b.Id == orderR.MassageTopicId).FirstOrDefault();
+                    if(msgTopic.SellItemTypeId == 1)
+                    {
+                        discountFinal.Add(dr);
+                    }
+                }
+            }
+
+            discountWithCash = discountFinal.Sum(d => int.Parse(d.Value));
+
+            return discountWithCash;
+        }
+
+        public int getSumDiscountWithCredit_M(int AccountId)
+        {
+            int discountWithCash = 0;
+            List<DiscountRecord> discountRec;
+            List<DiscountRecord> discountFinal = new List<DiscountRecord>();
+            //OrderRecordWithDiscount orderW;
+
+            using (var db = new SQLiteConnection(dbname))
+            {
+                discountRec = db.Table<DiscountRecord>().Where(b => b.AccountId == AccountId && b.IsCreditCard == "true" && b.CancelStatus == "false").ToList();
+            }
+
+            foreach (DiscountRecord dr in discountRec)
+            {
+                using (var db = new SQLiteConnection(dbname))
+                {
+                    OrderRecordWithDiscount orderW = db.Table<OrderRecordWithDiscount>().Where(b => b.DiscountRecordId == dr.Id).FirstOrDefault();
+                    OrderRecord orderR = db.Table<OrderRecord>().Where(b => b.Id == orderW.OrderRecordId).FirstOrDefault();
+                    MassageTopic msgTopic = db.Table<MassageTopic>().Where(b => b.Id == orderR.MassageTopicId).FirstOrDefault();
+                    if (msgTopic.SellItemTypeId == 1)
+                    {
+                        discountFinal.Add(dr);
+                    }
+                }
+            }
+
+            discountWithCash = discountFinal.Sum(d => int.Parse(d.Value));
+
+            return discountWithCash;
+        }
+
+        public int getSumDiscountWithCash_B(int AccountId)
+        {
+            int discountWithCash = 0;
+            List<DiscountRecord> discountRec;
+            List<DiscountRecord> discountFinal = new List<DiscountRecord>();
+            //OrderRecordWithDiscount orderW;
+
+            using (var db = new SQLiteConnection(dbname))
+            {
+                discountRec = db.Table<DiscountRecord>().Where(b => b.AccountId == AccountId && b.IsCreditCard == "false" && b.CancelStatus == "false").ToList();
+            }
+
+            foreach (DiscountRecord dr in discountRec)
+            {
+                using (var db = new SQLiteConnection(dbname))
+                {
+                    OrderRecordWithDiscount orderW = db.Table<OrderRecordWithDiscount>().Where(b => b.DiscountRecordId == dr.Id).FirstOrDefault();
+                    OrderRecord orderR = db.Table<OrderRecord>().Where(b => b.Id == orderW.OrderRecordId).FirstOrDefault();
+                    MassageTopic msgTopic = db.Table<MassageTopic>().Where(b => b.Id == orderR.MassageTopicId).FirstOrDefault();
+                    if (msgTopic.SellItemTypeId == 2)
+                    {
+                        discountFinal.Add(dr);
+                    }
+                }
+            }
+
+            discountWithCash = discountFinal.Sum(d => int.Parse(d.Value));
+
+            return discountWithCash;
+        }
+
+        public int getSumDiscountWithCredit_B(int AccountId)
+        {
+            int discountWithCash = 0;
+            List<DiscountRecord> discountRec;
+            List<DiscountRecord> discountFinal = new List<DiscountRecord>();
+            //OrderRecordWithDiscount orderW;
+
+            using (var db = new SQLiteConnection(dbname))
+            {
+                discountRec = db.Table<DiscountRecord>().Where(b => b.AccountId == AccountId && b.IsCreditCard == "true" && b.CancelStatus == "false").ToList();
+            }
+
+            foreach (DiscountRecord dr in discountRec)
+            {
+                using (var db = new SQLiteConnection(dbname))
+                {
+                    OrderRecordWithDiscount orderW = db.Table<OrderRecordWithDiscount>().Where(b => b.DiscountRecordId == dr.Id).FirstOrDefault();
+                    OrderRecord orderR = db.Table<OrderRecord>().Where(b => b.Id == orderW.OrderRecordId).FirstOrDefault();
+                    MassageTopic msgTopic = db.Table<MassageTopic>().Where(b => b.Id == orderR.MassageTopicId).FirstOrDefault();
+                    if (msgTopic.SellItemTypeId == 2)
+                    {
+                        discountFinal.Add(dr);
+                    }
+                }
+            }
+
+            discountWithCash = discountFinal.Sum(d => int.Parse(d.Value));
+
+            return discountWithCash;
         }
 
         //public string getEmployeeTypeShowNameById(int empTypeId)

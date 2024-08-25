@@ -147,6 +147,7 @@ namespace Urban.Model
         [NotNull]
         public string Commission { get; set; }
         public string CreateDateTime { get; set; }
+        public int Position { get; set; }
     }
 
     public class OrderRecord

@@ -295,6 +295,8 @@ namespace Urban
                     GlobalValue.Instance.reportDetail = this.db.getCurrentReportDetailStatus().Value;
                     GlobalValue.Instance.MobileQrEnable = this.db.getCurrentMobileQrEnable().Value;
                     GlobalValue.Instance.VIPCardEnable = this.db.getCurrentVIPCardEnable().Value;
+                    GlobalValue.Instance.BeautySeparate = this.db.getCurrentBeautySeparate().Value;
+                    GlobalValue.Instance.IncludeOtherSaleCom = this.db.getCurrentIncludeOtherSaleCom().Value;
                 }
                 else
                 {
@@ -362,6 +364,7 @@ namespace Urban
                             mSet.Price = rootMassageSet[i]["Price"].ToString();
                             mSet.Commission = rootMassageSet[i]["Commission"].ToString();
                             mSet.CreateDateTime = ConvertDateTime(rootMassageSet[i]["CreateDateTime"].ToString());
+                            mSet.Position = (int)rootMassageSet[i]["Position"];
 
                             this.db.InsertMassageSet(mSet);
                         }
@@ -635,6 +638,8 @@ namespace Urban
                     GlobalValue.Instance.reportDetail = this.db.getCurrentReportDetailStatus().Value;
                     GlobalValue.Instance.MobileQrEnable = this.db.getCurrentMobileQrEnable().Value;
                     GlobalValue.Instance.VIPCardEnable = this.db.getCurrentVIPCardEnable().Value;
+                    GlobalValue.Instance.BeautySeparate = this.db.getCurrentBeautySeparate().Value;
+                    GlobalValue.Instance.IncludeOtherSaleCom = this.db.getCurrentIncludeOtherSaleCom().Value;
                 }
             }
             catch (Exception o)
@@ -656,6 +661,8 @@ namespace Urban
                 GlobalValue.Instance.reportDetail = this.db.getCurrentReportDetailStatus().Value;
                 GlobalValue.Instance.MobileQrEnable = this.db.getCurrentMobileQrEnable().Value;
                 GlobalValue.Instance.VIPCardEnable = this.db.getCurrentVIPCardEnable().Value;
+                GlobalValue.Instance.BeautySeparate = this.db.getCurrentBeautySeparate().Value;
+                GlobalValue.Instance.IncludeOtherSaleCom = this.db.getCurrentIncludeOtherSaleCom().Value;
 
                 MessageBox.Show("Check version fail, Please check your internet connection");
             }
@@ -709,18 +716,17 @@ namespace Urban
             reportDateTxt.Text = current.ToString("dd MMMM yyyy");
             reportTimeTxt.Text = current.ToString("HH:mm:ss");
 
-            List<int> getAllMassageTopicId = new List<int>();
-            List<MassageSet> getAllMassageSets = this.db.getAllMassageSet();
-            for(int i=0;i<getAllMassageSets.Count();i++)
-            {
-                getAllMassageTopicId.Add(getAllMassageSets[i].MassageTopicId);
-                //System.Diagnostics.Debug.WriteLine(getAllMassageSets[i].MassageTopicId+"");
-            }
+            //List<int> getAllMassageTopicId = new List<int>();
+            //List<MassageSet> getAllMassageSets = this.db.getAllMassageSet();
+            //for(int i=0;i<getAllMassageSets.Count();i++)
+            //{
+            //    getAllMassageTopicId.Add(getAllMassageSets[i].MassageTopicId);
+            //    //System.Diagnostics.Debug.WriteLine(getAllMassageSets[i].MassageTopicId+"");
+            //}
 
-            var set = new HashSet<int>(getAllMassageTopicId);
-            List<int> finalTopicId = set.ToList<int>();
+            //var set = new HashSet<int>(getAllMassageTopicId);
+            List<int> finalTopicId = this.db.getAllMassageTopicId();
 
-            globalListMassageTopic = this.db.getAllMassageTopic(finalTopicId);
             List<MassageTopic> listMassageTopic = this.db.getAllMassageTopic(finalTopicId);
             if(listMassageTopic.Count() < 1)
             {
@@ -963,18 +969,8 @@ namespace Urban
             reportDateTxt.Text = current.ToString("dd MMMM yyyy");
             reportTimeTxt.Text = current.ToString("HH:mm:ss");
 
-            List<int> getAllMassageTopicId = new List<int>();
-            List<MassageSet> getAllMassageSets = this.db.getAllMassageSet();
-            for (int i = 0; i < getAllMassageSets.Count(); i++)
-            {
-                getAllMassageTopicId.Add(getAllMassageSets[i].MassageTopicId);
-                //System.Diagnostics.Debug.WriteLine(getAllMassageSets[i].MassageTopicId+"");
-            }
+            List<int> finalTopicId = this.db.getAllMassageTopicId();
 
-            var set = new HashSet<int>(getAllMassageTopicId);
-            List<int> finalTopicId = set.ToList<int>();
-
-            globalListMassageTopic = this.db.getAllMassageTopic(finalTopicId);
             List<MassageTopic> listMassageTopic = this.db.getAllMassageTopic(finalTopicId);
             if (listMassageTopic.Count() < 1)
             {
@@ -2009,12 +2005,32 @@ namespace Urban
             reportStaffAmountTxt.Text = currentStaffNo + " p.";
             reportPaxAmount.Text = recordNum.Count() + " p.";
             reportOilTxt.Text = String.Format("{0:n}", currentStaffNo * GlobalValue.Instance.oilPrice) + " ฿";
-            reportCommissionTxt.Text = String.Format("{0:n}", getTotalCommission()) + " ฿";
-            reportOtherSaleTxt.Text = String.Format("{0:n}", getGrandTotalOtherRecord()) + " ฿";
+            reportOtherSaleTxt.Text = String.Format("{0:n}", this.db.getSumOtherSaleRecordExceptCancelled(currentUseAccountId)) + " ฿";
+            //if(GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+            //{
+            //    reportCommissionTxt.Text = String.Format("{0:n}", this.db.getSumCommissionExceptCancelled(currentUseAccountId)) + " ฿";
+            //}
+            //else
+            //{
+            //    reportCommissionTxt.Text = String.Format("{0:n}", this.db.getSumOrderCommissionExceptCancelled(currentUseAccountId)) + " ฿";
+            //}
+            
+            reportTotalIncomeTxt.Text = String.Format("{0:n}", (currentStaffNo * GlobalValue.Instance.oilPrice) + getTotalSale() + this.db.getSumOtherSaleRecordExceptCancelled(currentUseAccountId));
 
-            reportTotalIncomeTxt.Text = String.Format("{0:n}", (currentStaffNo * GlobalValue.Instance.oilPrice) + getTotalSale() + getGrandTotalOtherRecord());
-            reportTotalExpenseTxt.Text = String.Format("{0:n}", getTotalCommission());
-            reportGrandTotalTxt.Text = String.Format("{0:n}", (currentStaffNo * GlobalValue.Instance.oilPrice) + getTotalSale() + getGrandTotalOtherRecord() - getTotalCommission());
+            if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+            {
+                reportCommissionTxt.Text = String.Format("{0:n}", this.db.getSumCommissionExceptCancelled(currentUseAccountId)) + " ฿";
+                reportTotalExpenseTxt.Text = String.Format("{0:n}", this.db.getSumCommissionExceptCancelled(currentUseAccountId));
+                reportGrandTotalTxt.Text = String.Format("{0:n}", (currentStaffNo * GlobalValue.Instance.oilPrice) + getTotalSale() + this.db.getSumOtherSaleRecordExceptCancelled(currentUseAccountId) - this.db.getSumCommissionExceptCancelled(currentUseAccountId));
+            }
+            else
+            {
+                reportTotalExpenseTxt.Text = String.Format("{0:n}", this.db.getSumOrderCommissionExceptCancelled(currentUseAccountId));
+                reportCommissionTxt.Text = String.Format("{0:n}", this.db.getSumOrderCommissionExceptCancelled(currentUseAccountId)) + " ฿";
+                reportGrandTotalTxt.Text = String.Format("{0:n}", (currentStaffNo * GlobalValue.Instance.oilPrice) + getTotalSale() + this.db.getSumOtherSaleRecordExceptCancelled(currentUseAccountId) - this.db.getSumOrderCommissionExceptCancelled(currentUseAccountId));
+            }
+
+            //reportGrandTotalTxt.Text = String.Format("{0:n}", (currentStaffNo * GlobalValue.Instance.oilPrice) + getTotalSale() + this.db.getSumOtherSaleRecordExceptCancelled(currentUseAccountId) - this.db.getSumCommissionExceptCancelled(currentUseAccountId));
         }
 
         private void reportBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2160,7 +2176,10 @@ namespace Urban
 
             SaveOtherSaleOrderToDB("cash");
             PrintOtherSaleReceipt();
-            PrintOtherSaleCommission();
+            if(GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+            {
+                PrintOtherSaleCommission();
+            }
 
             summaryOtherPopupGrid.Visibility = Visibility.Collapsed;
             otherSaleListPopupGrid.Visibility = Visibility.Collapsed;
@@ -2176,7 +2195,10 @@ namespace Urban
 
             SaveOtherSaleOrderToDB("credit");
             PrintOtherSaleReceipt();
-            PrintOtherSaleCommission();
+            if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+            {
+                PrintOtherSaleCommission();
+            }
 
             summaryOtherPopupGrid.Visibility = Visibility.Collapsed;
             otherSaleListPopupGrid.Visibility = Visibility.Collapsed;
@@ -2254,15 +2276,25 @@ namespace Urban
             await Task.Delay(2000);
 
             //Check staff fee is 0 or more
-            if(GlobalValue.Instance.oilPrice == 0)
+            //if(GlobalValue.Instance.oilPrice == 0)
+            //{
+            //    exportPDF_NoStaffFee();
+            //}
+            //else
+            //{
+            //    exportPDF();
+            //}
+
+            //Check Beauty type is seprate or not
+            if (GlobalValue.Instance.BeautySeparate.Equals("true"))
             {
-                exportPDF_NoStaffFee();
+                exportPDF_withBeauty();
             }
             else
             {
                 exportPDF();
             }
-            
+
         }
 
         private void cancelExitBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -2497,17 +2529,42 @@ namespace Urban
                         //Tag = cancelParams
                     };
 
-                    TextBlock otherSaleItemTxt = new TextBlock()
+                    TextBlock otherSaleItemTxt = new TextBlock();
+
+                    if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
                     {
-                        Text = this.db.getOtherSaleNameFromId(otherSaleList[v].OtherSaleId) + " (Other sale)\n" + "Commission : " + String.Format("{0:n}", Int32.Parse(otherSaleList[v].Commission)) + " ฿",
-                        FontSize = 15,
-                        HorizontalAlignment = HorizontalAlignment.Left,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        TextWrapping = TextWrapping.Wrap,
-                        TextTrimming = TextTrimming.None,
-                        Width = 300,
-                        Padding = new Thickness(8, 8, 0, 8)
-                    };
+                        //otherSaleItemTxt = new TextBlock()
+                        //{
+                        //    Text = this.db.getOtherSaleNameFromId(otherSaleList[v].OtherSaleId) + " (Other sale)\n" + "Commission : " + String.Format("{0:n}", Int32.Parse(otherSaleList[v].Commission)) + " ฿",
+                        //    FontSize = 15,
+                        //    HorizontalAlignment = HorizontalAlignment.Left,
+                        //    VerticalAlignment = VerticalAlignment.Top,
+                        //    TextWrapping = TextWrapping.Wrap,
+                        //    TextTrimming = TextTrimming.None,
+                        //    Width = 300,
+                        //    Padding = new Thickness(8, 8, 0, 8)
+                        //};
+
+                        otherSaleItemTxt.Text = this.db.getOtherSaleNameFromId(otherSaleList[v].OtherSaleId) + " (Other sale)\n" + "Commission : " + String.Format("{0:n}", Int32.Parse(otherSaleList[v].Commission)) + " ฿";
+                        otherSaleItemTxt.FontSize = 15;
+                        otherSaleItemTxt.HorizontalAlignment = HorizontalAlignment.Left;
+                        otherSaleItemTxt.VerticalAlignment = VerticalAlignment.Top;
+                        otherSaleItemTxt.TextWrapping = TextWrapping.Wrap;
+                        otherSaleItemTxt.TextTrimming = TextTrimming.None;
+                        otherSaleItemTxt.Width = 300;
+                        otherSaleItemTxt.Padding = new Thickness(8, 8, 0, 8);
+                    }
+                    else
+                    {
+                        otherSaleItemTxt.Text = this.db.getOtherSaleNameFromId(otherSaleList[v].OtherSaleId) + " (Other sale)";
+                        otherSaleItemTxt.FontSize = 15;
+                        otherSaleItemTxt.HorizontalAlignment = HorizontalAlignment.Left;
+                        otherSaleItemTxt.VerticalAlignment = VerticalAlignment.Top;
+                        otherSaleItemTxt.TextWrapping = TextWrapping.Wrap;
+                        otherSaleItemTxt.TextTrimming = TextTrimming.None;
+                        otherSaleItemTxt.Width = 300;
+                        otherSaleItemTxt.Padding = new Thickness(8, 8, 0, 8);
+                    }
 
                     TextBlock otherSalePriceItemTxt = new TextBlock()
                     {
@@ -2977,7 +3034,7 @@ namespace Urban
             //PrintDialog pd = new PrintDialog();
 
             //For test printing
-            MessageBox.Show(sb.ToString(), "Receipt Preview");
+            //MessageBox.Show(sb.ToString(), "Receipt Preview");
 
             //printString += sb.ToString();
 
@@ -3050,7 +3107,7 @@ namespace Urban
                 //MessageBox.Show(paxBeforeCalculate+"");
 
                 //For test printing
-                MessageBox.Show(sb.ToString(), "Commission Preview");
+                //MessageBox.Show(sb.ToString(), "Commission Preview");
 
                 RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.commissionPrinter, sb.ToString());
 
@@ -3085,7 +3142,7 @@ namespace Urban
             sb.AppendLine("\x1b" + "\x69");
             //PrintDialog pd = new PrintDialog();
             //Test print
-            MessageBox.Show(sb.ToString(), "Other sale receipt Preview");
+            //MessageBox.Show(sb.ToString(), "Other sale receipt Preview");
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.receiptPrinter, sb.ToString());
             
 
@@ -3117,7 +3174,7 @@ namespace Urban
             //MessageBox.Show(paxBeforeCalculate+"");
 
             //For test printing
-            MessageBox.Show(sb.ToString(), "Other Sale Commission Preview");
+            //MessageBox.Show(sb.ToString(), "Other Sale Commission Preview");
 
             RawPrinterHelper.SendStringToPrinter(GlobalValue.Instance.commissionPrinter, sb.ToString());
 
@@ -3155,7 +3212,7 @@ namespace Urban
             //PrintDialog pd = new PrintDialog();
 
             //For test printing
-            MessageBox.Show(sb.ToString(), "Cancel Preview");
+            //MessageBox.Show(sb.ToString(), "Cancel Preview");
 
             //printString += sb.ToString();
 
@@ -3450,8 +3507,20 @@ namespace Urban
                         int income = getTotalSaleFromId(listAccount[f].Id) - voucherCash;
                         int creditIncome = getTotalCreditSaleFromId(listAccount[f].Id) - voucherCredit;
                         int totalVoucher = voucherCash + voucherCredit;
-                        int commis = getTotalCommissionFromId(listAccount[f].Id);
-                        int pax = getTotalPaxFromId(listAccount[f].Id);
+                        int commis = 0;
+                        //Check commission condition (include other sale commission or not
+                        if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+                        {
+                            commis = this.db.getSumCommissionExceptCancelled(listAccount[f].Id);
+                        }
+                        else
+                        {
+                            commis = this.db.getSumOrderCommissionExceptCancelled(listAccount[f].Id);
+                        }
+
+                        int finalOtherSale = this.db.getSumOtherSaleRecordExceptCancelled(listAccount[f].Id);
+
+                        int pax = this.db.getSumPaxExceptCancelled(listAccount[f].Id);
                         int grandIncome = income + creditIncome; //+ oil;
                         int averagePax = 0;
                         if (grandIncome != 0 && pax != 0)
@@ -3461,31 +3530,75 @@ namespace Urban
                         }
                         //int uniform = getTotalUniformFromId(listAccount[f].Id);
                         //int tigerBalm = getTotalTigerBalmFromId(listAccount[f].Id);
-                        int finalOtherSale = getTotalOtherSaleFromId(listAccount[f].Id);
-                        double finalWorkerBonus_d = (double)grandIncome * 0.13;
-                        int finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
-                        int finalIncome = grandIncome - commis + finalOtherSale - finalWorkerBonus;
+
+                        int realGrandincome = 0;
+                        int finalWorkerBonus = 0;
+                        int finalIncome = 0;
+                        double finalWorkerBonus_d = 0;
+
+                        if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+                        {
+                            realGrandincome = grandIncome + finalOtherSale;
+                            finalWorkerBonus_d = (double)realGrandincome * 0.13;
+                            finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
+                            finalIncome = realGrandincome - commis - finalWorkerBonus;
+                        }
+                        else
+                        {
+                            finalWorkerBonus_d = (double)grandIncome * 0.13;
+                            finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
+                            finalIncome = grandIncome - commis + finalOtherSale - finalWorkerBonus;
+                        }
+
+                        //int uniform = getTotalUniformFromId(listAccount[f].Id);
+                        //int tigerBalm = getTotalTigerBalmFromId(listAccount[f].Id);
+
+
                         int totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
 
-
-                        DailyReportForm dailyForm = new DailyReportForm()
+                        DailyReportForm dailyForm;
+                        if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
                         {
-                            Date = s[2],
-                            StartMoney = String.Format("{0:n}", Int32.Parse(listAccount[f].StartMoney)),
-                            TotalPax = pax.ToString(),
-                            MassageAmount = String.Format("{0:n}", income),
-                            MassageCreditAmount = String.Format("{0:n}", creditIncome),
-                            MassageVoucherAmount = String.Format("{0:n}", totalVoucher),
-                            AveragePerPax = String.Format("{0:n}", averagePax),
-                            TotalWorker = staff.ToString(),
-                            OilAmount = String.Format("{0:n}", oil),
-                            TotalIncome = String.Format("{0:n}", grandIncome),
-                            PayWorkers = String.Format("{0:n}", commis),
-                            TotalCancelled = totalCancelled.ToString(),
-                            WorkBonus = String.Format("{0:n}", finalWorkerBonus),
-                            TotalOtherSale = String.Format("{0:n}", finalOtherSale),
-                            BalanceNet = String.Format("{0:n}", finalIncome)
-                        };
+                            dailyForm = new DailyReportForm()
+                            {
+                                Date = s[2],
+                                StartMoney = String.Format("{0:n}", Int32.Parse(listAccount[f].StartMoney)),
+                                TotalPax = pax.ToString(),
+                                MassageAmount = String.Format("{0:n}", income),
+                                MassageCreditAmount = String.Format("{0:n}", creditIncome),
+                                MassageVoucherAmount = String.Format("{0:n}", totalVoucher),
+                                AveragePerPax = String.Format("{0:n}", averagePax),
+                                TotalWorker = staff.ToString(),
+                                OilAmount = String.Format("{0:n}", oil),
+                                TotalIncome = String.Format("{0:n}", realGrandincome),
+                                PayWorkers = String.Format("{0:n}", commis),
+                                TotalCancelled = totalCancelled.ToString(),
+                                WorkBonus = String.Format("{0:n}", finalWorkerBonus),
+                                TotalOtherSale = String.Format("{0:n}", finalOtherSale),
+                                BalanceNet = String.Format("{0:n}", finalIncome)
+                            };
+                        }
+                        else
+                        {
+                            dailyForm = new DailyReportForm()
+                            {
+                                Date = s[2],
+                                StartMoney = String.Format("{0:n}", Int32.Parse(listAccount[f].StartMoney)),
+                                TotalPax = pax.ToString(),
+                                MassageAmount = String.Format("{0:n}", income),
+                                MassageCreditAmount = String.Format("{0:n}", creditIncome),
+                                MassageVoucherAmount = String.Format("{0:n}", totalVoucher),
+                                AveragePerPax = String.Format("{0:n}", averagePax),
+                                TotalWorker = staff.ToString(),
+                                OilAmount = String.Format("{0:n}", oil),
+                                TotalIncome = String.Format("{0:n}", grandIncome),
+                                PayWorkers = String.Format("{0:n}", commis),
+                                TotalCancelled = totalCancelled.ToString(),
+                                WorkBonus = String.Format("{0:n}", finalWorkerBonus),
+                                TotalOtherSale = String.Format("{0:n}", finalOtherSale),
+                                BalanceNet = String.Format("{0:n}", finalIncome)
+                            };
+                        }
 
                         allDailyForm.Add(dailyForm);
                     }
@@ -3845,7 +3958,7 @@ namespace Urban
 
         }
 
-        public async void exportPDF_NoStaffFee()
+        public async void exportPDF_withBeauty()
         {
             List<Branch> listBranch = this.db.getAllBranch();
 
@@ -3854,395 +3967,613 @@ namespace Urban
 
             // Create an empty page
             PdfPage page = document.AddPage();
+            PdfPage page2 = document.AddPage();
             page.Orientation = PageOrientation.Landscape;
+            page2.Orientation = PageOrientation.Landscape;
 
-            // Get an XGraphics object for drawing
-            XGraphics gfx = XGraphics.FromPdfPage(page);
-
-            //XRect rect = new XRect(0, 0, 250, 140);
-
-            //XFont font = new XFont("Verdana", 10);
-            //XBrush brush = XBrushes.Purple;
-
-
-            XRect BigTitleRect = new XRect(0, 0, 800, 20);
-            XRect TableHeaderRect = new XRect(10, 77, 770, 36);
-            XRect TableFooterRect = new XRect(10, 517, 770, 12);
-
-            XRect TableColumnRect_Date = new XRect(10, 77, 30, 452);
-            XRect TableColumnRect_InitialMoney = new XRect(40, 77, 55, 452);
-            XRect TableColumnRect_Total = new XRect(95, 77, 30, 452);
-            XRect TableColumnRect_Massage = new XRect(125, 77, 174, 452);
-            XRect TableColumnRect_Massage_Cash = new XRect(125, 95, 62, 434);
-            XRect TableColumnRect_Massage_Credit = new XRect(187, 95, 61, 434);
-            XRect TableColumnRect_Massage_Voucher = new XRect(248, 95, 51, 434);
-            XRect TableColumnRect_AveragePerPax = new XRect(299, 77, 80, 452);
-            XRect TableColumnRect_TotalWorker = new XRect(379, 77, 55, 452);
-            //XRect TableColumnRect_OilIncome = new XRect(380, 77, 54, 452);
-            XRect TableColumnRect_TotalIncome = new XRect(534, 77, 69, 452);//change position
-            XRect TableColumnRect_PayWorker = new XRect(603, 77, 62, 452);//change position
-            XRect TableColumnRect_TotalCancelled = new XRect(665, 77, 45, 452);//change position
-            XRect TableColumnRect_TotalUniform = new XRect(434, 77, 46, 452);//change position
-            XRect TableColumnRect_TotalTigerBalm = new XRect(480, 77, 54, 452);//change position
-            XRect TableColumnRect_BalanceNet = new XRect(710, 77, 70, 452);
-
-            XRect TableColumnRect_Date_Text_Header = new XRect(11, 90, 27, 520);
-            XRect TableColumnRect_InitialMoney_Text_Header = new XRect(54, 90, 27, 520);
-            XRect TableColumnRect_Total_Text_Header = new XRect(95, 90, 27, 520);
-            XRect TableColumnRect_Massage_Text_Header = new XRect(201, 80, 27, 520);
-            XRect TableColumnRect_Massage_Cash_Text_Header = new XRect(147, 99, 14, 520);
-            XRect TableColumnRect_Massage_Credit_Text_Header = new XRect(210, 99, 14, 520);
-            XRect TableColumnRect_Massage_Voucher_Text_Header = new XRect(265, 99, 14, 520);
-            XRect TableColumnRect_AveragePerPax_Text_Header = new XRect(318, 90, 46, 520);
-            //XRect TableColumnRect_AveragePerPax_2_Text_Header = new XRect(308, 95, 27, 520);
-            XRect TableColumnRect_TotalWorker_Text_Header = new XRect(374, 90, 65, 520);
-            //XRect TableColumnRect_TotalWorker_2_Text_Header = new XRect(341, 95, 43, 520);
-            //XRect TableColumnRect_OilIncome_Text_Header = new XRect(390, 85, 33, 520);
-            //XRect TableColumnRect_OilIncome_2_Text_Header = new XRect(390, 95, 33, 520);
-            XRect TableColumnRect_TotalIncome_Text_Header = new XRect(541, 90, 56, 520);//change position
-            XRect TableColumnRect_PayWorker_Text_Header = new XRect(617, 90, 33, 520);//change position
-            XRect TableColumnRect_TotalCancelled_Text_Header = new XRect(663, 90, 50, 520);//change position
-            XRect TableColumnRect_TotalUniform_Text_Header = new XRect(433, 90, 50, 520);//change position
-            XRect TableColumnRect_TotalTigerBalm_Text_Header = new XRect(483, 90, 50, 520);//change position
-            XRect TableColumnRect_BalanceNet_Text_Header = new XRect(718, 90, 56, 520);
-
-            XRect TableColumnRect_Date_Text = new XRect(11, 100, 27, 520);
-            XRect TableColumnRect_InitialMoney_Text = new XRect(52, 100, 27, 520);
-            XRect TableColumnRect_Total_Text = new XRect(90, 100, 27, 520);
-            XRect TableColumnRect_Massage_Text = new XRect(135, 100, 27, 520);
-            XRect TableColumnRect_Massage_Credit_Text = new XRect(199, 100, 27, 520);
-            XRect TableColumnRect_Massage_Voucher_Text = new XRect(259, 100, 27, 520);
-            XRect TableColumnRect_AveragePerPax_Text = new XRect(320, 100, 27, 520);
-            XRect TableColumnRect_TotalWorker_Text = new XRect(384, 100, 43, 520);
-            //XRect TableColumnRect_OilIncome_Text = new XRect(389, 100, 33, 520);
-            XRect TableColumnRect_TotalIncome_Text = new XRect(535, 100, 56, 520);//change position
-            XRect TableColumnRect_PayWorker_Text = new XRect(614, 100, 33, 520);//change position
-            XRect TableColumnRect_TotalCancelled_Text = new XRect(664, 100, 50, 520);//change position
-            XRect TableColumnRect_TotalUniform_Text = new XRect(438, 100, 50, 520);//change position
-            XRect TableColumnRect_TotalTigerBalm_Text = new XRect(481, 100, 50, 520);//change position
-            XRect TableColumnRect_BalanceNet_Text = new XRect(718, 100, 56, 520);
-
-            XRect TableColumnRect_No = new XRect(10, 95, 27, 520);
-            XRect TableColumnRect_Time = new XRect(10 + TableColumnRect_No.Width, 95, 50, 520);
-            XRect TableColumnRect_Detail = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width, 95, 438, 520);
-            XRect TableColumnRect_Price = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width + TableColumnRect_Detail.Width, 95, 75, 545);
-
-            XRect TableColumnRect_No_Text = new XRect(10, 122, 27, 520);
-            XRect TableColumnRect_Time_Text = new XRect(10 + TableColumnRect_No.Width, 122, 50, 520);
-            XRect TableColumnRect_Detail_Text = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width, 122, 438, 520);
-            XRect TableColumnRect_Price_Text = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width + TableColumnRect_Detail.Width, 122, 75, 545);
-
-            //XRect TableFooterText_TotalSale = new XRect(10, 635, 590, 25);
-            //XRect TableFooterText_TotalSaleValue = new XRect(10, 635, 590, 25);
-
-            XFont BigTitleFont = new XFont("Verdana", 13);
-            XFont HeaderContentFont = new XFont("Verdana", 10, XFontStyle.Underline);
-            XFont ContentFont = new XFont("Verdana", 8);
-
-            XBrush BlackBrush = XBrushes.Black;
-
-            XStringFormat format = new XStringFormat();
-
-            //gfx.DrawRectangle(XPens.YellowGreen, rect);
-            gfx.DrawRectangle(XBrushes.LightGray, BigTitleRect);
-            gfx.DrawRectangle(XPens.Black, BigTitleRect);
-            //gfx.DrawLine(XPens.YellowGreen, rect.Width / 2, 0, rect.Width / 2, rect.Height);
-            //gfx.DrawLine(XPens.YellowGreen, 0, rect.Height / 2, rect.Width, rect.Height / 2);
-            Account curAcctx = this.db.getAccountFromId(currentUseAccountId);
-            string acctxDate = curAcctx.Date;
-            string[] splitAcctxDate = acctxDate.Split('-');
-            MonthConvertor mc = new MonthConvertor();
-
-            format.LineAlignment = XLineAlignment.Center;
-            format.Alignment = XStringAlignment.Center;
-            gfx.DrawString(currentBranchName, BigTitleFont, BlackBrush, BigTitleRect, format);
-            gfx.DrawString("Daily Report", HeaderContentFont, BlackBrush, 20, 4 + HeaderContentFont.Height + BigTitleRect.Height);
-            gfx.DrawString("Branch name : " + currentBranchName, ContentFont, BlackBrush, 20, 8 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height);
-            gfx.DrawString("Month/Year : " + mc.calMonth(splitAcctxDate[1]) + " " + splitAcctxDate[0], ContentFont, BlackBrush, 20, 6 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
-            //gfx.DrawString("Branch name : " + currentBranchName, ContentFont, BlackBrush, 220, 8 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height);
-            gfx.DrawString("Generate Date/Time : " + DateTime.Now.ToString("dd-MM-yyy HH:mm"), ContentFont, BlackBrush, 220, 6 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
-
-            gfx.DrawLine(XPens.Black, 0, 16 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height, BigTitleRect.Width, 17 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
-
-            gfx.DrawRectangle(XBrushes.Yellow, TableHeaderRect);
-            gfx.DrawRectangle(XPens.Black, TableHeaderRect);
-            gfx.DrawRectangle(XBrushes.Yellow, TableFooterRect);
-
-            //gfx.DrawRectangle(XBrushes.LightGray, TableFooterRect);
-            //gfx.DrawRectangle(XPens.Black, TableFooterRect);
-
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_Date);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_InitialMoney);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_Total);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Cash);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Credit);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Voucher);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_AveragePerPax);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalWorker);
-            //gfx.DrawRectangle(XPens.Black, TableColumnRect_OilIncome);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalIncome);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_PayWorker);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalCancelled);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalUniform);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalTigerBalm);
-            gfx.DrawRectangle(XPens.Black, TableColumnRect_BalanceNet);
-
-            format.LineAlignment = XLineAlignment.Near;
-            format.Alignment = XStringAlignment.Center;
-
-            gfx.DrawString("Date", ContentFont, BlackBrush, TableColumnRect_Date_Text_Header, format);
-            gfx.DrawString("Start Money", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text_Header, format);
-            gfx.DrawString("Pax", ContentFont, BlackBrush, TableColumnRect_Total_Text_Header, format);
-            gfx.DrawString("Massage Amount", ContentFont, BlackBrush, TableColumnRect_Massage_Text_Header, format);
-            gfx.DrawString("Cash", ContentFont, BlackBrush, TableColumnRect_Massage_Cash_Text_Header, format);
-            gfx.DrawString("Credit", ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text_Header, format);
-            gfx.DrawString("Voucher", ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text_Header, format);
-            gfx.DrawString("Average/Pax", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text_Header, format);
-            //gfx.DrawString("/Pax", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_2_Text_Header, format);
-            gfx.DrawString("Total Worker", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text_Header, format);
-            //gfx.DrawString("Worker", ContentFont, BlackBrush, TableColumnRect_TotalWorker_2_Text_Header, format);
-            //gfx.DrawString("Income", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text_Header, format);
-            //gfx.DrawString(GlobalValue.Instance.oilPrice + "B/Staff", ContentFont, BlackBrush, TableColumnRect_OilIncome_2_Text_Header, format);
-            gfx.DrawString("Total Incomes", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text_Header, format);
-            gfx.DrawString("Pay Workers", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text_Header, format);
-            gfx.DrawString("Cancelled", ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text_Header, format);
-            gfx.DrawString("Uniform", ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text_Header, format);
-            //gfx.DrawString("Tiger Balm", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
-            gfx.DrawString("Other Sale", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
-            gfx.DrawString("Balance Net", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text_Header, format);
-
-            int y1 = 126;
-            int y2 = 127;
-            int plusYe = 23;
-
-            for (int h = 0; h < 31; h++)
+            for(int pg=0; pg < document.PageCount; pg++)
             {
-                if (h == 0)
+                // Get an XGraphics object for drawing
+                XGraphics gfx = XGraphics.FromPdfPage(document.Pages[pg]);
+
+                //XRect rect = new XRect(0, 0, 250, 140);
+
+                //XFont font = new XFont("Verdana", 10);
+                //XBrush brush = XBrushes.Purple;
+
+                //Massage type
+                XRect BigTitleRect = new XRect(0, 0, 800, 20);
+                XRect TableHeaderRect = new XRect(10, 77, 770, 36);
+                XRect TableFooterRect = new XRect(10, 517, 770, 12);
+
+                XRect TableColumnRect_Date = new XRect(10, 77, 30, 452);
+                XRect TableColumnRect_InitialMoney = new XRect(40, 77, 55, 452);
+                XRect TableColumnRect_Total = new XRect(95, 77, 30, 452);
+                XRect TableColumnRect_Massage = new XRect(125, 77, 174, 452);
+                XRect TableColumnRect_Massage_Cash = new XRect(125, 95, 62, 434);
+                XRect TableColumnRect_Massage_Credit = new XRect(187, 95, 61, 434);
+                XRect TableColumnRect_Massage_Voucher = new XRect(248, 95, 51, 434);
+                XRect TableColumnRect_AveragePerPax = new XRect(299, 77, 47, 452);
+                XRect TableColumnRect_TotalWorker = new XRect(346, 77, 34, 452);
+                XRect TableColumnRect_OilIncome = new XRect(380, 77, 54, 452);
+                XRect TableColumnRect_TotalOtherSale = new XRect(434, 77, 54, 452);//change position
+                XRect TableColumnRect_TotalIncome = new XRect(488, 77, 69, 452);//change position
+                XRect TableColumnRect_PayWorker = new XRect(557, 77, 62, 452);//change position
+                XRect TableColumnRect_WorkerBonus = new XRect(619, 77, 58, 452);//change position
+                XRect TableColumnRect_TotalCancelled = new XRect(677, 77, 33, 452);//change position
+                XRect TableColumnRect_BalanceNet = new XRect(710, 77, 70, 452);
+
+                XRect TableColumnRect_Date_Text_Header = new XRect(11, 90, 27, 520);
+                XRect TableColumnRect_InitialMoney_Text_Header = new XRect(54, 90, 27, 520);
+                XRect TableColumnRect_Total_Text_Header = new XRect(95, 90, 27, 520);
+                XRect TableColumnRect_Massage_Text_Header = new XRect(201, 80, 27, 520);
+                XRect TableColumnRect_Massage_Cash_Text_Header = new XRect(147, 99, 14, 520);
+                XRect TableColumnRect_Massage_Credit_Text_Header = new XRect(210, 99, 14, 520);
+                XRect TableColumnRect_Massage_Voucher_Text_Header = new XRect(265, 99, 14, 520);
+                XRect TableColumnRect_AveragePerPax_Text_Header = new XRect(308, 85, 27, 520);
+                XRect TableColumnRect_AveragePerPax_2_Text_Header = new XRect(308, 95, 27, 520);
+                XRect TableColumnRect_TotalWorker_Text_Header = new XRect(341, 85, 43, 520);
+                XRect TableColumnRect_TotalWorker_2_Text_Header = new XRect(341, 95, 43, 520);
+                XRect TableColumnRect_OilIncome_Text_Header = new XRect(390, 85, 33, 520);
+                XRect TableColumnRect_OilIncome_2_Text_Header = new XRect(390, 95, 33, 520);
+                XRect TableColumnRect_TotalOtherSale_Text_Header = new XRect(435, 90, 50, 520);//change position
+                XRect TableColumnRect_TotalIncome_Text_Header = new XRect(495, 90, 56, 520);//change position
+                XRect TableColumnRect_PayWorker_Text_Header = new XRect(571, 90, 33, 520);//change position
+                XRect TableColumnRect_WorkerBonus_Text_Header = new XRect(624, 85, 50, 520);
+                XRect TableColumnRect_WorkerBonus_2_Text_Header = new XRect(624, 95, 50, 520);
+                XRect TableColumnRect_TotalCancelled_Text_Header = new XRect(676, 90, 35, 520);//change position
+                XRect TableColumnRect_BalanceNet_Text_Header = new XRect(718, 90, 56, 520);
+
+                XRect TableColumnRect_Date_Text = new XRect(11, 100, 27, 520);
+                XRect TableColumnRect_InitialMoney_Text = new XRect(52, 100, 27, 520);
+                XRect TableColumnRect_Total_Text = new XRect(90, 100, 27, 520);
+                XRect TableColumnRect_Massage_Text = new XRect(135, 100, 27, 520);
+                XRect TableColumnRect_Massage_Credit_Text = new XRect(199, 100, 27, 520);
+                XRect TableColumnRect_Massage_Voucher_Text = new XRect(259, 100, 27, 520);
+                XRect TableColumnRect_AveragePerPax_Text = new XRect(306, 100, 27, 520);
+                XRect TableColumnRect_TotalWorker_Text = new XRect(340, 100, 43, 520);
+                XRect TableColumnRect_OilIncome_Text = new XRect(389, 100, 33, 520);
+                XRect TableColumnRect_TotalOtherSale_Text = new XRect(430, 100, 50, 520);//change position
+                XRect TableColumnRect_TotalIncome_Text = new XRect(488, 100, 56, 520);//change position
+                XRect TableColumnRect_PayWorker_Text = new XRect(570, 100, 33, 520);//change position
+                XRect TableColumnRect_WorkerBonus_Text = new XRect(622, 100, 50, 520);//change position
+                XRect TableColumnRect_TotalCancelled_Text = new XRect(674, 100, 50, 520);//change position
+                XRect TableColumnRect_BalanceNet_Text = new XRect(718, 100, 56, 520);
+
+                XRect TableColumnRect_No = new XRect(10, 95, 27, 520);
+                XRect TableColumnRect_Time = new XRect(10 + TableColumnRect_No.Width, 95, 50, 520);
+                XRect TableColumnRect_Detail = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width, 95, 438, 520);
+                XRect TableColumnRect_Price = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width + TableColumnRect_Detail.Width, 95, 75, 545);
+
+                XRect TableColumnRect_No_Text = new XRect(10, 122, 27, 520);
+                XRect TableColumnRect_Time_Text = new XRect(10 + TableColumnRect_No.Width, 122, 50, 520);
+                XRect TableColumnRect_Detail_Text = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width, 122, 438, 520);
+                XRect TableColumnRect_Price_Text = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width + TableColumnRect_Detail.Width, 122, 75, 545);
+
+                //Beauty type
+                //XRect BigTitleRect_p2 = new XRect(0, 0, 800, 20);
+                //XRect TableHeaderRect_p2 = new XRect(10, 77, 770, 36);
+                //XRect TableFooterRect_p2 = new XRect(10, 517, 770, 12);
+
+                //XRect TableColumnRect_Date_p2 = new XRect(10, 77, 30, 452);
+                //XRect TableColumnRect_InitialMoney_p2 = new XRect(40, 77, 55, 452);
+                //XRect TableColumnRect_Total_p2 = new XRect(95, 77, 30, 452);
+                //XRect TableColumnRect_Massage_p2 = new XRect(125, 77, 174, 452);
+                //XRect TableColumnRect_Massage_Cash_p2 = new XRect(125, 95, 62, 434);
+                //XRect TableColumnRect_Massage_Credit_p2 = new XRect(187, 95, 61, 434);
+                //XRect TableColumnRect_Massage_Voucher_p2 = new XRect(248, 95, 51, 434);
+                //XRect TableColumnRect_AveragePerPax_p2 = new XRect(299, 77, 47, 452);
+                //XRect TableColumnRect_TotalWorker_p2 = new XRect(346, 77, 34, 452);
+                //XRect TableColumnRect_OilIncome_p2 = new XRect(380, 77, 54, 452);
+                //XRect TableColumnRect_TotalOtherSale_p2 = new XRect(434, 77, 54, 452);//change position
+                //XRect TableColumnRect_TotalIncome_p2 = new XRect(488, 77, 69, 452);//change position
+                //XRect TableColumnRect_PayWorker_p2 = new XRect(557, 77, 62, 452);//change position
+                //XRect TableColumnRect_WorkerBonus_p2 = new XRect(619, 77, 58, 452);//change position
+                //XRect TableColumnRect_TotalCancelled_p2 = new XRect(677, 77, 33, 452);//change position
+                //XRect TableColumnRect_BalanceNet_p2 = new XRect(710, 77, 70, 452);
+
+                //XRect TableColumnRect_Date_Text_Header_p2 = new XRect(11, 90, 27, 520);
+                //XRect TableColumnRect_InitialMoney_Text_Header_p2 = new XRect(54, 90, 27, 520);
+                //XRect TableColumnRect_Total_Text_Header_p2 = new XRect(95, 90, 27, 520);
+                //XRect TableColumnRect_Massage_Text_Header_p2 = new XRect(201, 80, 27, 520);
+                //XRect TableColumnRect_Massage_Cash_Text_Header_p2 = new XRect(147, 99, 14, 520);
+                //XRect TableColumnRect_Massage_Credit_Text_Header_p2 = new XRect(210, 99, 14, 520);
+                //XRect TableColumnRect_Massage_Voucher_Text_Header_p2 = new XRect(265, 99, 14, 520);
+                //XRect TableColumnRect_AveragePerPax_Text_Header_p2 = new XRect(308, 85, 27, 520);
+                //XRect TableColumnRect_AveragePerPax_2_Text_Header_p2 = new XRect(308, 95, 27, 520);
+                //XRect TableColumnRect_TotalWorker_Text_Header_p2 = new XRect(341, 85, 43, 520);
+                //XRect TableColumnRect_TotalWorker_2_Text_Header_p2 = new XRect(341, 95, 43, 520);
+                //XRect TableColumnRect_OilIncome_Text_Header_p2 = new XRect(390, 85, 33, 520);
+                //XRect TableColumnRect_OilIncome_2_Text_Header_p2 = new XRect(390, 95, 33, 520);
+                //XRect TableColumnRect_TotalOtherSale_Text_Header_p2 = new XRect(435, 90, 50, 520);//change position
+                //XRect TableColumnRect_TotalIncome_Text_Header_p2 = new XRect(495, 90, 56, 520);//change position
+                //XRect TableColumnRect_PayWorker_Text_Header = new XRect(571, 90, 33, 520);//change position
+                //XRect TableColumnRect_WorkerBonus_Text_Header = new XRect(624, 85, 50, 520);
+                //XRect TableColumnRect_WorkerBonus_2_Text_Header = new XRect(624, 95, 50, 520);
+                //XRect TableColumnRect_TotalCancelled_Text_Header = new XRect(676, 90, 35, 520);//change position
+                //XRect TableColumnRect_BalanceNet_Text_Header = new XRect(718, 90, 56, 520);
+
+                //XRect TableColumnRect_Date_Text = new XRect(11, 100, 27, 520);
+                //XRect TableColumnRect_InitialMoney_Text = new XRect(52, 100, 27, 520);
+                //XRect TableColumnRect_Total_Text = new XRect(90, 100, 27, 520);
+                //XRect TableColumnRect_Massage_Text = new XRect(135, 100, 27, 520);
+                //XRect TableColumnRect_Massage_Credit_Text = new XRect(199, 100, 27, 520);
+                //XRect TableColumnRect_Massage_Voucher_Text = new XRect(259, 100, 27, 520);
+                //XRect TableColumnRect_AveragePerPax_Text = new XRect(306, 100, 27, 520);
+                //XRect TableColumnRect_TotalWorker_Text = new XRect(340, 100, 43, 520);
+                //XRect TableColumnRect_OilIncome_Text = new XRect(389, 100, 33, 520);
+                //XRect TableColumnRect_TotalOtherSale_Text = new XRect(430, 100, 50, 520);//change position
+                //XRect TableColumnRect_TotalIncome_Text = new XRect(488, 100, 56, 520);//change position
+                //XRect TableColumnRect_PayWorker_Text = new XRect(570, 100, 33, 520);//change position
+                //XRect TableColumnRect_WorkerBonus_Text = new XRect(622, 100, 50, 520);//change position
+                //XRect TableColumnRect_TotalCancelled_Text = new XRect(674, 100, 50, 520);//change position
+                //XRect TableColumnRect_BalanceNet_Text = new XRect(718, 100, 56, 520);
+
+                //XRect TableColumnRect_No = new XRect(10, 95, 27, 520);
+                //XRect TableColumnRect_Time = new XRect(10 + TableColumnRect_No.Width, 95, 50, 520);
+                //XRect TableColumnRect_Detail = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width, 95, 438, 520);
+                //XRect TableColumnRect_Price = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width + TableColumnRect_Detail.Width, 95, 75, 545);
+
+                //XRect TableColumnRect_No_Text = new XRect(10, 122, 27, 520);
+                //XRect TableColumnRect_Time_Text = new XRect(10 + TableColumnRect_No.Width, 122, 50, 520);
+                //XRect TableColumnRect_Detail_Text = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width, 122, 438, 520);
+                //XRect TableColumnRect_Price_Text = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width + TableColumnRect_Detail.Width, 122, 75, 545);
+
+                XFont BigTitleFont = new XFont("Verdana", 13);
+                XFont HeaderContentFont = new XFont("Verdana", 10, XFontStyle.Underline);
+                XFont ContentFont = new XFont("Verdana", 8);
+
+                XBrush BlackBrush = XBrushes.Black;
+
+                XStringFormat format = new XStringFormat();
+
+                //gfx.DrawRectangle(XPens.YellowGreen, rect);
+                gfx.DrawRectangle(XBrushes.LightGray, BigTitleRect);
+                gfx.DrawRectangle(XPens.Black, BigTitleRect);
+                //gfx.DrawLine(XPens.YellowGreen, rect.Width / 2, 0, rect.Width / 2, rect.Height);
+                //gfx.DrawLine(XPens.YellowGreen, 0, rect.Height / 2, rect.Width, rect.Height / 2);
+                Account curAcctx = this.db.getAccountFromId(currentUseAccountId);
+                string acctxDate = curAcctx.Date;
+                string[] splitAcctxDate = acctxDate.Split('-');
+                MonthConvertor mc = new MonthConvertor();
+
+                format.LineAlignment = XLineAlignment.Center;
+                format.Alignment = XStringAlignment.Center;
+
+                //Check page to print extend page name
+                if(pg == 0)
                 {
-                    gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
-                    gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+                    gfx.DrawString(currentBranchName+" (Massage)", BigTitleFont, BlackBrush, BigTitleRect, format);
                 }
                 else
                 {
-                    plusYe = plusYe + 13;
-                    y1 = y1 + 13;
-                    y2 = y2 + 13;
-                    gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
-                    gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+                    gfx.DrawString(currentBranchName + " (Beauty)", BigTitleFont, BlackBrush, BigTitleRect, format);
                 }
-            }
+                
+                gfx.DrawString("Daily Report", HeaderContentFont, BlackBrush, 20, 4 + HeaderContentFont.Height + BigTitleRect.Height);
+                gfx.DrawString("Branch name : " + currentBranchName, ContentFont, BlackBrush, 20, 8 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height);
+                gfx.DrawString("Month/Year : " + mc.calMonth(splitAcctxDate[1]) + " " + splitAcctxDate[0], ContentFont, BlackBrush, 20, 6 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
+                //gfx.DrawString("Branch name : " + currentBranchName, ContentFont, BlackBrush, 220, 8 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height);
+                gfx.DrawString("Generate Date/Time : " + DateTime.Now.ToString("dd-MM-yyy HH:mm"), ContentFont, BlackBrush, 220, 6 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
 
-            List<Account> listAccount = this.db.getAccountLast40Records();
-            List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
-            Account getLatestMonth = this.db.getLatestAcount();
-            String[] sGetLatestMonth = getLatestMonth.Date.ToString().Split('-');
-            //String[] s2GetLatestMonth = sGetLatestMonth[0].Split('/');
-            DateTime getUseDateAddTmr = DateTime.Parse(getLatestMonth.Date).AddDays(1);
-            string usingMonthAddTmr = getUseDateAddTmr.ToString("MM");
+                gfx.DrawLine(XPens.Black, 0, 16 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height, BigTitleRect.Width, 17 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
 
-            if (listAccount.Count != 0)
-            {
-                //List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
-                for (int f = 0; f < listAccount.Count; f++)
-                {
-                    String[] s = listAccount[f].Date.ToString().Split('-');
-                    //String[] s2 = s[0].Split('/');
+                gfx.DrawRectangle(XBrushes.Yellow, TableHeaderRect);
+                gfx.DrawRectangle(XPens.Black, TableHeaderRect);
+                gfx.DrawRectangle(XBrushes.Yellow, TableFooterRect);
 
-                    //MessageBox.Show(s2[0] + "///" + curMonth + "===" + s2[2] + "///" + DateTime.Now.ToString("yyyy"));
-                    if ((Int32.Parse(s[1]) == Int32.Parse(sGetLatestMonth[1])) && (Int32.Parse(s[0]) == Int32.Parse(sGetLatestMonth[0])))
-                    {
-                        int voucherCash = this.db.getAllDiscountWithCashFromAccountID(listAccount[f].Id);
-                        int voucherCredit = this.db.getAllDiscountWithCreditFromAccountID(listAccount[f].Id);
-                        int staff = Int32.Parse(listAccount[f].StaffAmount);
-                        int oil = staff * GlobalValue.Instance.oilPrice;
-                        int income = getTotalSaleFromId(listAccount[f].Id) - voucherCash;
-                        int creditIncome = getTotalCreditSaleFromId(listAccount[f].Id) - voucherCredit;
-                        int totalVoucher = voucherCash + voucherCredit;
-                        int commis = getTotalCommissionFromId(listAccount[f].Id);
-                        int pax = getTotalPaxFromId(listAccount[f].Id);
-                        int grandIncome = income + creditIncome; //+ oil;
-                        int averagePax = 0;
-                        if (grandIncome != 0 && pax != 0)
-                        {
-                            double averagePax_d = (double)grandIncome / (double)pax;
-                            averagePax = (int)Math.Round(averagePax_d);
-                        }
-                        int uniform = getTotalUniformFromId(listAccount[f].Id);
-                        //int tigerBalm = getTotalTigerBalmFromId(listAccount[f].Id);
-                        int tigerBalm = getTotalOtherSaleExceptUniformFromId(listAccount[f].Id);
-                        int finalIncome = grandIncome - commis + uniform + tigerBalm;
-                        int totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
+                //gfx.DrawRectangle(XBrushes.LightGray, TableFooterRect);
+                //gfx.DrawRectangle(XPens.Black, TableFooterRect);
 
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_Date);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_InitialMoney);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_Total);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Cash);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Credit);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Voucher);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_AveragePerPax);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalWorker);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_OilIncome);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalIncome);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_PayWorker);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalCancelled);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_WorkerBonus);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalOtherSale);
+                gfx.DrawRectangle(XPens.Black, TableColumnRect_BalanceNet);
 
-                        DailyReportForm dailyForm = new DailyReportForm()
-                        {
-                            Date = s[2],
-                            StartMoney = String.Format("{0:n}", Int32.Parse(listAccount[f].StartMoney)),
-                            TotalPax = pax.ToString(),
-                            MassageAmount = String.Format("{0:n}", income),
-                            MassageCreditAmount = String.Format("{0:n}", creditIncome),
-                            MassageVoucherAmount = String.Format("{0:n}", totalVoucher),
-                            AveragePerPax = String.Format("{0:n}", averagePax),
-                            TotalWorker = staff.ToString(),
-                            OilAmount = String.Format("{0:n}", oil),
-                            TotalIncome = String.Format("{0:n}", grandIncome),
-                            PayWorkers = String.Format("{0:n}", commis),
-                            TotalCancelled = totalCancelled.ToString(),
-                            TotalUniform = String.Format("{0:n}", uniform),
-                            TotalTigerBalm = String.Format("{0:n}", tigerBalm),
-                            BalanceNet = String.Format("{0:n}", finalIncome)
-                        };
+                format.LineAlignment = XLineAlignment.Near;
+                format.Alignment = XStringAlignment.Center;
 
-                        allDailyForm.Add(dailyForm);
-                    }
+                gfx.DrawString("Date", ContentFont, BlackBrush, TableColumnRect_Date_Text_Header, format);
+                gfx.DrawString("Start Money", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text_Header, format);
+                gfx.DrawString("Pax", ContentFont, BlackBrush, TableColumnRect_Total_Text_Header, format);
+                gfx.DrawString("Massage Amount", ContentFont, BlackBrush, TableColumnRect_Massage_Text_Header, format);
+                gfx.DrawString("Cash", ContentFont, BlackBrush, TableColumnRect_Massage_Cash_Text_Header, format);
+                gfx.DrawString("Credit", ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text_Header, format);
+                gfx.DrawString("Voucher", ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text_Header, format);
+                gfx.DrawString("Average", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text_Header, format);
+                gfx.DrawString("/Pax", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_2_Text_Header, format);
+                gfx.DrawString("Total", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text_Header, format);
+                gfx.DrawString("Worker", ContentFont, BlackBrush, TableColumnRect_TotalWorker_2_Text_Header, format);
+                gfx.DrawString("Income", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text_Header, format);
+                gfx.DrawString(GlobalValue.Instance.oilPrice + "B/Staff", ContentFont, BlackBrush, TableColumnRect_OilIncome_2_Text_Header, format);
+                gfx.DrawString("Total Incomes", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text_Header, format);
+                gfx.DrawString("Pay Workers", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text_Header, format);
+                gfx.DrawString("Cancel", ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text_Header, format);
+                gfx.DrawString("Worker", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text_Header, format);
+                gfx.DrawString("Bonus", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_2_Text_Header, format);
+                //gfx.DrawString("Tiger Balm", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
+                gfx.DrawString("Other Sale", ContentFont, BlackBrush, TableColumnRect_TotalOtherSale_Text_Header, format);
+                gfx.DrawString("Balance Net", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text_Header, format);
 
-                }
-
-                int plusY = 23;
+                int y1 = 126;
+                int y2 = 127;
+                int plusYe = 23;
 
                 for (int h = 0; h < 31; h++)
                 {
-                    for (int j = 0; j < allDailyForm.Count; j++)
+                    if (h == 0)
                     {
-                        int a = h + 1;
-                        if (a == Int32.Parse(allDailyForm[j].Date))
+                        gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+                        gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+                    }
+                    else
+                    {
+                        plusYe = plusYe + 13;
+                        y1 = y1 + 13;
+                        y2 = y2 + 13;
+                        gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+                        gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+                    }
+                }
+
+                List<Account> listAccount = this.db.getAccountLast40Records();
+                List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
+                Account getLatestMonth = this.db.getLatestAcount();
+                String[] sGetLatestMonth = getLatestMonth.Date.ToString().Split('-');
+                //String[] s2GetLatestMonth = sGetLatestMonth[0].Split('/');
+                DateTime getUseDateAddTmr = DateTime.Parse(getLatestMonth.Date).AddDays(1);
+                string usingMonthAddTmr = getUseDateAddTmr.ToString("MM");
+
+                if (listAccount.Count != 0)
+                {
+                    //List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
+                    for (int f = 0; f < listAccount.Count; f++)
+                    {
+                        String[] s = listAccount[f].Date.ToString().Split('-');
+                        //String[] s2 = s[0].Split('/');
+
+                        //Massage type cal
+                        if(pg == 0)
                         {
-                            //gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].StartMoney, ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X - 4, TableColumnRect_InitialMoney_Text.Y + plusY); //edit on 3 Nov 2019
-                            gfx.DrawString(allDailyForm[j].TotalPax, ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 8, TableColumnRect_Total_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].MassageAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].MassageCreditAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text.X - 4, TableColumnRect_Massage_Credit_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].MassageVoucherAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text.X - 4, TableColumnRect_Massage_Voucher_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].AveragePerPax, ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].TotalWorker, ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 14, TableColumnRect_TotalWorker_Text.Y + plusY);
-                            //gfx.DrawString(allDailyForm[j].OilAmount, ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].TotalIncome, ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].PayWorkers, ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].TotalCancelled, ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 15, TableColumnRect_TotalCancelled_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].TotalUniform, ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text.X + 5, TableColumnRect_TotalUniform_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].TotalTigerBalm, ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text.X + 10, TableColumnRect_TotalTigerBalm_Text.Y + plusY);
-                            gfx.DrawString(allDailyForm[j].BalanceNet, ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X + 6, TableColumnRect_BalanceNet_Text.Y + plusY); //edit on 3 Nov 2019
+                            if ((Int32.Parse(s[1]) == Int32.Parse(sGetLatestMonth[1])) && (Int32.Parse(s[0]) == Int32.Parse(sGetLatestMonth[0])))
+                            {
+                                int voucherCash = this.db.getSumDiscountWithCash_M(listAccount[f].Id);
+                                int voucherCredit = this.db.getSumDiscountWithCredit_M(listAccount[f].Id);
+                                int staff = Int32.Parse(listAccount[f].StaffAmount);
+                                int oil = staff * GlobalValue.Instance.oilPrice;
+                                int income = this.db.getSumOrderRecordCashExceptCancelled_M(listAccount[f].Id) - voucherCash;
+                                int creditIncome = this.db.getSumOrderRecordCreditExceptCancelled_M(listAccount[f].Id) - voucherCredit;
+                                int totalVoucher = voucherCash + voucherCredit;
 
+                                //In this case, other sale has to be only at Beauty that why Massage has not to be cal com of Othersale
+                                int commis = this.db.getSumOrderRecordComExceptCancelled_M(listAccount[f].Id);
+
+                                //Check commission condition (include other sale commission or not
+                                //if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+                                //{
+                                //    commis = this.db.getSumCommissionExceptCancelled(listAccount[f].Id);
+                                //}
+                                //else
+                                //{
+                                //    commis = this.db.getSumOrderCommissionExceptCancelled(listAccount[f].Id);
+                                //}
+
+                                //In this case, other sale has to be only at Beauty that why Massage has not to be cal Othersale
+                                int finalOtherSale = 0;
+
+                                int pax = this.db.getSumPaxExceptCancelled_M(listAccount[f].Id);
+                                int grandIncome = income + creditIncome; //+ oil;
+                                int averagePax = 0;
+                                if (grandIncome != 0 && pax != 0)
+                                {
+                                    double averagePax_d = (double)grandIncome / (double)pax;
+                                    averagePax = (int)Math.Round(averagePax_d);
+                                }
+
+                                int realGrandincome = grandIncome + finalOtherSale;
+
+                                double finalWorkerBonus_d = (double)realGrandincome * 0.13;
+                                int finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
+                                int finalIncome = realGrandincome - commis - finalWorkerBonus;
+                                int totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
+
+
+                                DailyReportForm dailyForm = new DailyReportForm()
+                                {
+                                    Date = s[2],
+                                    StartMoney = String.Format("{0:n}", Int32.Parse(listAccount[f].StartMoney)),
+                                    TotalPax = pax.ToString(),
+                                    MassageAmount = String.Format("{0:n}", income),
+                                    MassageCreditAmount = String.Format("{0:n}", creditIncome),
+                                    MassageVoucherAmount = String.Format("{0:n}", totalVoucher),
+                                    AveragePerPax = String.Format("{0:n}", averagePax),
+                                    TotalWorker = staff.ToString(),
+                                    OilAmount = String.Format("{0:n}", oil),
+                                    TotalIncome = String.Format("{0:n}", grandIncome),
+                                    PayWorkers = String.Format("{0:n}", commis),
+                                    TotalCancelled = totalCancelled.ToString(),
+                                    WorkBonus = String.Format("{0:n}", finalWorkerBonus),
+                                    TotalOtherSale = String.Format("{0:n}", finalOtherSale),
+                                    BalanceNet = String.Format("{0:n}", finalIncome)
+                                };
+
+                                allDailyForm.Add(dailyForm);
+                            }
+                        } //Beauty type cal
+                        else
+                        {
+                            if ((Int32.Parse(s[1]) == Int32.Parse(sGetLatestMonth[1])) && (Int32.Parse(s[0]) == Int32.Parse(sGetLatestMonth[0])))
+                            {
+                                int voucherCash = this.db.getSumDiscountWithCash_B(listAccount[f].Id);
+                                int voucherCredit = this.db.getSumDiscountWithCredit_B(listAccount[f].Id);
+                                int staff = Int32.Parse(listAccount[f].StaffAmount);
+                                int oil = staff * GlobalValue.Instance.oilPrice;
+                                int income = this.db.getSumOrderRecordCashExceptCancelled_B(listAccount[f].Id) - voucherCash;
+                                int creditIncome = this.db.getSumOrderRecordCreditExceptCancelled_B(listAccount[f].Id) - voucherCredit;
+                                int totalVoucher = voucherCash + voucherCredit;
+                                int commis = 0;
+                                //Check commission condition (include other sale commission or not
+                                if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+                                {
+                                    commis = this.db.getSumComExceptCancelled_B(listAccount[f].Id);
+                                }
+                                else
+                                {
+                                    commis = this.db.getSumOrderRecordComExceptCancelled_B(listAccount[f].Id);
+                                }
+
+                                int finalOtherSale = this.db.getSumOtherSaleRecordExceptCancelled(listAccount[f].Id);
+
+                                int pax = this.db.getSumPaxExceptCancelled_B(listAccount[f].Id);
+                                int grandIncome = income + creditIncome; //+ oil;
+                                int averagePax = 0;
+                                if (grandIncome != 0 && pax != 0)
+                                {
+                                    double averagePax_d = (double)grandIncome / (double)pax;
+                                    averagePax = (int)Math.Round(averagePax_d);
+                                }
+
+                                int realGrandincome = 0;
+                                int finalWorkerBonus = 0;
+                                int finalIncome = 0;
+                                double finalWorkerBonus_d = 0;
+
+                                if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+                                {
+                                    realGrandincome = grandIncome + finalOtherSale;
+                                    finalWorkerBonus_d = (double)realGrandincome * 0.13;
+                                    finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
+                                    finalIncome = realGrandincome - commis - finalWorkerBonus;
+                                }
+                                else
+                                {
+                                    finalWorkerBonus_d = (double)grandIncome * 0.13;
+                                    finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
+                                    finalIncome = grandIncome - commis + finalOtherSale - finalWorkerBonus;
+                                }
+
+                                //int uniform = getTotalUniformFromId(listAccount[f].Id);
+                                //int tigerBalm = getTotalTigerBalmFromId(listAccount[f].Id);
+                                
+                                
+                                int totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
+
+                                DailyReportForm dailyForm;
+                                if(GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+                                {
+                                    dailyForm = new DailyReportForm()
+                                    {
+                                        Date = s[2],
+                                        StartMoney = String.Format("{0:n}", Int32.Parse(listAccount[f].StartMoney)),
+                                        TotalPax = pax.ToString(),
+                                        MassageAmount = String.Format("{0:n}", income),
+                                        MassageCreditAmount = String.Format("{0:n}", creditIncome),
+                                        MassageVoucherAmount = String.Format("{0:n}", totalVoucher),
+                                        AveragePerPax = String.Format("{0:n}", averagePax),
+                                        TotalWorker = staff.ToString(),
+                                        OilAmount = String.Format("{0:n}", oil),
+                                        TotalIncome = String.Format("{0:n}", realGrandincome),
+                                        PayWorkers = String.Format("{0:n}", commis),
+                                        TotalCancelled = totalCancelled.ToString(),
+                                        WorkBonus = String.Format("{0:n}", finalWorkerBonus),
+                                        TotalOtherSale = String.Format("{0:n}", finalOtherSale),
+                                        BalanceNet = String.Format("{0:n}", finalIncome)
+                                    };
+                                }
+                                else
+                                {
+                                    dailyForm = new DailyReportForm()
+                                    {
+                                        Date = s[2],
+                                        StartMoney = String.Format("{0:n}", Int32.Parse(listAccount[f].StartMoney)),
+                                        TotalPax = pax.ToString(),
+                                        MassageAmount = String.Format("{0:n}", income),
+                                        MassageCreditAmount = String.Format("{0:n}", creditIncome),
+                                        MassageVoucherAmount = String.Format("{0:n}", totalVoucher),
+                                        AveragePerPax = String.Format("{0:n}", averagePax),
+                                        TotalWorker = staff.ToString(),
+                                        OilAmount = String.Format("{0:n}", oil),
+                                        TotalIncome = String.Format("{0:n}", grandIncome),
+                                        PayWorkers = String.Format("{0:n}", commis),
+                                        TotalCancelled = totalCancelled.ToString(),
+                                        WorkBonus = String.Format("{0:n}", finalWorkerBonus),
+                                        TotalOtherSale = String.Format("{0:n}", finalOtherSale),
+                                        BalanceNet = String.Format("{0:n}", finalIncome)
+                                    };
+                                }
+                                
+
+                                allDailyForm.Add(dailyForm);
+                            }
                         }
-
+                        
 
                     }
 
-                    plusY = plusY + 13;
-                    //if (h == 0)
-                    //{
-                    //    gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
-                    //    gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + plusY);
-                    //    gfx.DrawString("125", ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 4, TableColumnRect_Total_Text.Y + plusY);
-                    //    gfx.DrawString("44,500.00", ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
-                    //    gfx.DrawString("300.00", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
-                    //    gfx.DrawString("30", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 10, TableColumnRect_TotalWorker_Text.Y + plusY);
-                    //    gfx.DrawString("600.00", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
-                    //    gfx.DrawString("45,100.00", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
-                    //    gfx.DrawString("20,000.00", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
-                    //    gfx.DrawString("25,100.00", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X, TableColumnRect_BalanceNet_Text.Y + plusY);
-                    //}
-                    //else
-                    //{
-                    //    plusY = plusY + 13;
+                    int plusY = 23;
 
-                    //    gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
-                    //    gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + plusY);
-                    //    gfx.DrawString("125", ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 4, TableColumnRect_Total_Text.Y + plusY);
-                    //    gfx.DrawString("44,500.00", ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
-                    //    gfx.DrawString("300.00", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
-                    //    gfx.DrawString("30", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 10, TableColumnRect_TotalWorker_Text.Y + plusY);
-                    //    gfx.DrawString("600.00", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
-                    //    gfx.DrawString("45,100.00", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
-                    //    gfx.DrawString("20,000.00", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
-                    //    gfx.DrawString("25,100.00", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X, TableColumnRect_BalanceNet_Text.Y + plusY);
-                    //}
+                    for (int h = 0; h < 31; h++)
+                    {
+                        for (int j = 0; j < allDailyForm.Count; j++)
+                        {
+                            int a = h + 1;
+                            if (a == Int32.Parse(allDailyForm[j].Date))
+                            {
+                                //gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].StartMoney, ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X - 4, TableColumnRect_InitialMoney_Text.Y + plusY); //edit on 3 Nov 2019
+                                gfx.DrawString(allDailyForm[j].TotalPax, ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 8, TableColumnRect_Total_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].MassageAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].MassageCreditAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text.X - 4, TableColumnRect_Massage_Credit_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].MassageVoucherAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text.X - 4, TableColumnRect_Massage_Voucher_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].AveragePerPax, ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].TotalWorker, ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 14, TableColumnRect_TotalWorker_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].OilAmount, ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].TotalIncome, ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].PayWorkers, ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].TotalCancelled, ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 15, TableColumnRect_TotalCancelled_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].WorkBonus, ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text.X + 5, TableColumnRect_WorkerBonus_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].TotalOtherSale, ContentFont, BlackBrush, TableColumnRect_TotalOtherSale_Text.X + 10, TableColumnRect_TotalOtherSale_Text.Y + plusY);
+                                gfx.DrawString(allDailyForm[j].BalanceNet, ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X + 6, TableColumnRect_BalanceNet_Text.Y + plusY); //edit on 3 Nov 2019
+
+                            }
+
+
+                        }
+
+                        plusY = plusY + 13;
+                        //if (h == 0)
+                        //{
+                        //    gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
+                        //    gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + plusY);
+                        //    gfx.DrawString("125", ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 4, TableColumnRect_Total_Text.Y + plusY);
+                        //    gfx.DrawString("44,500.00", ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
+                        //    gfx.DrawString("300.00", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
+                        //    gfx.DrawString("30", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 10, TableColumnRect_TotalWorker_Text.Y + plusY);
+                        //    gfx.DrawString("600.00", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
+                        //    gfx.DrawString("45,100.00", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
+                        //    gfx.DrawString("20,000.00", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
+                        //    gfx.DrawString("25,100.00", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X, TableColumnRect_BalanceNet_Text.Y + plusY);
+                        //}
+                        //else
+                        //{
+                        //    plusY = plusY + 13;
+
+                        //    gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
+                        //    gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + plusY);
+                        //    gfx.DrawString("125", ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 4, TableColumnRect_Total_Text.Y + plusY);
+                        //    gfx.DrawString("44,500.00", ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
+                        //    gfx.DrawString("300.00", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
+                        //    gfx.DrawString("30", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 10, TableColumnRect_TotalWorker_Text.Y + plusY);
+                        //    gfx.DrawString("600.00", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
+                        //    gfx.DrawString("45,100.00", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
+                        //    gfx.DrawString("20,000.00", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
+                        //    gfx.DrawString("25,100.00", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X, TableColumnRect_BalanceNet_Text.Y + plusY);
+                        //}
+                    }
                 }
+
+                int netTotalPax = 0;
+                int netMassageAmount = 0;
+                int netMassageCreditAmount = 0;
+                int netVoucherAmount = 0;
+                int netAveragePerPax = 0;
+                int netTotalWorker = 0;
+                int netOil = 0;
+                int netTotalIncome = 0;
+                int netCommis = 0;
+                int netCancelledPax = 0;
+                //int netUniform = 0;
+                //int netTigerBalm = 0;
+                int netWorkerBonus = 0;
+                int netOtherSale = 0;
+                int netBalanceNet = 0;
+                for (int k = 0; k < allDailyForm.Count; k++)
+                {
+                    string convertTotalPax = allDailyForm[k].TotalPax.Replace(".00", "");
+                    string convertMassageAmount = allDailyForm[k].MassageAmount.Replace(".00", "");
+                    string convertMassageCreditAmount = allDailyForm[k].MassageCreditAmount.Replace(".00", "");
+                    string convertMassageVoucherAmount = allDailyForm[k].MassageVoucherAmount.Replace(".00", "");
+                    string convertAveragePerPax = allDailyForm[k].AveragePerPax.Replace(".00", "");
+                    string convertTotalWorker = allDailyForm[k].TotalWorker.Replace(".00", "");
+                    string convertOilAmount = allDailyForm[k].OilAmount.Replace(".00", "");
+                    string convertTotalIncome = allDailyForm[k].TotalIncome.Replace(".00", "");
+                    string convertCommis = allDailyForm[k].PayWorkers.Replace(".00", "");
+                    string convertCancelledPax = allDailyForm[k].TotalCancelled.Replace(".00", "");
+                    string convertWorkerBonus = allDailyForm[k].WorkBonus.Replace(".00", "");
+                    string convertOtherSale = allDailyForm[k].TotalOtherSale.Replace(".00", "");
+                    string convertBalance = allDailyForm[k].BalanceNet.Replace(".00", "");
+
+                    string convertTotalPaxs = convertTotalPax.Replace(",", "");
+                    string convertMassageAmounts = convertMassageAmount.Replace(",", "");
+                    string convertMassageCreditAmounts = convertMassageCreditAmount.Replace(",", "");
+                    string convertMassageVoucherAmounts = convertMassageVoucherAmount.Replace(",", "");
+                    string convertAveragePerPaxs = convertAveragePerPax.Replace(",", "");
+                    string convertTotalWorkers = convertTotalWorker.Replace(",", "");
+                    string convertOilAmounts = convertOilAmount.Replace(",", "");
+                    string convertTotalIncomes = convertTotalIncome.Replace(",", "");
+                    string convertCommiss = convertCommis.Replace(",", "");
+                    string convertCancelledPaxs = convertCancelledPax.Replace(",", "");
+                    string convertWorkerBonuses = convertWorkerBonus.Replace(",", "");
+                    string convertOtherSales = convertOtherSale.Replace(",", "");
+                    string convertBalances = convertBalance.Replace(",", "");
+
+                    netTotalPax += Int32.Parse(convertTotalPaxs);
+                    netMassageAmount += Int32.Parse(convertMassageAmounts);
+                    netMassageCreditAmount += Int32.Parse(convertMassageCreditAmounts);
+                    netVoucherAmount += Int32.Parse(convertMassageVoucherAmounts);
+                    //netAveragePerPax += Int32.Parse(convertAveragePerPaxs);
+                    netTotalWorker += Int32.Parse(convertTotalWorkers);
+                    netOil += Int32.Parse(convertOilAmounts);
+                    netTotalIncome += Int32.Parse(convertTotalIncomes);
+                    netCommis += Int32.Parse(convertCommiss);
+                    netCancelledPax += Int32.Parse(convertCancelledPaxs);
+                    netWorkerBonus += Int32.Parse(convertWorkerBonuses);
+                    netOtherSale += Int32.Parse(convertOtherSales);
+                    netBalanceNet += Int32.Parse(convertBalances);
+                }
+
+                //Updated on 04 October 2022
+                double netAveragePerPax_d = (double)netTotalIncome / (double)netTotalPax;
+                netAveragePerPax = (int)Math.Round(netAveragePerPax_d);
+
+                gfx.DrawString("Total", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + 426);
+                //gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n0}", netTotalPax), ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 8, TableColumnRect_Total_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netMassageAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netMassageCreditAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text.X - 4, TableColumnRect_Massage_Credit_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netVoucherAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text.X - 4, TableColumnRect_Massage_Voucher_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netAveragePerPax), ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X - 3, TableColumnRect_AveragePerPax_Text.Y + 426);
+                gfx.DrawString(netTotalWorker.ToString(), ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 15, TableColumnRect_TotalWorker_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netOil), ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netTotalIncome), ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netCommis), ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 5, TableColumnRect_PayWorker_Text.Y + 426);
+                gfx.DrawString(netCancelledPax.ToString(), ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 14, TableColumnRect_TotalCancelled_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netWorkerBonus), ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text.X + 5, TableColumnRect_WorkerBonus_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netOtherSale), ContentFont, BlackBrush, TableColumnRect_TotalOtherSale_Text.X + 10, TableColumnRect_TotalOtherSale_Text.Y + 426);
+                gfx.DrawString(String.Format("{0:n}", netBalanceNet), ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X + 5, TableColumnRect_BalanceNet_Text.Y + 426);
+                gfx.DrawLine(XPens.Black, 10, 529, 780, 530);
+                //MessageBox.Show(dateStamp.ToString()+"//"+dateStamp.ToLongDateString());
             }
 
-            int netTotalPax = 0;
-            int netMassageAmount = 0;
-            int netMassageCreditAmount = 0;
-            int netVoucherAmount = 0;
-            int netAveragePerPax = 0;
-            int netTotalWorker = 0;
-            int netOil = 0;
-            int netTotalIncome = 0;
-            int netCommis = 0;
-            int netCancelledPax = 0;
-            int netUniform = 0;
-            int netTigerBalm = 0;
-            int netBalanceNet = 0;
-            for (int k = 0; k < allDailyForm.Count; k++)
-            {
-                string convertTotalPax = allDailyForm[k].TotalPax.Replace(".00", "");
-                string convertMassageAmount = allDailyForm[k].MassageAmount.Replace(".00", "");
-                string convertMassageCreditAmount = allDailyForm[k].MassageCreditAmount.Replace(".00", "");
-                string convertMassageVoucherAmount = allDailyForm[k].MassageVoucherAmount.Replace(".00", "");
-                string convertAveragePerPax = allDailyForm[k].AveragePerPax.Replace(".00", "");
-                string convertTotalWorker = allDailyForm[k].TotalWorker.Replace(".00", "");
-                string convertOilAmount = allDailyForm[k].OilAmount.Replace(".00", "");
-                string convertTotalIncome = allDailyForm[k].TotalIncome.Replace(".00", "");
-                string convertCommis = allDailyForm[k].PayWorkers.Replace(".00", "");
-                string convertCancelledPax = allDailyForm[k].TotalCancelled.Replace(".00", "");
-                string convertUniform = allDailyForm[k].TotalUniform.Replace(".00", "");
-                string convertTigerBalm = allDailyForm[k].TotalTigerBalm.Replace(".00", "");
-                string convertBalance = allDailyForm[k].BalanceNet.Replace(".00", "");
 
-                string convertTotalPaxs = convertTotalPax.Replace(",", "");
-                string convertMassageAmounts = convertMassageAmount.Replace(",", "");
-                string convertMassageCreditAmounts = convertMassageCreditAmount.Replace(",", "");
-                string convertMassageVoucherAmounts = convertMassageVoucherAmount.Replace(",", "");
-                string convertAveragePerPaxs = convertAveragePerPax.Replace(",", "");
-                string convertTotalWorkers = convertTotalWorker.Replace(",", "");
-                string convertOilAmounts = convertOilAmount.Replace(",", "");
-                string convertTotalIncomes = convertTotalIncome.Replace(",", "");
-                string convertCommiss = convertCommis.Replace(",", "");
-                string convertCancelledPaxs = convertCancelledPax.Replace(",", "");
-                string convertUniforms = convertUniform.Replace(",", "");
-                string convertTigerBalms = convertTigerBalm.Replace(",", "");
-                string convertBalances = convertBalance.Replace(",", "");
+            Account getLatestMonth_ = this.db.getLatestAcount();
+            String[] sGetLatestMonth_ = getLatestMonth_.Date.ToString().Split('-');
+            DateTime getUseDateAddTmr_ = DateTime.Parse(getLatestMonth_.Date).AddDays(1);
+            string usingMonthAddTmr_ = getUseDateAddTmr_.ToString("MM");
 
-                netTotalPax += Int32.Parse(convertTotalPaxs);
-                netMassageAmount += Int32.Parse(convertMassageAmounts);
-                netMassageCreditAmount += Int32.Parse(convertMassageCreditAmounts);
-                netVoucherAmount += Int32.Parse(convertMassageVoucherAmounts);
-                //netAveragePerPax += Int32.Parse(convertAveragePerPaxs);
-                netTotalWorker += Int32.Parse(convertTotalWorkers);
-                netOil += Int32.Parse(convertOilAmounts);
-                netTotalIncome += Int32.Parse(convertTotalIncomes);
-                netCommis += Int32.Parse(convertCommiss);
-                netCancelledPax += Int32.Parse(convertCancelledPaxs);
-                netUniform += Int32.Parse(convertUniforms);
-                netTigerBalm += Int32.Parse(convertTigerBalms);
-                netBalanceNet += Int32.Parse(convertBalances);
-            }
-
-            //Updated on 04 October 2022
-            double netAveragePerPax_d = (double)netTotalIncome / (double)netTotalPax;
-            netAveragePerPax = (int)Math.Round(netAveragePerPax_d);
-
-            gfx.DrawString("Total", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + 426);
-            //gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n0}", netTotalPax), ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 8, TableColumnRect_Total_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netMassageAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netMassageCreditAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text.X - 4, TableColumnRect_Massage_Credit_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netVoucherAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text.X - 4, TableColumnRect_Massage_Voucher_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netAveragePerPax), ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X - 3, TableColumnRect_AveragePerPax_Text.Y + 426);
-            gfx.DrawString(netTotalWorker.ToString(), ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 15, TableColumnRect_TotalWorker_Text.Y + 426);
-            //gfx.DrawString(String.Format("{0:n}", netOil), ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netTotalIncome), ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netCommis), ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 5, TableColumnRect_PayWorker_Text.Y + 426);
-            gfx.DrawString(netCancelledPax.ToString(), ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 20, TableColumnRect_TotalCancelled_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netUniform), ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text.X + 5, TableColumnRect_TotalUniform_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netTigerBalm), ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text.X + 10, TableColumnRect_TotalTigerBalm_Text.Y + 426);
-            gfx.DrawString(String.Format("{0:n}", netBalanceNet), ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X + 5, TableColumnRect_BalanceNet_Text.Y + 426);
-            gfx.DrawLine(XPens.Black, 10, 529, 780, 530);
-            //MessageBox.Show(dateStamp.ToString()+"//"+dateStamp.ToLongDateString());
-
-
-            string fullDate = new DateTime(Int32.Parse(sGetLatestMonth[0]), Int32.Parse(sGetLatestMonth[1]), Int32.Parse(sGetLatestMonth[2])).ToString("ddMMMMyyyy");
+            string fullDate = new DateTime(Int32.Parse(sGetLatestMonth_[0]), Int32.Parse(sGetLatestMonth_[1]), Int32.Parse(sGetLatestMonth_[2])).ToString("ddMMMMyyyy");
             //string[] longDate = dateStamp.ToLongDateString().Split(' ');
             //string preReal = longDate[2] + longDate[1] + longDate[3];
             //string realDate = preReal.Replace(",", "");
@@ -4283,8 +4614,8 @@ namespace Urban
                 int curMonth = Int32.Parse(curDT);
                 //string nextDT = DateTime.Now.AddDays(1).ToString("MM");
                 //int nextDayMonth = Int32.Parse(nextDT);
-                int useMonth = Int32.Parse(sGetLatestMonth[1]);
-                int useMonthPlus1Day = Int32.Parse(usingMonthAddTmr);
+                int useMonth = Int32.Parse(sGetLatestMonth_[1]);
+                int useMonthPlus1Day = Int32.Parse(usingMonthAddTmr_);
 
                 //Fix SendGrid TLS from 1.1 to 1.2
                 System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
@@ -4337,56 +4668,6 @@ namespace Urban
 
                             //SmtpServer.Send(mail);
 
-                            //Test MailJet
-                            //string pngIn64 = ConvertImageToBase64(@"C:\SpaSystem\logo.png");
-
-
-                            //MailjetClient client = new MailjetClient("78c48553bf020514a935c05b07578596", "8f2eeea01accc7653e53ae4a0db8ec1f");
-
-                            //MailjetRequest request = new MailjetRequest
-                            //{
-                            //    Resource = Send.Resource,
-                            //}
-                            //.Property(Send.FromEmail, GlobalValue.Instance.senderEmail)
-                            ////.Property(Send.FromName, "POS System Report")
-                            //.Property(Send.Subject, currentBranchName + " - Daily Report(" + fullDate + ")")
-                            //.Property(Send.TextPart, "This daily report email is auto sent by POS Program (" + currentBranchName + ")")
-                            //.Property(Send.Recipients, new JArray {
-                            //    new JObject {
-                            //        {"Email", "t.jaturong@outlook.com"}
-                            //    }
-                            //    //new JObject {
-                            //    //    {"Email", "RECIPIENT_EMAIL_ADDRESS"},
-                            //    //    {"Name", "RECIPIENT_NAME"}
-                            //    //}
-                            //})
-                            //.Property(Send.Attachments, new JArray {
-                            //     new JObject {
-                            //         {"ContentType", "image/png"}, // This should be the MIME type of your file
-                            //         {"Filename", "logo.png"},   // Name of the attached file
-                            //         {"Base64Content", pngIn64} // Path to the file you want to attach
-                            //     }
-                            //});
-                            ////.Property(Send.Attachments, new JArray {
-                            ////    new JObject {
-                            ////        {"ContentType", "application/pdf"}, // This should be the MIME type for a PDF
-                            ////        {"Filename", "report" + fullDate + ".pdf"},        // Name of the attached file
-                            ////        {"Base64Content", ConvertFileToBase64(@"C:\SpaSystem\report" + fullDate + ".pdf")} // Path to the PDF file you want to attach
-                            ////     }
-                            ////    // ... You can add more attachments as necessary
-                            ////});
-
-                            //MailjetResponse response = await client.PostAsync(request);
-                            //if (response.IsSuccessStatusCode)
-                            //{
-                            //    Console.WriteLine($"Email sent successfully, Total: {response.GetTotal()}, Data: {string.Join(",", response.GetData())}");
-                            //}
-                            //else
-                            //{
-                            //    Console.WriteLine($"Error occurred: Status Code {response.StatusCode}");
-                            //    Console.WriteLine($"Error Details: {response.GetErrorInfo()}");
-                            //}
-
                             //MailJet by using SMTP
                             MailMessage mail = new MailMessage();
                             SmtpClient SmtpServer = new SmtpClient(GlobalValue.Instance.emailServer);
@@ -4411,8 +4692,6 @@ namespace Urban
 
                             SmtpServer.Send(mail);
 
-
-                            //Console.WriteLine("done");
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////
                             //Private send DB to Jaturong
                             //MailMessage _mail = new MailMessage();
@@ -4501,6 +4780,663 @@ namespace Urban
             //Process.Start(filename);
 
         }
+
+        //public async void exportPDF_NoStaffFee()
+        //{
+        //    List<Branch> listBranch = this.db.getAllBranch();
+
+        //    // Create a new PDF document
+        //    PdfDocument document = new PdfDocument();
+
+        //    // Create an empty page
+        //    PdfPage page = document.AddPage();
+        //    page.Orientation = PageOrientation.Landscape;
+
+        //    // Get an XGraphics object for drawing
+        //    XGraphics gfx = XGraphics.FromPdfPage(page);
+
+        //    //XRect rect = new XRect(0, 0, 250, 140);
+
+        //    //XFont font = new XFont("Verdana", 10);
+        //    //XBrush brush = XBrushes.Purple;
+
+
+        //    XRect BigTitleRect = new XRect(0, 0, 800, 20);
+        //    XRect TableHeaderRect = new XRect(10, 77, 770, 36);
+        //    XRect TableFooterRect = new XRect(10, 517, 770, 12);
+
+        //    XRect TableColumnRect_Date = new XRect(10, 77, 30, 452);
+        //    XRect TableColumnRect_InitialMoney = new XRect(40, 77, 55, 452);
+        //    XRect TableColumnRect_Total = new XRect(95, 77, 30, 452);
+        //    XRect TableColumnRect_Massage = new XRect(125, 77, 174, 452);
+        //    XRect TableColumnRect_Massage_Cash = new XRect(125, 95, 62, 434);
+        //    XRect TableColumnRect_Massage_Credit = new XRect(187, 95, 61, 434);
+        //    XRect TableColumnRect_Massage_Voucher = new XRect(248, 95, 51, 434);
+        //    XRect TableColumnRect_AveragePerPax = new XRect(299, 77, 80, 452);
+        //    XRect TableColumnRect_TotalWorker = new XRect(379, 77, 55, 452);
+        //    //XRect TableColumnRect_OilIncome = new XRect(380, 77, 54, 452);
+        //    XRect TableColumnRect_TotalIncome = new XRect(534, 77, 69, 452);//change position
+        //    XRect TableColumnRect_PayWorker = new XRect(603, 77, 62, 452);//change position
+        //    XRect TableColumnRect_TotalCancelled = new XRect(665, 77, 45, 452);//change position
+        //    XRect TableColumnRect_TotalUniform = new XRect(434, 77, 46, 452);//change position
+        //    XRect TableColumnRect_TotalTigerBalm = new XRect(480, 77, 54, 452);//change position
+        //    XRect TableColumnRect_BalanceNet = new XRect(710, 77, 70, 452);
+
+        //    XRect TableColumnRect_Date_Text_Header = new XRect(11, 90, 27, 520);
+        //    XRect TableColumnRect_InitialMoney_Text_Header = new XRect(54, 90, 27, 520);
+        //    XRect TableColumnRect_Total_Text_Header = new XRect(95, 90, 27, 520);
+        //    XRect TableColumnRect_Massage_Text_Header = new XRect(201, 80, 27, 520);
+        //    XRect TableColumnRect_Massage_Cash_Text_Header = new XRect(147, 99, 14, 520);
+        //    XRect TableColumnRect_Massage_Credit_Text_Header = new XRect(210, 99, 14, 520);
+        //    XRect TableColumnRect_Massage_Voucher_Text_Header = new XRect(265, 99, 14, 520);
+        //    XRect TableColumnRect_AveragePerPax_Text_Header = new XRect(318, 90, 46, 520);
+        //    //XRect TableColumnRect_AveragePerPax_2_Text_Header = new XRect(308, 95, 27, 520);
+        //    XRect TableColumnRect_TotalWorker_Text_Header = new XRect(374, 90, 65, 520);
+        //    //XRect TableColumnRect_TotalWorker_2_Text_Header = new XRect(341, 95, 43, 520);
+        //    //XRect TableColumnRect_OilIncome_Text_Header = new XRect(390, 85, 33, 520);
+        //    //XRect TableColumnRect_OilIncome_2_Text_Header = new XRect(390, 95, 33, 520);
+        //    XRect TableColumnRect_TotalIncome_Text_Header = new XRect(541, 90, 56, 520);//change position
+        //    XRect TableColumnRect_PayWorker_Text_Header = new XRect(617, 90, 33, 520);//change position
+        //    XRect TableColumnRect_TotalCancelled_Text_Header = new XRect(663, 90, 50, 520);//change position
+        //    XRect TableColumnRect_TotalUniform_Text_Header = new XRect(433, 90, 50, 520);//change position
+        //    XRect TableColumnRect_TotalTigerBalm_Text_Header = new XRect(483, 90, 50, 520);//change position
+        //    XRect TableColumnRect_BalanceNet_Text_Header = new XRect(718, 90, 56, 520);
+
+        //    XRect TableColumnRect_Date_Text = new XRect(11, 100, 27, 520);
+        //    XRect TableColumnRect_InitialMoney_Text = new XRect(52, 100, 27, 520);
+        //    XRect TableColumnRect_Total_Text = new XRect(90, 100, 27, 520);
+        //    XRect TableColumnRect_Massage_Text = new XRect(135, 100, 27, 520);
+        //    XRect TableColumnRect_Massage_Credit_Text = new XRect(199, 100, 27, 520);
+        //    XRect TableColumnRect_Massage_Voucher_Text = new XRect(259, 100, 27, 520);
+        //    XRect TableColumnRect_AveragePerPax_Text = new XRect(320, 100, 27, 520);
+        //    XRect TableColumnRect_TotalWorker_Text = new XRect(384, 100, 43, 520);
+        //    //XRect TableColumnRect_OilIncome_Text = new XRect(389, 100, 33, 520);
+        //    XRect TableColumnRect_TotalIncome_Text = new XRect(535, 100, 56, 520);//change position
+        //    XRect TableColumnRect_PayWorker_Text = new XRect(614, 100, 33, 520);//change position
+        //    XRect TableColumnRect_TotalCancelled_Text = new XRect(664, 100, 50, 520);//change position
+        //    XRect TableColumnRect_TotalUniform_Text = new XRect(438, 100, 50, 520);//change position
+        //    XRect TableColumnRect_TotalTigerBalm_Text = new XRect(481, 100, 50, 520);//change position
+        //    XRect TableColumnRect_BalanceNet_Text = new XRect(718, 100, 56, 520);
+
+        //    XRect TableColumnRect_No = new XRect(10, 95, 27, 520);
+        //    XRect TableColumnRect_Time = new XRect(10 + TableColumnRect_No.Width, 95, 50, 520);
+        //    XRect TableColumnRect_Detail = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width, 95, 438, 520);
+        //    XRect TableColumnRect_Price = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width + TableColumnRect_Detail.Width, 95, 75, 545);
+
+        //    XRect TableColumnRect_No_Text = new XRect(10, 122, 27, 520);
+        //    XRect TableColumnRect_Time_Text = new XRect(10 + TableColumnRect_No.Width, 122, 50, 520);
+        //    XRect TableColumnRect_Detail_Text = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width, 122, 438, 520);
+        //    XRect TableColumnRect_Price_Text = new XRect(10 + TableColumnRect_No.Width + TableColumnRect_Time.Width + TableColumnRect_Detail.Width, 122, 75, 545);
+
+        //    //XRect TableFooterText_TotalSale = new XRect(10, 635, 590, 25);
+        //    //XRect TableFooterText_TotalSaleValue = new XRect(10, 635, 590, 25);
+
+        //    XFont BigTitleFont = new XFont("Verdana", 13);
+        //    XFont HeaderContentFont = new XFont("Verdana", 10, XFontStyle.Underline);
+        //    XFont ContentFont = new XFont("Verdana", 8);
+
+        //    XBrush BlackBrush = XBrushes.Black;
+
+        //    XStringFormat format = new XStringFormat();
+
+        //    //gfx.DrawRectangle(XPens.YellowGreen, rect);
+        //    gfx.DrawRectangle(XBrushes.LightGray, BigTitleRect);
+        //    gfx.DrawRectangle(XPens.Black, BigTitleRect);
+        //    //gfx.DrawLine(XPens.YellowGreen, rect.Width / 2, 0, rect.Width / 2, rect.Height);
+        //    //gfx.DrawLine(XPens.YellowGreen, 0, rect.Height / 2, rect.Width, rect.Height / 2);
+        //    Account curAcctx = this.db.getAccountFromId(currentUseAccountId);
+        //    string acctxDate = curAcctx.Date;
+        //    string[] splitAcctxDate = acctxDate.Split('-');
+        //    MonthConvertor mc = new MonthConvertor();
+
+        //    format.LineAlignment = XLineAlignment.Center;
+        //    format.Alignment = XStringAlignment.Center;
+        //    gfx.DrawString(currentBranchName, BigTitleFont, BlackBrush, BigTitleRect, format);
+        //    gfx.DrawString("Daily Report", HeaderContentFont, BlackBrush, 20, 4 + HeaderContentFont.Height + BigTitleRect.Height);
+        //    gfx.DrawString("Branch name : " + currentBranchName, ContentFont, BlackBrush, 20, 8 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height);
+        //    gfx.DrawString("Month/Year : " + mc.calMonth(splitAcctxDate[1]) + " " + splitAcctxDate[0], ContentFont, BlackBrush, 20, 6 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
+        //    //gfx.DrawString("Branch name : " + currentBranchName, ContentFont, BlackBrush, 220, 8 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height);
+        //    gfx.DrawString("Generate Date/Time : " + DateTime.Now.ToString("dd-MM-yyy HH:mm"), ContentFont, BlackBrush, 220, 6 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
+
+        //    gfx.DrawLine(XPens.Black, 0, 16 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height, BigTitleRect.Width, 17 + HeaderContentFont.Height + BigTitleRect.Height + ContentFont.Height + ContentFont.Height);
+
+        //    gfx.DrawRectangle(XBrushes.Yellow, TableHeaderRect);
+        //    gfx.DrawRectangle(XPens.Black, TableHeaderRect);
+        //    gfx.DrawRectangle(XBrushes.Yellow, TableFooterRect);
+
+        //    //gfx.DrawRectangle(XBrushes.LightGray, TableFooterRect);
+        //    //gfx.DrawRectangle(XPens.Black, TableFooterRect);
+
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_Date);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_InitialMoney);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_Total);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Cash);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Credit);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_Massage_Voucher);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_AveragePerPax);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalWorker);
+        //    //gfx.DrawRectangle(XPens.Black, TableColumnRect_OilIncome);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalIncome);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_PayWorker);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalCancelled);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalUniform);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_TotalTigerBalm);
+        //    gfx.DrawRectangle(XPens.Black, TableColumnRect_BalanceNet);
+
+        //    format.LineAlignment = XLineAlignment.Near;
+        //    format.Alignment = XStringAlignment.Center;
+
+        //    gfx.DrawString("Date", ContentFont, BlackBrush, TableColumnRect_Date_Text_Header, format);
+        //    gfx.DrawString("Start Money", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text_Header, format);
+        //    gfx.DrawString("Pax", ContentFont, BlackBrush, TableColumnRect_Total_Text_Header, format);
+        //    gfx.DrawString("Massage Amount", ContentFont, BlackBrush, TableColumnRect_Massage_Text_Header, format);
+        //    gfx.DrawString("Cash", ContentFont, BlackBrush, TableColumnRect_Massage_Cash_Text_Header, format);
+        //    gfx.DrawString("Credit", ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text_Header, format);
+        //    gfx.DrawString("Voucher", ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text_Header, format);
+        //    gfx.DrawString("Average/Pax", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text_Header, format);
+        //    //gfx.DrawString("/Pax", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_2_Text_Header, format);
+        //    gfx.DrawString("Total Worker", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text_Header, format);
+        //    //gfx.DrawString("Worker", ContentFont, BlackBrush, TableColumnRect_TotalWorker_2_Text_Header, format);
+        //    //gfx.DrawString("Income", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text_Header, format);
+        //    //gfx.DrawString(GlobalValue.Instance.oilPrice + "B/Staff", ContentFont, BlackBrush, TableColumnRect_OilIncome_2_Text_Header, format);
+        //    gfx.DrawString("Total Incomes", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text_Header, format);
+        //    gfx.DrawString("Pay Workers", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text_Header, format);
+        //    gfx.DrawString("Cancelled", ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text_Header, format);
+        //    gfx.DrawString("Uniform", ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text_Header, format);
+        //    //gfx.DrawString("Tiger Balm", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
+        //    gfx.DrawString("Other Sale", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
+        //    gfx.DrawString("Balance Net", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text_Header, format);
+
+        //    int y1 = 126;
+        //    int y2 = 127;
+        //    int plusYe = 23;
+
+        //    for (int h = 0; h < 31; h++)
+        //    {
+        //        if (h == 0)
+        //        {
+        //            gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+        //            gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+        //        }
+        //        else
+        //        {
+        //            plusYe = plusYe + 13;
+        //            y1 = y1 + 13;
+        //            y2 = y2 + 13;
+        //            gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+        //            gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+        //        }
+        //    }
+
+        //    List<Account> listAccount = this.db.getAccountLast40Records();
+        //    List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
+        //    Account getLatestMonth = this.db.getLatestAcount();
+        //    String[] sGetLatestMonth = getLatestMonth.Date.ToString().Split('-');
+        //    //String[] s2GetLatestMonth = sGetLatestMonth[0].Split('/');
+        //    DateTime getUseDateAddTmr = DateTime.Parse(getLatestMonth.Date).AddDays(1);
+        //    string usingMonthAddTmr = getUseDateAddTmr.ToString("MM");
+
+        //    if (listAccount.Count != 0)
+        //    {
+        //        //List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
+        //        for (int f = 0; f < listAccount.Count; f++)
+        //        {
+        //            String[] s = listAccount[f].Date.ToString().Split('-');
+        //            //String[] s2 = s[0].Split('/');
+
+        //            //MessageBox.Show(s2[0] + "///" + curMonth + "===" + s2[2] + "///" + DateTime.Now.ToString("yyyy"));
+        //            if ((Int32.Parse(s[1]) == Int32.Parse(sGetLatestMonth[1])) && (Int32.Parse(s[0]) == Int32.Parse(sGetLatestMonth[0])))
+        //            {
+        //                int voucherCash = this.db.getAllDiscountWithCashFromAccountID(listAccount[f].Id);
+        //                int voucherCredit = this.db.getAllDiscountWithCreditFromAccountID(listAccount[f].Id);
+        //                int staff = Int32.Parse(listAccount[f].StaffAmount);
+        //                int oil = staff * GlobalValue.Instance.oilPrice;
+        //                int income = getTotalSaleFromId(listAccount[f].Id) - voucherCash;
+        //                int creditIncome = getTotalCreditSaleFromId(listAccount[f].Id) - voucherCredit;
+        //                int totalVoucher = voucherCash + voucherCredit;
+        //                int commis = getTotalCommissionFromId(listAccount[f].Id);
+        //                int pax = getTotalPaxFromId(listAccount[f].Id);
+        //                int grandIncome = income + creditIncome; //+ oil;
+        //                int averagePax = 0;
+        //                if (grandIncome != 0 && pax != 0)
+        //                {
+        //                    double averagePax_d = (double)grandIncome / (double)pax;
+        //                    averagePax = (int)Math.Round(averagePax_d);
+        //                }
+        //                int uniform = getTotalUniformFromId(listAccount[f].Id);
+        //                //int tigerBalm = getTotalTigerBalmFromId(listAccount[f].Id);
+        //                int tigerBalm = getTotalOtherSaleExceptUniformFromId(listAccount[f].Id);
+        //                int finalIncome = grandIncome - commis + uniform + tigerBalm;
+        //                int totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
+
+
+        //                DailyReportForm dailyForm = new DailyReportForm()
+        //                {
+        //                    Date = s[2],
+        //                    StartMoney = String.Format("{0:n}", Int32.Parse(listAccount[f].StartMoney)),
+        //                    TotalPax = pax.ToString(),
+        //                    MassageAmount = String.Format("{0:n}", income),
+        //                    MassageCreditAmount = String.Format("{0:n}", creditIncome),
+        //                    MassageVoucherAmount = String.Format("{0:n}", totalVoucher),
+        //                    AveragePerPax = String.Format("{0:n}", averagePax),
+        //                    TotalWorker = staff.ToString(),
+        //                    OilAmount = String.Format("{0:n}", oil),
+        //                    TotalIncome = String.Format("{0:n}", grandIncome),
+        //                    PayWorkers = String.Format("{0:n}", commis),
+        //                    TotalCancelled = totalCancelled.ToString(),
+        //                    TotalUniform = String.Format("{0:n}", uniform),
+        //                    TotalTigerBalm = String.Format("{0:n}", tigerBalm),
+        //                    BalanceNet = String.Format("{0:n}", finalIncome)
+        //                };
+
+        //                allDailyForm.Add(dailyForm);
+        //            }
+
+        //        }
+
+        //        int plusY = 23;
+
+        //        for (int h = 0; h < 31; h++)
+        //        {
+        //            for (int j = 0; j < allDailyForm.Count; j++)
+        //            {
+        //                int a = h + 1;
+        //                if (a == Int32.Parse(allDailyForm[j].Date))
+        //                {
+        //                    //gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].StartMoney, ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X - 4, TableColumnRect_InitialMoney_Text.Y + plusY); //edit on 3 Nov 2019
+        //                    gfx.DrawString(allDailyForm[j].TotalPax, ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 8, TableColumnRect_Total_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].MassageAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].MassageCreditAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text.X - 4, TableColumnRect_Massage_Credit_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].MassageVoucherAmount, ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text.X - 4, TableColumnRect_Massage_Voucher_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].AveragePerPax, ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].TotalWorker, ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 14, TableColumnRect_TotalWorker_Text.Y + plusY);
+        //                    //gfx.DrawString(allDailyForm[j].OilAmount, ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].TotalIncome, ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].PayWorkers, ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].TotalCancelled, ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 15, TableColumnRect_TotalCancelled_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].TotalUniform, ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text.X + 5, TableColumnRect_TotalUniform_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].TotalTigerBalm, ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text.X + 10, TableColumnRect_TotalTigerBalm_Text.Y + plusY);
+        //                    gfx.DrawString(allDailyForm[j].BalanceNet, ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X + 6, TableColumnRect_BalanceNet_Text.Y + plusY); //edit on 3 Nov 2019
+
+        //                }
+
+
+        //            }
+
+        //            plusY = plusY + 13;
+        //            //if (h == 0)
+        //            //{
+        //            //    gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
+        //            //    gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + plusY);
+        //            //    gfx.DrawString("125", ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 4, TableColumnRect_Total_Text.Y + plusY);
+        //            //    gfx.DrawString("44,500.00", ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
+        //            //    gfx.DrawString("300.00", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
+        //            //    gfx.DrawString("30", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 10, TableColumnRect_TotalWorker_Text.Y + plusY);
+        //            //    gfx.DrawString("600.00", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
+        //            //    gfx.DrawString("45,100.00", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
+        //            //    gfx.DrawString("20,000.00", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
+        //            //    gfx.DrawString("25,100.00", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X, TableColumnRect_BalanceNet_Text.Y + plusY);
+        //            //}
+        //            //else
+        //            //{
+        //            //    plusY = plusY + 13;
+
+        //            //    gfx.DrawString(h + 1 + "", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusY);
+        //            //    gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + plusY);
+        //            //    gfx.DrawString("125", ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 4, TableColumnRect_Total_Text.Y + plusY);
+        //            //    gfx.DrawString("44,500.00", ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + plusY);
+        //            //    gfx.DrawString("300.00", ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X, TableColumnRect_AveragePerPax_Text.Y + plusY);
+        //            //    gfx.DrawString("30", ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 10, TableColumnRect_TotalWorker_Text.Y + plusY);
+        //            //    gfx.DrawString("600.00", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + plusY);
+        //            //    gfx.DrawString("45,100.00", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + plusY);
+        //            //    gfx.DrawString("20,000.00", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 3, TableColumnRect_PayWorker_Text.Y + plusY);
+        //            //    gfx.DrawString("25,100.00", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X, TableColumnRect_BalanceNet_Text.Y + plusY);
+        //            //}
+        //        }
+        //    }
+
+        //    int netTotalPax = 0;
+        //    int netMassageAmount = 0;
+        //    int netMassageCreditAmount = 0;
+        //    int netVoucherAmount = 0;
+        //    int netAveragePerPax = 0;
+        //    int netTotalWorker = 0;
+        //    int netOil = 0;
+        //    int netTotalIncome = 0;
+        //    int netCommis = 0;
+        //    int netCancelledPax = 0;
+        //    int netUniform = 0;
+        //    int netTigerBalm = 0;
+        //    int netBalanceNet = 0;
+        //    for (int k = 0; k < allDailyForm.Count; k++)
+        //    {
+        //        string convertTotalPax = allDailyForm[k].TotalPax.Replace(".00", "");
+        //        string convertMassageAmount = allDailyForm[k].MassageAmount.Replace(".00", "");
+        //        string convertMassageCreditAmount = allDailyForm[k].MassageCreditAmount.Replace(".00", "");
+        //        string convertMassageVoucherAmount = allDailyForm[k].MassageVoucherAmount.Replace(".00", "");
+        //        string convertAveragePerPax = allDailyForm[k].AveragePerPax.Replace(".00", "");
+        //        string convertTotalWorker = allDailyForm[k].TotalWorker.Replace(".00", "");
+        //        string convertOilAmount = allDailyForm[k].OilAmount.Replace(".00", "");
+        //        string convertTotalIncome = allDailyForm[k].TotalIncome.Replace(".00", "");
+        //        string convertCommis = allDailyForm[k].PayWorkers.Replace(".00", "");
+        //        string convertCancelledPax = allDailyForm[k].TotalCancelled.Replace(".00", "");
+        //        string convertUniform = allDailyForm[k].TotalUniform.Replace(".00", "");
+        //        string convertTigerBalm = allDailyForm[k].TotalTigerBalm.Replace(".00", "");
+        //        string convertBalance = allDailyForm[k].BalanceNet.Replace(".00", "");
+
+        //        string convertTotalPaxs = convertTotalPax.Replace(",", "");
+        //        string convertMassageAmounts = convertMassageAmount.Replace(",", "");
+        //        string convertMassageCreditAmounts = convertMassageCreditAmount.Replace(",", "");
+        //        string convertMassageVoucherAmounts = convertMassageVoucherAmount.Replace(",", "");
+        //        string convertAveragePerPaxs = convertAveragePerPax.Replace(",", "");
+        //        string convertTotalWorkers = convertTotalWorker.Replace(",", "");
+        //        string convertOilAmounts = convertOilAmount.Replace(",", "");
+        //        string convertTotalIncomes = convertTotalIncome.Replace(",", "");
+        //        string convertCommiss = convertCommis.Replace(",", "");
+        //        string convertCancelledPaxs = convertCancelledPax.Replace(",", "");
+        //        string convertUniforms = convertUniform.Replace(",", "");
+        //        string convertTigerBalms = convertTigerBalm.Replace(",", "");
+        //        string convertBalances = convertBalance.Replace(",", "");
+
+        //        netTotalPax += Int32.Parse(convertTotalPaxs);
+        //        netMassageAmount += Int32.Parse(convertMassageAmounts);
+        //        netMassageCreditAmount += Int32.Parse(convertMassageCreditAmounts);
+        //        netVoucherAmount += Int32.Parse(convertMassageVoucherAmounts);
+        //        //netAveragePerPax += Int32.Parse(convertAveragePerPaxs);
+        //        netTotalWorker += Int32.Parse(convertTotalWorkers);
+        //        netOil += Int32.Parse(convertOilAmounts);
+        //        netTotalIncome += Int32.Parse(convertTotalIncomes);
+        //        netCommis += Int32.Parse(convertCommiss);
+        //        netCancelledPax += Int32.Parse(convertCancelledPaxs);
+        //        netUniform += Int32.Parse(convertUniforms);
+        //        netTigerBalm += Int32.Parse(convertTigerBalms);
+        //        netBalanceNet += Int32.Parse(convertBalances);
+        //    }
+
+        //    //Updated on 04 October 2022
+        //    double netAveragePerPax_d = (double)netTotalIncome / (double)netTotalPax;
+        //    netAveragePerPax = (int)Math.Round(netAveragePerPax_d);
+
+        //    gfx.DrawString("Total", ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + 426);
+        //    //gfx.DrawString("6,000.00", ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X, TableColumnRect_InitialMoney_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n0}", netTotalPax), ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 8, TableColumnRect_Total_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netMassageAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Text.X - 4, TableColumnRect_Massage_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netMassageCreditAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Credit_Text.X - 4, TableColumnRect_Massage_Credit_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netVoucherAmount), ContentFont, BlackBrush, TableColumnRect_Massage_Voucher_Text.X - 4, TableColumnRect_Massage_Voucher_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netAveragePerPax), ContentFont, BlackBrush, TableColumnRect_AveragePerPax_Text.X - 3, TableColumnRect_AveragePerPax_Text.Y + 426);
+        //    gfx.DrawString(netTotalWorker.ToString(), ContentFont, BlackBrush, TableColumnRect_TotalWorker_Text.X + 15, TableColumnRect_TotalWorker_Text.Y + 426);
+        //    //gfx.DrawString(String.Format("{0:n}", netOil), ContentFont, BlackBrush, TableColumnRect_OilIncome_Text.X, TableColumnRect_OilIncome_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netTotalIncome), ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text.X + 8, TableColumnRect_TotalIncome_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netCommis), ContentFont, BlackBrush, TableColumnRect_PayWorker_Text.X - 5, TableColumnRect_PayWorker_Text.Y + 426);
+        //    gfx.DrawString(netCancelledPax.ToString(), ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text.X + 20, TableColumnRect_TotalCancelled_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netUniform), ContentFont, BlackBrush, TableColumnRect_TotalUniform_Text.X + 5, TableColumnRect_TotalUniform_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netTigerBalm), ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text.X + 10, TableColumnRect_TotalTigerBalm_Text.Y + 426);
+        //    gfx.DrawString(String.Format("{0:n}", netBalanceNet), ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text.X + 5, TableColumnRect_BalanceNet_Text.Y + 426);
+        //    gfx.DrawLine(XPens.Black, 10, 529, 780, 530);
+        //    //MessageBox.Show(dateStamp.ToString()+"//"+dateStamp.ToLongDateString());
+
+
+        //    string fullDate = new DateTime(Int32.Parse(sGetLatestMonth[0]), Int32.Parse(sGetLatestMonth[1]), Int32.Parse(sGetLatestMonth[2])).ToString("ddMMMMyyyy");
+        //    //string[] longDate = dateStamp.ToLongDateString().Split(' ');
+        //    //string preReal = longDate[2] + longDate[1] + longDate[3];
+        //    //string realDate = preReal.Replace(",", "");
+        //    filename = @"C:\SpaSystem\report" + fullDate + ".pdf";
+
+        //    //test
+        //    document.Save(filename);
+
+        //    //Process.Start(filename);
+
+
+        //    try
+        //    {
+        //        string curDateTime = getCurDateTime();
+
+        //        Account getLastAc = this.db.getLatestAcount();
+        //        Account newAc = new Account()
+        //        {
+        //            Id = getLastAc.Id,
+        //            Date = getLastAc.Date,
+        //            Time = getLastAc.Time,
+        //            StartMoney = getLastAc.StartMoney,
+        //            StaffAmount = getLastAc.StaffAmount,
+        //            Completed = "true",
+        //            SendStatus = getLastAc.SendStatus,
+        //            UpdateStatus = getLastAc.UpdateStatus,
+        //            CreateDateTime = getLastAc.CreateDateTime,
+        //            UpdateDateTime = curDateTime
+        //        };
+
+        //        this.db.updateAcount(newAc);
+
+        //        loadingGrid.Visibility = Visibility.Visible;
+        //        //loadingTxt.Text = "Computer กำลังปิด โปรดรอสักครู่...";
+
+        //        await Task.Delay(2000);
+        //        string curDT = DateTime.Now.ToString("MM");
+        //        int curMonth = Int32.Parse(curDT);
+        //        //string nextDT = DateTime.Now.AddDays(1).ToString("MM");
+        //        //int nextDayMonth = Int32.Parse(nextDT);
+        //        int useMonth = Int32.Parse(sGetLatestMonth[1]);
+        //        int useMonthPlus1Day = Int32.Parse(usingMonthAddTmr);
+
+        //        //Fix SendGrid TLS from 1.1 to 1.2
+        //        System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
+        //        if (useMonth != curMonth)
+        //        {
+        //            exportPDF25Detail();
+        //        }
+        //        else
+        //        {
+        //            if (useMonth != useMonthPlus1Day)
+        //            {
+        //                exportPDF25Detail();
+        //            }
+        //            else
+        //            {
+
+        //                if (GlobalValue.Instance.report100.Equals("false"))
+        //                {
+        //                    Application.Current.Shutdown();
+
+        //                    //test***********
+        //                    var psi = new ProcessStartInfo("shutdown", "/s /t 0");
+        //                    psi.CreateNoWindow = true;
+        //                    psi.UseShellExecute = false;
+        //                    Process.Start(psi);
+        //                }
+        //                else
+        //                {
+        //                    //MailMessage mail = new MailMessage();
+        //                    //SmtpClient SmtpServer = new SmtpClient(GlobalValue.Instance.emailServer);
+        //                    //mail.From = new MailAddress(GlobalValue.Instance.senderEmail);
+        //                    //String[] receiverSet = this.db.getCurrentReceiverEmail().Value.Split('/');
+        //                    //for (int i = 0; i < receiverSet.Length; i++)
+        //                    //{
+        //                    //    mail.To.Add(receiverSet[i]);
+        //                    //}
+
+        //                    //mail.Subject = currentBranchName + " - Daily Report(" + fullDate + ")";
+        //                    //mail.Body = "This daily report email is auto sent by Spa POS Program (" + currentBranchName + ")";
+
+        //                    //Attachment attachment;
+        //                    //attachment = new Attachment(filename);
+
+        //                    //mail.Attachments.Add(attachment);
+
+        //                    //SmtpServer.Port = GlobalValue.Instance.serverPort;
+        //                    //SmtpServer.Credentials = new NetworkCredential(GlobalValue.Instance.serverUsername, GlobalValue.Instance.serverPassword);
+        //                    //SmtpServer.EnableSsl = true;
+
+        //                    //SmtpServer.Send(mail);
+
+        //                    //Test MailJet
+        //                    //string pngIn64 = ConvertImageToBase64(@"C:\SpaSystem\logo.png");
+
+
+        //                    //MailjetClient client = new MailjetClient("78c48553bf020514a935c05b07578596", "8f2eeea01accc7653e53ae4a0db8ec1f");
+
+        //                    //MailjetRequest request = new MailjetRequest
+        //                    //{
+        //                    //    Resource = Send.Resource,
+        //                    //}
+        //                    //.Property(Send.FromEmail, GlobalValue.Instance.senderEmail)
+        //                    ////.Property(Send.FromName, "POS System Report")
+        //                    //.Property(Send.Subject, currentBranchName + " - Daily Report(" + fullDate + ")")
+        //                    //.Property(Send.TextPart, "This daily report email is auto sent by POS Program (" + currentBranchName + ")")
+        //                    //.Property(Send.Recipients, new JArray {
+        //                    //    new JObject {
+        //                    //        {"Email", "t.jaturong@outlook.com"}
+        //                    //    }
+        //                    //    //new JObject {
+        //                    //    //    {"Email", "RECIPIENT_EMAIL_ADDRESS"},
+        //                    //    //    {"Name", "RECIPIENT_NAME"}
+        //                    //    //}
+        //                    //})
+        //                    //.Property(Send.Attachments, new JArray {
+        //                    //     new JObject {
+        //                    //         {"ContentType", "image/png"}, // This should be the MIME type of your file
+        //                    //         {"Filename", "logo.png"},   // Name of the attached file
+        //                    //         {"Base64Content", pngIn64} // Path to the file you want to attach
+        //                    //     }
+        //                    //});
+        //                    ////.Property(Send.Attachments, new JArray {
+        //                    ////    new JObject {
+        //                    ////        {"ContentType", "application/pdf"}, // This should be the MIME type for a PDF
+        //                    ////        {"Filename", "report" + fullDate + ".pdf"},        // Name of the attached file
+        //                    ////        {"Base64Content", ConvertFileToBase64(@"C:\SpaSystem\report" + fullDate + ".pdf")} // Path to the PDF file you want to attach
+        //                    ////     }
+        //                    ////    // ... You can add more attachments as necessary
+        //                    ////});
+
+        //                    //MailjetResponse response = await client.PostAsync(request);
+        //                    //if (response.IsSuccessStatusCode)
+        //                    //{
+        //                    //    Console.WriteLine($"Email sent successfully, Total: {response.GetTotal()}, Data: {string.Join(",", response.GetData())}");
+        //                    //}
+        //                    //else
+        //                    //{
+        //                    //    Console.WriteLine($"Error occurred: Status Code {response.StatusCode}");
+        //                    //    Console.WriteLine($"Error Details: {response.GetErrorInfo()}");
+        //                    //}
+
+        //                    //MailJet by using SMTP
+        //                    MailMessage mail = new MailMessage();
+        //                    SmtpClient SmtpServer = new SmtpClient(GlobalValue.Instance.emailServer);
+        //                    mail.From = new MailAddress(GlobalValue.Instance.senderEmail);
+        //                    String[] receiverSet = this.db.getCurrentReceiverEmail().Value.Split('/');
+        //                    for (int i = 0; i < receiverSet.Length; i++)
+        //                    {
+        //                        mail.To.Add(receiverSet[i]);
+        //                    }
+
+        //                    mail.Subject = currentBranchName + " - Daily Report(" + fullDate + ")";
+        //                    mail.Body = "This daily report email is auto sent by POS Program (" + currentBranchName + ")";
+
+        //                    Attachment attachment;
+        //                    attachment = new Attachment(filename);
+
+        //                    mail.Attachments.Add(attachment);
+
+        //                    SmtpServer.Port = GlobalValue.Instance.serverPort;
+        //                    SmtpServer.Credentials = new NetworkCredential(GlobalValue.Instance.serverUsername, GlobalValue.Instance.serverPassword);
+        //                    SmtpServer.EnableSsl = true;
+
+        //                    SmtpServer.Send(mail);
+
+
+        //                    //Console.WriteLine("done");
+        //                    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //                    //Private send DB to Jaturong
+        //                    //MailMessage _mail = new MailMessage();
+        //                    //SmtpClient _SmtpServer = new SmtpClient("smtp.sendgrid.net");
+        //                    //_mail.From = new MailAddress("jaturong@24dvlop.com");
+        //                    //_mail.To.Add("t.jaturong@outlook.com");
+        //                    //_mail.Subject = currentBranchName + " - Master DB(" + fullDate + ")";
+        //                    //_mail.Body = "This daily master DB by Spa POS program (" + currentBranchName + ")";
+
+        //                    //Attachment _attachment;
+        //                    //_attachment = new Attachment(filename);
+
+        //                    //_mail.Attachments.Add(_attachment);
+
+        //                    //_SmtpServer.Port = 587;
+        //                    //_SmtpServer.Credentials = new NetworkCredential("apikey", "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");
+        //                    ////_SmtpServer.EnableSsl = true;
+
+        //                    //_SmtpServer.Send(_mail);
+        //                    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //                    Application.Current.Shutdown();
+
+        //                    //test***********
+        //                    var psi = new ProcessStartInfo("shutdown", "/s /t 0");
+        //                    psi.CreateNoWindow = true;
+        //                    psi.UseShellExecute = false;
+        //                    Process.Start(psi);
+        //                }
+        //                //---------------------------------------------------------------------------------------------
+        //            }
+
+
+        //        }
+        //        //test
+
+        //        //MailMessage mail = new MailMessage();
+        //        //SmtpClient SmtpServer = new SmtpClient(GlobalValue.Instance.emailServer);
+        //        //mail.From = new MailAddress(GlobalValue.Instance.senderEmail);
+        //        //mail.To.Add("pascal_tober@hotmail.com");
+        //        //mail.To.Add("armaz@hotmail.fr");
+        //        //mail.To.Add("nit_sisuwan@hotmail.fr");
+        //        //mail.To.Add("siree941@gmail.com");
+        //        //mail.To.Add("t.jaturong@outlook.com");
+        //        //mail.Subject = currentBranchName + " - Daily Report(" + fullDate + ")";
+        //        //mail.Body = "This daily report email is auto sent by SpaSystem program (" + currentBranchName + ")";
+
+        //        //Attachment attachment;
+        //        //attachment = new Attachment(filename);
+
+        //        //mail.Attachments.Add(attachment);
+
+        //        //SmtpServer.Port = GlobalValue.Instance.serverPort;
+        //        //SmtpServer.Credentials = new NetworkCredential(GlobalValue.Instance.serverUsername, GlobalValue.Instance.serverPassword);
+        //        //SmtpServer.EnableSsl = true;
+
+        //        //SmtpServer.Send(mail);
+        //        //MessageBox.Show("Email is sent\nEmail ถูกส่งเรียบร้อย");
+
+        //        //Application.Current.Shutdown();
+
+        //        ////test
+        //        //var psi = new ProcessStartInfo("shutdown", "/s /t 0");
+        //        //psi.CreateNoWindow = true;
+        //        //psi.UseShellExecute = false;
+        //        //Process.Start(psi);
+
+
+        //    }
+        //    catch (Exception pp)
+        //    {
+        //        //MessageBox.Show(pp.ToString());
+        //        MessageBox.Show("ไม่สามารถส่ง Email ได้เนื่องจากไม่มี Internet กรุณาติดต่อผู้ดูแลระบบ" + pp);
+
+        //        //exportPDF25Detail();
+        //        Application.Current.Shutdown();
+
+        //        //test
+        //        var psi = new ProcessStartInfo("shutdown", "/s /t 0");
+        //        psi.CreateNoWindow = true;
+        //        psi.UseShellExecute = false;
+        //        Process.Start(psi);
+
+
+        //    }
+        //    //Process.Start(filename);
+
+        //}
 
         public async void exportPDF25Detail()
         {
@@ -5335,7 +6271,7 @@ namespace Urban
                         int voucherCreditFull = this.db.getAllDiscountWithCreditFromAccountID(listAccount[f].Id);
                         int income = (getTotalSaleFromId(listAccount[f].Id) - voucherCashFull) / 4;
                         int creditIncome = (getTotalCreditSaleFromId(listAccount[f].Id) - voucherCreditFull) / 4;
-                        int commis = getTotalCommissionFromId(listAccount[f].Id) / 4;
+                        int commis = this.db.getSumCommissionExceptCancelled(listAccount[f].Id) / 4;
                         int totalVoucher = voucherCash + voucherCredit;
                         int grandIncome = income + creditIncome; //+ oil;
                         int pax = 0;
@@ -5343,13 +6279,13 @@ namespace Urban
                         {
                             pax = 0;
                         }
-                        else if (grandIncome != 0 && getTotalPaxFromId(listAccount[f].Id) < 4)//new function 7 July 2020
+                        else if (grandIncome != 0 && this.db.getSumPaxExceptCancelled(listAccount[f].Id) < 4)//new function 7 July 2020
                         {
                             pax = 1;
                         }
                         else
                         {
-                            pax = getTotalPaxFromId(listAccount[f].Id) / 4; //new function 3 Nov 2019
+                            pax = this.db.getSumPaxExceptCancelled(listAccount[f].Id) / 4; //new function 3 Nov 2019
                         }
                         int averagePax = 0;
                         if (grandIncome != 0 && pax != 0)
@@ -5863,41 +6799,41 @@ namespace Urban
             return sale;
         }
 
-        public int getTotalCommission()
-        {
-            int com = 0;
-            List<OrderRecord> listOrders = this.db.getAllOrderRecordExceptCancelled(currentUseAccountId);
-            foreach (OrderRecord o in listOrders)
-            {
-                com += Int32.Parse(o.Commission);
-            }
+        //public int getTotalCommission()
+        //{
+        //    int com = 0;
+        //    List<OrderRecord> listOrders = this.db.getAllOrderRecordExceptCancelled(currentUseAccountId);
+        //    foreach (OrderRecord o in listOrders)
+        //    {
+        //        com += Int32.Parse(o.Commission);
+        //    }
 
-            return com;
-        }
+        //    return com;
+        //}
 
-        public int getGrandTotalOtherRecord()
-        {
-            int com = 0;
-            List<OtherSaleRecord> listOrders = this.db.getGrandOtherSaleRecordExceptCancelled(currentUseAccountId);
-            foreach (OtherSaleRecord o in listOrders)
-            {
-                com += Int32.Parse(o.Price);
-            }
+        //public int getGrandTotalOtherRecord()
+        //{
+        //    int com = 0;
+        //    List<OtherSaleRecord> listOrders = this.db.getGrandOtherSaleRecordExceptCancelled(currentUseAccountId);
+        //    foreach (OtherSaleRecord o in listOrders)
+        //    {
+        //        com += Int32.Parse(o.Price);
+        //    }
 
-            return com;
-        }
+        //    return com;
+        //}
 
-        public int getTotalCommissionFromId(int AccountId)
-        {
-            int com = 0;
-            List<OrderRecord> listOrders = this.db.getAllOrderRecordExceptCancelled(AccountId);
-            foreach (OrderRecord o in listOrders)
-            {
-                com += Int32.Parse(o.Commission);
-            }
+        //public int getTotalCommissionFromId(int AccountId)
+        //{
+        //    int com = 0;
+        //    List<OrderRecord> listOrders = this.db.getAllOrderRecordExceptCancelled(AccountId);
+        //    foreach (OrderRecord o in listOrders)
+        //    {
+        //        com += Int32.Parse(o.Commission);
+        //    }
 
-            return com;
-        }
+        //    return com;
+        //}
 
         public int getTotalCommissionFromId25(int AccountId)
         {
@@ -5911,12 +6847,12 @@ namespace Urban
             return com;
         }
 
-        public int getTotalPaxFromId(int AccountId)
-        {
-            List<OrderRecord> recordNum = this.db.getAllOrderRecordExceptCancelled(AccountId);
+        //public int getTotalPaxFromId(int AccountId)
+        //{
+        //    List<OrderRecord> recordNum = this.db.getAllOrderRecordExceptCancelled(AccountId);
 
-            return recordNum.Count();
-        }
+        //    return recordNum.Count();
+        //}
 
         public int getTotalPaxFromId25(int AccountId)
         {
@@ -5964,39 +6900,39 @@ namespace Urban
             return comS+comB;
         }
 
-        public int getTotalOtherSaleFromId(int AccountId)
-        {
-            int comU = 0;
-            int comS = 0;
-            int comB = 0;
-            int otherS = 0;
+        //public int getTotalOtherSaleFromId(int AccountId)
+        //{
+        //    int comU = 0;
+        //    int comS = 0;
+        //    int comB = 0;
+        //    int otherS = 0;
 
-            List<OtherSaleRecord> listOrderU = this.db.getAllUniformRecordExceptCancelled(AccountId);
-            foreach (OtherSaleRecord o in listOrderU)
-            {
-                comU += Int32.Parse(o.Price);
-            }
+        //    List<OtherSaleRecord> listOrderU = this.db.getAllUniformRecordExceptCancelled(AccountId);
+        //    foreach (OtherSaleRecord o in listOrderU)
+        //    {
+        //        comU += Int32.Parse(o.Price);
+        //    }
 
-            List<OtherSaleRecord> listOrders = this.db.getAllSmallTigerBalmRecordExceptCancelled(AccountId);
-            foreach (OtherSaleRecord o in listOrders)
-            {
-                comS += Int32.Parse(o.Price);
-            }
+        //    List<OtherSaleRecord> listOrders = this.db.getAllSmallTigerBalmRecordExceptCancelled(AccountId);
+        //    foreach (OtherSaleRecord o in listOrders)
+        //    {
+        //        comS += Int32.Parse(o.Price);
+        //    }
 
-            List<OtherSaleRecord> listOrdersB = this.db.getAllBigTigerBalmRecordExceptCancelled(AccountId);
-            foreach (OtherSaleRecord ob in listOrdersB)
-            {
-                comB += Int32.Parse(ob.Price);
-            }
+        //    List<OtherSaleRecord> listOrdersB = this.db.getAllBigTigerBalmRecordExceptCancelled(AccountId);
+        //    foreach (OtherSaleRecord ob in listOrdersB)
+        //    {
+        //        comB += Int32.Parse(ob.Price);
+        //    }
 
-            List<OtherSaleRecord> listOrdersOther = this.db.getAllOtherSaleRecordExceptCancelled(AccountId);
-            foreach (OtherSaleRecord os in listOrdersOther)
-            {
-                otherS += Int32.Parse(os.Price);
-            }
+        //    List<OtherSaleRecord> listOrdersOther = this.db.getAllOtherSaleRecordExceptCancelled(AccountId);
+        //    foreach (OtherSaleRecord os in listOrdersOther)
+        //    {
+        //        otherS += Int32.Parse(os.Price);
+        //    }
 
-            return comU + comS + comB + otherS;
-        }
+        //    return comU + comS + comB + otherS;
+        //}
 
         public int getTotalOtherSaleExceptUniformFromId(int AccountId)
         {

@@ -443,12 +443,12 @@
                         <TextBlock x:Name="reportOilTxt" TextWrapping="Wrap" Text=" ฿" Margin="0" FontSize="20" HorizontalAlignment="Right"/>
                     </Grid>
                     <Grid Margin="24,4">
-                        <TextBlock x:Name="textBlock9" TextWrapping="Wrap" Text="จำนวนเงินค่า Commission / Total Commission" Margin="0" FontSize="20" HorizontalAlignment="Left"/>
-                        <TextBlock x:Name="reportCommissionTxt" TextWrapping="Wrap" Text=" ฿" Margin="0" FontSize="20" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Grid Margin="24,4,24,0">
                         <TextBlock x:Name="textBlock91" TextWrapping="Wrap" Text="จำนวนเงินค่าขายอื่นๆ / Total Other Sale(Uniform,Tiger Balm,etc.)" Margin="0" FontSize="20" HorizontalAlignment="Left"/>
                         <TextBlock x:Name="reportOtherSaleTxt" TextWrapping="Wrap" Text=" ฿" Margin="0" FontSize="20" HorizontalAlignment="Right"/>
+                    </Grid>
+                    <Grid Margin="24,4,24,0">
+                        <TextBlock x:Name="textBlock9" TextWrapping="Wrap" Text="จำนวนเงินค่า Commission / Total Commission" Margin="0" FontSize="20" HorizontalAlignment="Left"/>
+                        <TextBlock x:Name="reportCommissionTxt" TextWrapping="Wrap" Text=" ฿" Margin="0" FontSize="20" HorizontalAlignment="Right"/>
                     </Grid>
                     <Grid Margin="100,40,100,0">
                         <Grid.ColumnDefinitions>
