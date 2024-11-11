@@ -24,5 +24,6 @@ namespace Urban.Model
         public int MemberId { get; set; }
         public string MemberDiscountAmount { get; set; }
         public int ReceiptId { get; set; }
+        public int OrderReceiptId { get; set; }
     }
 }

@@ -7008,7 +7008,7 @@ namespace Urban
         public void SendTextToMonitor(String[] tagArray)
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13 || getBranchId == 14)
             {
                 try
                 {
@@ -7124,7 +7124,7 @@ namespace Urban
         public void SendTextTotal()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13 || getBranchId == 14)
             {
                 try
                 {
@@ -7185,7 +7185,7 @@ namespace Urban
         public void SendTextTotalWithDiscount()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13 || getBranchId == 14)
             {
                 try
                 {
@@ -7246,7 +7246,7 @@ namespace Urban
         public void ClearText()
         {
             int getBranchId = this.db.getBranch().Id;
-            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13)
+            if (getBranchId == 7 || getBranchId == 10 || getBranchId == 11 || getBranchId == 12 || getBranchId == 13 || getBranchId == 14)
             {
                 try
                 {
@@ -7486,7 +7486,8 @@ namespace Urban
                 UpdateDateTime = getOrd.UpdateDateTime,
                 MemberId = getOrd.MemberId,
                 MemberDiscountAmount = getOrd.MemberDiscountAmount,
-                ReceiptId = getOrd.ReceiptId
+                ReceiptId = getOrd.ReceiptId,
+                OrderReceiptId = getOrd.OrderReceiptId
             };
 
             listOrders.Add(ords);
@@ -7556,7 +7557,8 @@ namespace Urban
                     UpdateDateTime = getOrd.UpdateDateTime,
                     MemberId = getOrd.MemberId,
                     MemberDiscountAmount = getOrd.MemberDiscountAmount,
-                    ReceiptId = getOrd.ReceiptId
+                    ReceiptId = getOrd.ReceiptId,
+                    OrderReceiptId = getOrd.OrderReceiptId
                 };
 
                 var obj = new OrderUpdateSerializer
@@ -8252,7 +8254,7 @@ namespace Urban
             string curDateTime = getCurDateTime();
             int usingAccountId = this.db.getLatestAcount().Id;
             //Generate ReceiptNo
-            string currentDateYYMM = DateTime.Now.ToString("yyMM");
+            string currentDateYYMM = DateTime.Now.ToString("yyMMdd");
 
             int bID = this.db.getBranch().Id;
             string bCode = "";
@@ -8265,16 +8267,36 @@ namespace Urban
                 bCode = "" + bID;
             }
 
+            OrderReceipt oRcpt;
+
             //Save OrderReceipt to local db then sent to server
-            OrderReceipt oRcpt = new OrderReceipt()
+            if (prepareOrder.Count > 0)
             {
-                AccountId = usingAccountId,
-                ReceiptNo = "R"+ bCode + currentDateYYMM+this.db.getOrderReceiptRunning(usingAccountId),
-                CancelStatus = "false",
-                CreateDateTime = curDateTime,
-                UpdateDateTime = curDateTime
-                //EmployeeTypeId = GlobalValue.Instance.SelectedEmployeeId
-            };
+                oRcpt = new OrderReceipt()
+                {
+                    AccountId = usingAccountId,
+                    ReceiptNo = "R" + bCode + currentDateYYMM + this.db.getOrderReceiptRunning(usingAccountId),
+                    CancelStatus = "false",
+                    CreateDateTime = curDateTime,
+                    UpdateDateTime = curDateTime,
+                    SellItemTypeId = this.db.getSellItemTypeIdbyMassageTopicId(prepareOrder[0].MassageTopicId)
+                    //EmployeeTypeId = GlobalValue.Instance.SelectedEmployeeId
+                };
+            }
+            else
+            {
+                oRcpt = new OrderReceipt()
+                {
+                    AccountId = usingAccountId,
+                    ReceiptNo = "R" + bCode + currentDateYYMM + this.db.getOrderReceiptRunning(usingAccountId),
+                    CancelStatus = "false",
+                    CreateDateTime = curDateTime,
+                    UpdateDateTime = curDateTime
+                    //SellItemTypeId = this.db.getSellItemTypeIdbyMassageTopicId(prepareOrder[0].MassageTopicId)
+                    //EmployeeTypeId = GlobalValue.Instance.SelectedEmployeeId
+                };
+            }
+            
 
             this.db.saveOrderReceipt(oRcpt);
 
@@ -8293,7 +8315,8 @@ namespace Urban
                 ReceiptNo = orcpt.ReceiptNo,
                 CancelStatus = orcpt.CancelStatus,
                 CreateDateTime = orcpt.CreateDateTime,
-                UpdateDateTime = orcpt.UpdateDateTime
+                UpdateDateTime = orcpt.UpdateDateTime,
+                SellItemTypeId = orcpt.SellItemTypeId
                 //EmployeeTypeId = orcpt.EmployeeTypeId
             };
 
