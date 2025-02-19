@@ -180,6 +180,7 @@
     <Compile Include="Model\SerializeClassForOtherSale.cs" />
     <Compile Include="Model\SerializeClassForReceipt.cs" />
     <Compile Include="Model\ShortMassageTopic.cs" />
+    <Compile Include="Model\Summary.cs" />
     <Compile Include="MyFormUrlEncodedContent.cs" />
     <Compile Include="RawPrinterHelper.cs" />
     <Compile Include="Slip.cs" />

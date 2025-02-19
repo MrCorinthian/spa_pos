@@ -550,7 +550,8 @@
         <Grid x:Name="loadingGrid" Background="#D8000000" Grid.RowSpan="3" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" Margin="200,0">
                 <TextBlock x:Name="loadingTxt" TextWrapping="Wrap" Text="Checked out &amp; Shutting down.." Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,12" FontSize="36"/>
-                <ProgressBar IsIndeterminate="True" Background="{x:Null}" Height="20" Margin="0"/>
+                <ProgressBar x:Name="progressBar" Background="{x:Null}" Height="20" Margin="0"/>
+                <TextBlock x:Name="progressText" TextWrapping="Wrap" Text="%" Foreground="White" HorizontalAlignment="Center" Margin="0,12,0,0" FontSize="14"/>
             </StackPanel>
         </Grid>
         <Grid x:Name="soldListGrid" Background="#FFFBFEFF" HorizontalAlignment="Right" Width="400" Grid.RowSpan="3" Margin="0,0,-500,0" RenderTransformOrigin="0.5,0.5">

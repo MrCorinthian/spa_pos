@@ -30,12 +30,12 @@ namespace Urban
             return Accounts;
         }
 
-        public List<Account> getAccountLast40Records()
+        public List<Account> getAccountLast40Records(int num)
         {
             List<Account> Accounts;
             using (var db = new SQLiteConnection(dbname))
             {
-                Accounts = db.Table<Account>().OrderByDescending(b => b.Id).Take(40).ToList();
+                Accounts = db.Table<Account>().OrderByDescending(b => b.Id).Take(num).ToList();
             }
             return Accounts;
         }
@@ -89,6 +89,21 @@ namespace Urban
                 account = db.Table<Account>().Last();
             }
             return account;
+        }
+
+        public int getLatestAccountDay()
+        {
+            //Account account = new Account();
+            string gDate = "";
+            using (var db = new SQLiteConnection(dbname))
+            {
+                gDate = db.Table<Account>().Last().Date;
+            }
+
+            string[] parts = gDate.Split('-');
+            int day = int.Parse(parts[2]); // Convert to int
+
+            return day;
         }
 
         public List<Branch> getAllBranch()
@@ -1778,6 +1793,8 @@ namespace Urban
 
             return discountWithCash;
         }
+
+        
 
         //public string getEmployeeTypeShowNameById(int empTypeId)
         //{
