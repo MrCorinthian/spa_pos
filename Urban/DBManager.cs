@@ -1601,6 +1601,26 @@ namespace Urban
             return sumCash;
         }
 
+        public int getSumComExceptCancelled_M(int AccountId)
+        {
+            int sumCash = 0;
+            int sumComOther = 0;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumCash = (from OrderList in db.Table<OrderRecord>()
+                           join MassageTp in db.Table<MassageTopic>() on OrderList.MassageTopicId equals MassageTp.Id
+                           where OrderList.AccountId == AccountId && OrderList.CancelStatus == "false" && MassageTp.SellItemTypeId == 1
+                           select OrderList).Sum(b => int.Parse(b.Commission));
+            }
+
+            using (var db = new SQLiteConnection(dbname))
+            {
+                sumComOther = db.Table<OtherSaleRecord>().Where(b => b.AccountId == AccountId && b.CancelStatus == "false").Sum(b => int.Parse(b.Commission));
+            }
+
+            return sumCash + sumComOther;
+        }
+
         public int getSumOrderRecordComExceptCancelled_B(int AccountId)
         {
             int sumCash = 0;

@@ -3540,13 +3540,13 @@ namespace Urban
                         if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
                         {
                             realGrandincome = grandIncome + finalOtherSale;
-                            finalWorkerBonus_d = (double)realGrandincome * 0.13;
+                            finalWorkerBonus_d = (double)realGrandincome * 0.10;
                             finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
                             finalIncome = realGrandincome - commis - finalWorkerBonus;
                         }
                         else
                         {
-                            finalWorkerBonus_d = (double)grandIncome * 0.13;
+                            finalWorkerBonus_d = (double)grandIncome * 0.10;
                             finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
                             finalIncome = grandIncome - commis + finalOtherSale - finalWorkerBonus;
                         }
@@ -5387,7 +5387,8 @@ namespace Urban
                 XRect TableColumnRect_OilIncome_2_Text_Header = new XRect(390, 95, 33, 520);
                 XRect TableColumnRect_TotalOtherSale_Text_Header = new XRect(435, 90, 50, 520);//change position
                 XRect TableColumnRect_TotalIncome_Text_Header = new XRect(495, 90, 56, 520);//change position
-                XRect TableColumnRect_PayWorker_Text_Header = new XRect(571, 90, 33, 520);//change position
+                XRect TableColumnRect_PayWorker_Text_Header = new XRect(571, 85, 33, 520);//change position
+                XRect TableColumnRect_PayWorker_2_Text_Header = new XRect(571, 95, 33, 520);//change position
                 XRect TableColumnRect_WorkerBonus_Text_Header = new XRect(624, 85, 50, 520);
                 XRect TableColumnRect_WorkerBonus_2_Text_Header = new XRect(624, 95, 50, 520);
                 XRect TableColumnRect_TotalCancelled_Text_Header = new XRect(676, 90, 35, 520);//change position
@@ -5500,10 +5501,11 @@ namespace Urban
                 gfx.DrawString("Income", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text_Header, format);
                 gfx.DrawString(GlobalValue.Instance.oilPrice + "B/Staff", ContentFont, BlackBrush, TableColumnRect_OilIncome_2_Text_Header, format);
                 gfx.DrawString("Total Incomes", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text_Header, format);
-                gfx.DrawString("Pay Workers", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text_Header, format);
+                gfx.DrawString("Therapists", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text_Header, format);
+                gfx.DrawString("Commissions", ContentFont, BlackBrush, TableColumnRect_PayWorker_2_Text_Header, format);
                 gfx.DrawString("Cancel", ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text_Header, format);
-                gfx.DrawString("Worker", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text_Header, format);
-                gfx.DrawString("Bonus", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_2_Text_Header, format);
+                gfx.DrawString("Therapists", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text_Header, format);
+                gfx.DrawString("rewards", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_2_Text_Header, format);
                 //gfx.DrawString("Tiger Balm", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
                 gfx.DrawString("Other Sale", ContentFont, BlackBrush, TableColumnRect_TotalOtherSale_Text_Header, format);
                 gfx.DrawString("Balance Net", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text_Header, format);
@@ -5834,7 +5836,17 @@ namespace Urban
                             int income = this.db.getSumOrderRecordCashExceptCancelled_M(listAccount[f].Id) - voucherCash;
                             int creditIncome = this.db.getSumOrderRecordCreditExceptCancelled_M(listAccount[f].Id) - voucherCredit;
                             int totalVoucher = voucherCash + voucherCredit;
-                            int commis = this.db.getSumOrderRecordComExceptCancelled_M(listAccount[f].Id);
+                            
+                            int commis = 0;
+                            if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+                            {
+                                commis = this.db.getSumComExceptCancelled_M(listAccount[f].Id);
+                            }
+                            else
+                            {
+                                commis = this.db.getSumOrderRecordComExceptCancelled_M(listAccount[f].Id);
+                            }
+
                             int finalOtherSale = 0;
 
                             int pax = this.db.getSumPaxExceptCancelled_M(listAccount[f].Id);
@@ -5846,8 +5858,10 @@ namespace Urban
                                 averagePax = (int)Math.Round(averagePax_d);
                             }
 
+                            finalOtherSale = this.db.getSumOtherSaleRecordExceptCancelled(listAccount[f].Id);
+
                             int realGrandincome = grandIncome + finalOtherSale;
-                            double finalWorkerBonus_d = (double)realGrandincome * 0.13;
+                            double finalWorkerBonus_d = (double)realGrandincome * 0.10;
                             int finalWorkerBonus = (int)Math.Round(finalWorkerBonus_d);
                             int finalIncome = realGrandincome - commis - finalWorkerBonus;
                             int totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
@@ -5881,17 +5895,20 @@ namespace Urban
                             income = this.db.getSumOrderRecordCashExceptCancelled_B(listAccount[f].Id) - voucherCash;
                             creditIncome = this.db.getSumOrderRecordCreditExceptCancelled_B(listAccount[f].Id) - voucherCredit;
                             totalVoucher = voucherCash + voucherCredit;
-                            commis = 0;
-                            if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
-                            {
-                                commis = this.db.getSumComExceptCancelled_B(listAccount[f].Id);
-                            }
-                            else
-                            {
-                                commis = this.db.getSumOrderRecordComExceptCancelled_B(listAccount[f].Id);
-                            }
 
-                            finalOtherSale = this.db.getSumOtherSaleRecordExceptCancelled(listAccount[f].Id);
+                            commis = this.db.getSumOrderRecordComExceptCancelled_B(listAccount[f].Id);
+                            //commis = 0;
+                            //if (GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
+                            //{
+                            //    commis = this.db.getSumComExceptCancelled_B(listAccount[f].Id);
+                            //}
+                            //else
+                            //{
+                            //    commis = this.db.getSumOrderRecordComExceptCancelled_B(listAccount[f].Id);
+                            //}
+
+                            //finalOtherSale = this.db.getSumOtherSaleRecordExceptCancelled(listAccount[f].Id);
+                            finalOtherSale = 0;
 
                             pax = this.db.getSumPaxExceptCancelled_B(listAccount[f].Id);
                             grandIncome = income + creditIncome;
@@ -5903,7 +5920,7 @@ namespace Urban
                             }
 
                             int realGrandincome_B = grandIncome + finalOtherSale;
-                            double finalWorkerBonus_d_B = (double)realGrandincome_B * 0.13;
+                            double finalWorkerBonus_d_B = (double)realGrandincome_B * 0.10;
                             int finalWorkerBonus_B = (int)Math.Round(finalWorkerBonus_d_B);
                             int finalIncome_B = realGrandincome_B - commis - finalWorkerBonus_B;
                             totalCancelled = getTotalCancelledPaxFromId(listAccount[f].Id);
@@ -9711,6 +9728,12 @@ namespace Urban
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             //For backdoor
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "ms-availablenetworks:",
+                UseShellExecute = true
+            });
+
         }
 
         //VIPMember functional start here
