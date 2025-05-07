@@ -40,6 +40,16 @@ namespace Urban
             return Accounts;
         }
 
+        public List<Account> getUsedAccount(string yearMonth)
+        {
+            List<Account> Accounts;
+            using (var db = new SQLiteConnection(dbname))
+            {
+                Accounts = db.Table<Account>().Where(r => r.Date.StartsWith("2025-04")).ToList();
+            }
+            return Accounts;
+        }
+
         public List<Account> getAllUnSendAccount()
         {
             List<Account> Accounts;
@@ -216,6 +226,36 @@ namespace Urban
             }
             return OrderRecords;
         }
+
+        public List<DetailReport> getAllOrderRecordForDetailReport(List<Account> targetAccounts)
+        {
+            var accountIds = targetAccounts.Select(a => a.Id).ToList();
+            List<DetailReport> finalOrder;
+
+            using (var db = new SQLiteConnection(dbname))
+            {
+                finalOrder = (
+                    from o in db.Table<OrderRecord>()
+                    join mt in db.Table<MassageTopic>() on o.MassageTopicId equals mt.Id
+                    join mp in db.Table<MassagePlan>() on o.MassagePlanId equals mp.Id
+                    where accountIds.Contains(o.AccountId)
+                    let groupKey = (mt.Name == "Package" || mt.Name == "Promotion")
+                                    ? $"{mt.Name} - {mp.Name}"
+                                    : $"{mt.Name}"
+                    group new { o.Price } by groupKey into g
+                    select new DetailReport
+                    {
+                        Name = g.Key,
+                        Price = g.Sum(x => int.TryParse(x.Price, out var p) ? p : 0),
+                        Count = g.Count()
+                    })
+                    .OrderByDescending(g => g.Count)
+                    .ToList();
+            }
+
+            return finalOrder;
+        }
+
 
         public List<OrderRecord> getAllOrderCashRecordExceptCancelled(int AccountId)
         {

@@ -162,6 +162,7 @@
     <Compile Include="Model\AccountSerialize.cs" />
     <Compile Include="Model\AccountUpdateSerialize.cs" />
     <Compile Include="Model\CancelRecordParam.cs" />
+    <Compile Include="Model\DetailReport.cs" />
     <Compile Include="Model\DiscountRecordSerialize.cs" />
     <Compile Include="Model\DiscountRecordUpdateSerializer.cs" />
     <Compile Include="Model\MonthConvertor.cs" />

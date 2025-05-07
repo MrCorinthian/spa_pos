@@ -1671,7 +1671,7 @@ namespace Urban
         {
             if (showInitMoneyForOtherSaleTb.Text.Length > 0)
             {
-                prepareToPayForOtherSale("3","Others", showInitMoneyForOtherSaleTb.Text);
+                prepareToPayForOtherSale("3", "VOUCHER / BOOKING", showInitMoneyForOtherSaleTb.Text);
                 InitMoneyForOtherSaleGrid.Visibility = Visibility.Collapsed;
             }
             else
@@ -2098,7 +2098,7 @@ namespace Urban
             string[] splitTag = getTag.Split('_');
 
 
-            if(splitTag[1].Equals("Others"))
+            if(splitTag[0].Equals("3"))
             {
                 showInitMoneyForOtherSaleTb.Text = "";
                 InitMoneyForOtherSaleGrid.Visibility = Visibility.Visible;
@@ -2178,7 +2178,10 @@ namespace Urban
             PrintOtherSaleReceipt();
             if(GlobalValue.Instance.IncludeOtherSaleCom.Equals("true"))
             {
-                PrintOtherSaleCommission();
+                if(centralOsr.OtherSaleId!=3)
+                {
+                    PrintOtherSaleCommission();
+                }
             }
 
             summaryOtherPopupGrid.Visibility = Visibility.Collapsed;
@@ -3347,7 +3350,8 @@ namespace Urban
             XRect TableColumnRect_OilIncome_2_Text_Header = new XRect(390, 95, 33, 520);
             XRect TableColumnRect_TotalOtherSale_Text_Header = new XRect(435, 90, 50, 520);//change position
             XRect TableColumnRect_TotalIncome_Text_Header = new XRect(495, 90, 56, 520);//change position
-            XRect TableColumnRect_PayWorker_Text_Header = new XRect(571, 90, 33, 520);//change position
+            XRect TableColumnRect_PayWorker_Text_Header = new XRect(571, 85, 33, 520);//change position
+            XRect TableColumnRect_PayWorker_2_Text_Header = new XRect(571, 95, 33, 520);//change position
             XRect TableColumnRect_WorkerBonus_Text_Header = new XRect(624, 85, 50, 520);
             XRect TableColumnRect_WorkerBonus_2_Text_Header = new XRect(624, 95, 50, 520);
             XRect TableColumnRect_TotalCancelled_Text_Header = new XRect(676, 90, 35, 520);//change position
@@ -3452,10 +3456,11 @@ namespace Urban
             gfx.DrawString("Income", ContentFont, BlackBrush, TableColumnRect_OilIncome_Text_Header, format);
             gfx.DrawString(GlobalValue.Instance.oilPrice+"B/Staff", ContentFont, BlackBrush, TableColumnRect_OilIncome_2_Text_Header, format);
             gfx.DrawString("Total Incomes", ContentFont, BlackBrush, TableColumnRect_TotalIncome_Text_Header, format);
-            gfx.DrawString("Pay Workers", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text_Header, format);
+            gfx.DrawString("Therapists", ContentFont, BlackBrush, TableColumnRect_PayWorker_Text_Header, format);
+            gfx.DrawString("Commissions", ContentFont, BlackBrush, TableColumnRect_PayWorker_2_Text_Header, format);
             gfx.DrawString("Cancel", ContentFont, BlackBrush, TableColumnRect_TotalCancelled_Text_Header, format);
-            gfx.DrawString("Worker", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text_Header, format);
-            gfx.DrawString("Bonus", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_2_Text_Header, format);
+            gfx.DrawString("Therapists", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_Text_Header, format);
+            gfx.DrawString("rewards", ContentFont, BlackBrush, TableColumnRect_WorkerBonus_2_Text_Header, format);
             //gfx.DrawString("Tiger Balm", ContentFont, BlackBrush, TableColumnRect_TotalTigerBalm_Text_Header, format);
             gfx.DrawString("Other Sale", ContentFont, BlackBrush, TableColumnRect_TotalOtherSale_Text_Header, format);
             gfx.DrawString("Balance Net", ContentFont, BlackBrush, TableColumnRect_BalanceNet_Text_Header, format);
@@ -7420,103 +7425,126 @@ namespace Urban
 
             //}
 
-            int yesterdayDay = this.db.getLatestAccountDay();
-            List<Account> listAccount = this.db.getAccountLast40Records(yesterdayDay);
-            List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
             Account getLatestMonth = this.db.getLatestAcount();
             String[] sGetLatestMonth = getLatestMonth.Date.ToString().Split('-');
-            List<OrderRecord> mainOrderRecord = new List<OrderRecord>();
+
+            List<Account> listAccount = this.db.getUsedAccount(sGetLatestMonth[0]+"-"+ sGetLatestMonth[1]);
+            List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
+
+            //int yesterdayDay = this.db.getLatestAccountDay();
+            
+            //List<OrderRecord> mainOrderRecord = new List<OrderRecord>();
             //String[] s2GetLatestMonth = sGetLatestMonth[0].Split('/');
 
             if (listAccount.Count != 0)
             {
                 //List<DailyReportForm> allDailyForm = new List<DailyReportForm>();
-                for (int f = 0; f < listAccount.Count; f++)
-                {
-                    String[] s = listAccount[f].Date.ToString().Split('-');
-                    //String[] s2 = s[0].Split('/');
+                //for (int f = 0; f < listAccount.Count; f++)
+                //{
+                //    String[] s = listAccount[f].Date.ToString().Split('-');
+                //    //String[] s2 = s[0].Split('/');
 
-                    //MessageBox.Show(s2[0] + "///" + curMonth + "===" + s2[2] + "///" + DateTime.Now.ToString("yyyy"));
-                    if ((Int32.Parse(s[1]) == Int32.Parse(sGetLatestMonth[1])) && (Int32.Parse(s[0]) == Int32.Parse(sGetLatestMonth[0])))
-                    {
-                        if (s[1].Equals("04") && s[2].Equals("12"))
-                        {
+                //    //MessageBox.Show(s2[0] + "///" + curMonth + "===" + s2[2] + "///" + DateTime.Now.ToString("yyyy"));
+                //    if ((Int32.Parse(s[1]) == Int32.Parse(sGetLatestMonth[1])) && (Int32.Parse(s[0]) == Int32.Parse(sGetLatestMonth[0])))
+                //    {
+                //        if (s[1].Equals("04") && s[2].Equals("12"))
+                //        {
 
-                        }
-                        else if (s[1].Equals("04") && s[2].Equals("13"))
-                        {
+                //        }
+                //        else if (s[1].Equals("04") && s[2].Equals("13"))
+                //        {
 
-                        }
-                        else if (s[1].Equals("04") && s[2].Equals("14"))
-                        {
+                //        }
+                //        else if (s[1].Equals("04") && s[2].Equals("14"))
+                //        {
 
-                        }
-                        else if (s[1].Equals("04") && s[2].Equals("15"))
-                        {
+                //        }
+                //        else if (s[1].Equals("04") && s[2].Equals("15"))
+                //        {
 
-                        }
-                        else
-                        {
-                            mainOrderRecord.AddRange(this.db.getAllOrderRecordExceptCancelled(listAccount[f].Id));
-                        }
+                //        }
+                //        else
+                //        {
+                //            mainOrderRecord.AddRange(this.db.getAllOrderRecordExceptCancelled(listAccount[f].Id));
+                //        }
 
 
 
-                    }
+                //    }
 
-                }
+                //}
+
+                List<DetailReport> finalOrderRecord = this.db.getAllOrderRecordForDetailReport(listAccount);
 
                 //Update 07092022 Ph2
-                var groupedSameTopicFromOrder = mainOrderRecord
-                    .GroupBy(u => u.MassageTopicId)
-                    .Select(grp => grp.ToList())
-                    .ToList();
+                //var groupedSameTopicFromOrder = mainOrderRecord
+                //    .GroupBy(u => u.MassageTopicId)
+                //    .Select(grp => grp.ToList())
+                //    .ToList();
 
-                List<int> groupMassageTopic = new List<int>();
+                //List<int> groupMassageTopic = new List<int>();
 
 
-                for(int v=0;v< groupedSameTopicFromOrder.Count();v++)
+                //for(int v=0;v< groupedSameTopicFromOrder.Count();v++)
+                //{
+                //    groupMassageTopic.Add(groupedSameTopicFromOrder[v][0].MassageTopicId);
+                //}
+                ////int aaa = groupedSameTopicFromOrder[0][0].MassageTopicId;
+                ////int bbb = groupedSameTopicFromOrder[1][0].MassageTopicId;
+
+                //List<ShortMassageTopic> finalMassageTopicSet = this.db.getMassageTopicShortSet(groupMassageTopic);
+                //List<ShortMassageTopic> finalMassageTopicSetSorted = finalMassageTopicSet.OrderBy(o => o.Id).ToList();
+
+                //for (int h = 0; h < finalMassageTopicSetSorted.Count(); h++)
+                //{
+                //    if (finalMassageTopicSetSorted[h].Name.Contains("Package") || finalMassageTopicSetSorted[h].Name.Contains("Promotion"))
+                //    {
+                //        List<MassageSet> msgPlanFromPackage = this.db.getMassagePlanFromTopic(finalMassageTopicSetSorted[h].Id);
+                //        for (int j = 0; j < msgPlanFromPackage.Count(); j++)
+                //        {
+                //            string msgPlanNameFromPackage = this.db.getMassagePlanName(msgPlanFromPackage[j].MassagePlanId);
+
+                //            plusYe = plusYe + 13;
+                //            y1 = y1 + 13;
+                //            y2 = y2 + 13;
+                //            gfx.DrawString(finalMassageTopicSetSorted[h].Name + " - " + msgPlanNameFromPackage, ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+                //            gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+                //        }
+
+                //    }
+                //    else
+                //    {
+                //        if (h == 0)
+                //        {
+                //            gfx.DrawString(finalMassageTopicSetSorted[h].Name, ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+                //            gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+                //        }
+                //        else
+                //        {
+                //            plusYe = plusYe + 13;
+                //            y1 = y1 + 13;
+                //            y2 = y2 + 13;
+                //            gfx.DrawString(finalMassageTopicSetSorted[h].Name, ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+                //            gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
+                //        }
+                //    }
+
+                //}
+
+                for (int h = 0; h < finalOrderRecord.Count(); h++)
                 {
-                    groupMassageTopic.Add(groupedSameTopicFromOrder[v][0].MassageTopicId);
-                }
-                //int aaa = groupedSameTopicFromOrder[0][0].MassageTopicId;
-                //int bbb = groupedSameTopicFromOrder[1][0].MassageTopicId;
-
-                List<ShortMassageTopic> finalMassageTopicSet = this.db.getMassageTopicShortSet(groupMassageTopic);
-                List<ShortMassageTopic> finalMassageTopicSetSorted = finalMassageTopicSet.OrderBy(o => o.Id).ToList();
-
-                for (int h = 0; h < finalMassageTopicSetSorted.Count(); h++)
-                {
-                    if (finalMassageTopicSetSorted[h].Name.Contains("Package") || finalMassageTopicSetSorted[h].Name.Contains("Promotion"))
+                    if (h == 0)
                     {
-                        List<MassageSet> msgPlanFromPackage = this.db.getMassagePlanFromTopic(finalMassageTopicSetSorted[h].Id);
-                        for (int j = 0; j < msgPlanFromPackage.Count(); j++)
-                        {
-                            string msgPlanNameFromPackage = this.db.getMassagePlanName(msgPlanFromPackage[j].MassagePlanId);
-
-                            plusYe = plusYe + 13;
-                            y1 = y1 + 13;
-                            y2 = y2 + 13;
-                            gfx.DrawString(finalMassageTopicSetSorted[h].Name + " - " + msgPlanNameFromPackage, ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
-                            gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
-                        }
-
+                        gfx.DrawString(finalOrderRecord[h].Name, ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+                        gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
                     }
                     else
                     {
-                        if (h == 0)
-                        {
-                            gfx.DrawString(finalMassageTopicSetSorted[h].Name, ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
-                            gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
-                        }
-                        else
-                        {
-                            plusYe = plusYe + 13;
-                            y1 = y1 + 13;
-                            y2 = y2 + 13;
-                            gfx.DrawString(finalMassageTopicSetSorted[h].Name, ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
-                            gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
-                        }
+                        plusYe = plusYe + 13;
+                        y1 = y1 + 13;
+                        y2 = y2 + 13;
+                        gfx.DrawString(finalOrderRecord[h].Name, ContentFont, BlackBrush, TableColumnRect_Date_Text.X + 7, TableColumnRect_Date_Text.Y + plusYe);
+                        gfx.DrawLine(XPens.Black, 10, y1, 780, y2);
                     }
 
                 }
@@ -7527,91 +7555,106 @@ namespace Urban
                 int totalPaxX = 0;
                 int totalSaleX = 0;
 
-                for (int p = 0; p < finalMassageTopicSetSorted.Count(); p++)
-                {
-                    if (finalMassageTopicSetSorted[p].Name.Contains("Package")|| finalMassageTopicSetSorted[p].Name.Contains("Promotion"))
-                    {
+                //for (int p = 0; p < finalMassageTopicSetSorted.Count(); p++)
+                //{
+                //    if (finalMassageTopicSetSorted[p].Name.Contains("Package")|| finalMassageTopicSetSorted[p].Name.Contains("Promotion"))
+                //    {
 
-                        List<MassageSet> msgPlanFromPackage = this.db.getMassagePlanFromTopic(finalMassageTopicSetSorted[p].Id);
-                        for (int k = 0; k < msgPlanFromPackage.Count(); k++)
-                        {
-                            int numbers = 0;
-                            int tPrice = 0;
+                //        List<MassageSet> msgPlanFromPackage = this.db.getMassagePlanFromTopic(finalMassageTopicSetSorted[p].Id);
+                //        for (int k = 0; k < msgPlanFromPackage.Count(); k++)
+                //        {
+                //            int numbers = 0;
+                //            int tPrice = 0;
 
-                            for (int j = 0; j < mainOrderRecord.Count(); j++)
-                            {
-                                if (finalMassageTopicSetSorted[p].Id == mainOrderRecord[j].MassageTopicId && msgPlanFromPackage[k].MassagePlanId == mainOrderRecord[j].MassagePlanId)
-                                {
-                                    numbers = numbers + 1;
-                                    tPrice = tPrice + Int32.Parse(mainOrderRecord[j].Price);
-                                }
-                            }
+                //            for (int j = 0; j < mainOrderRecord.Count(); j++)
+                //            {
+                //                if (finalMassageTopicSetSorted[p].Id == mainOrderRecord[j].MassageTopicId && msgPlanFromPackage[k].MassagePlanId == mainOrderRecord[j].MassagePlanId)
+                //                {
+                //                    numbers = numbers + 1;
+                //                    tPrice = tPrice + Int32.Parse(mainOrderRecord[j].Price);
+                //                }
+                //            }
 
-                            gfx.DrawString(String.Format("{0:n0}", numbers), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                //            gfx.DrawString(String.Format("{0:n0}", numbers), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
 
-                            gfx.DrawString(String.Format("{0:n}", tPrice), ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 58, TableColumnRect_Total_Text.Y + plusY);
+                //            gfx.DrawString(String.Format("{0:n}", tPrice), ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 58, TableColumnRect_Total_Text.Y + plusY);
 
-                            plusY = plusY + 13;
+                //            plusY = plusY + 13;
 
-                            totalPaxX = totalPaxX + numbers;
+                //            totalPaxX = totalPaxX + numbers;
 
-                            totalSaleX = totalSaleX + tPrice;
-                        }
+                //            totalSaleX = totalSaleX + tPrice;
+                //        }
 
-                    }
-                    else
-                    {
-                        int numbers = 0;
-                        int tPrice = 0;
-                        for (int j = 0; j < mainOrderRecord.Count(); j++)
-                        {
-                            if (finalMassageTopicSetSorted[p].Id == mainOrderRecord[j].MassageTopicId)
-                            {
-                                numbers = numbers + 1;
-                                tPrice = tPrice + Int32.Parse(mainOrderRecord[j].Price);
-                            }
-                        }
+                //    }
+                //    else
+                //    {
+                //        int numbers = 0;
+                //        int tPrice = 0;
+                //        for (int j = 0; j < mainOrderRecord.Count(); j++)
+                //        {
+                //            if (finalMassageTopicSetSorted[p].Id == mainOrderRecord[j].MassageTopicId)
+                //            {
+                //                numbers = numbers + 1;
+                //                tPrice = tPrice + Int32.Parse(mainOrderRecord[j].Price);
+                //            }
+                //        }
 
-                        //if (numbers > 3)
-                        //{
-                        //    gfx.DrawString(String.Format("{0:n0}", numbers / 4), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
-                        //}
-                        //else if (numbers == 0)
-                        //{
-                        //    gfx.DrawString(String.Format("{0:n0}", 0), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
-                        //}
-                        //else
-                        //{
-                        //    gfx.DrawString(String.Format("{0:n0}", 1), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
-                        //}
+                //        //if (numbers > 3)
+                //        //{
+                //        //    gfx.DrawString(String.Format("{0:n0}", numbers / 4), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                //        //}
+                //        //else if (numbers == 0)
+                //        //{
+                //        //    gfx.DrawString(String.Format("{0:n0}", 0), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                //        //}
+                //        //else
+                //        //{
+                //        //    gfx.DrawString(String.Format("{0:n0}", 1), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                //        //}
 
-                        gfx.DrawString(String.Format("{0:n0}", numbers), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                //        gfx.DrawString(String.Format("{0:n0}", numbers), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
 
-                        gfx.DrawString(String.Format("{0:n}", tPrice), ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 58, TableColumnRect_Total_Text.Y + plusY);
+                //        gfx.DrawString(String.Format("{0:n}", tPrice), ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 58, TableColumnRect_Total_Text.Y + plusY);
 
-                        plusY = plusY + 13;
+                //        plusY = plusY + 13;
 
-                        //if (numbers > 3)
-                        //{
-                        //    //gfx.DrawString(String.Format("{0:n0}", numbers / 4), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
-                        //    totalPaxX = totalPaxX + (numbers / 4);
-                        //}
-                        //else if (numbers == 0)
-                        //{
-                        //    //gfx.DrawString(String.Format("{0:n0}", 0), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
-                        //    totalPaxX = totalPaxX + 0;
-                        //}
-                        //else
-                        //{
-                        //    //gfx.DrawString(String.Format("{0:n0}", 1), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
-                        //    totalPaxX = totalPaxX + 1;
-                        //}
+                //        //if (numbers > 3)
+                //        //{
+                //        //    //gfx.DrawString(String.Format("{0:n0}", numbers / 4), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                //        //    totalPaxX = totalPaxX + (numbers / 4);
+                //        //}
+                //        //else if (numbers == 0)
+                //        //{
+                //        //    //gfx.DrawString(String.Format("{0:n0}", 0), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                //        //    totalPaxX = totalPaxX + 0;
+                //        //}
+                //        //else
+                //        //{
+                //        //    //gfx.DrawString(String.Format("{0:n0}", 1), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                //        //    totalPaxX = totalPaxX + 1;
+                //        //}
 
-                        totalPaxX = totalPaxX + numbers;
+                //        totalPaxX = totalPaxX + numbers;
 
-                        totalSaleX = totalSaleX + tPrice;
-                    }
+                //        totalSaleX = totalSaleX + tPrice;
+                //    }
                     
+
+                //}
+
+                for (int p = 0; p < finalOrderRecord.Count(); p++)
+                {
+                    gfx.DrawString(String.Format("{0:n0}", finalOrderRecord[p].Count), ContentFont, BlackBrush, TableColumnRect_InitialMoney_Text.X + 65, TableColumnRect_InitialMoney_Text.Y + plusY);
+                    gfx.DrawString(String.Format("{0:n}", finalOrderRecord[p].Price), ContentFont, BlackBrush, TableColumnRect_Total_Text.X + 58, TableColumnRect_Total_Text.Y + plusY);
+
+                    plusY = plusY + 13;
+
+
+                    totalPaxX = totalPaxX + finalOrderRecord[p].Count;
+
+                    totalSaleX = totalSaleX + finalOrderRecord[p].Price;
+
 
                 }
 
